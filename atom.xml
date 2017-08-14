@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-14T13:34:49.393Z</updated>
+  <updated>2017-08-14T13:42:24.457Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,11 +20,12 @@
     <link href="http://yoursite.com/2017/08/14/DataBase01/"/>
     <id>http://yoursite.com/2017/08/14/DataBase01/</id>
     <published>2017-08-14T13:04:20.000Z</published>
-    <updated>2017-08-14T13:34:49.393Z</updated>
+    <updated>2017-08-14T13:42:24.457Z</updated>
     
-    <content type="html"><![CDATA[<p><img src=".https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" width="614" height="160" alt="MongoDB"><br><a id="more"></a></p>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</p>
-<p>今天我们来简单梳理一下其基础的命令语法。顺带与SQL做个简单的对比。</p>
+    <content type="html"><![CDATA[<p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</p>
+<a id="more"></a>
+<p><img src="https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" width="614" height="160" alt="MongoDB"><br><img src="https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" alt=""></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天我们来简单梳理一下其基础的命令语法。顺带与SQL做个简单的对比。</p>
 <h3 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h3><p>我们先来了解一下基础概念：</p>
 <table>
 <thead>
@@ -196,7 +197,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;&lt;img src=&quot;.https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg&quot; width=&quot;614&quot; height=&quot;160&quot; alt=&quot;MongoDB&quot;&gt;&lt;br&gt;
+      &lt;p&gt;MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。&lt;/p&gt;
     
     </summary>
     
