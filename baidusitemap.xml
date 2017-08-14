@@ -3,6 +3,28 @@
 
 
     
+  <url>
+    <loc>http://yoursite.com/2017/08/14/DataBase01/</loc>
+    <lastmod>2017-08-14T13:14:42.181Z</lastmod>
+    <data>
+        <display>
+        <title>DataBase01</title>
+        <pubTime>2017-08-14T13:04:20.000Z</pubTime>
+        
+        <tag>MongoDB</tag>
+         
+        <tag>MySQL</tag>
+         
+         
+           
+             
+              <breadCrumb title="MongoDB 基础命令语法" url="http://yoursite.com/category/MongoDB-%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E8%AF%AD%E6%B3%95/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
     
     
     
@@ -219,21 +241,6 @@
              
               <breadCrumb title="前端基础进阶" url="http://yoursite.com/category/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/"/>
           
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://yoursite.com/2017/08/14/hello-world/</loc>
-    <lastmod>2017-08-10T11:03:28.313Z</lastmod>
-    <data>
-        <display>
-        <title>Hello World</title>
-        <pubTime>2017-08-14T11:55:31.711Z</pubTime>
-        
-         
-           
         </display>
     </data>
     </url>

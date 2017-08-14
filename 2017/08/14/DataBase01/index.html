@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="start from zero"><title>DataBase01 | We Are ALL Made Of Star Stuff</title><link rel="stylesheet" type="text/css" href="//fonts.css.network/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">DataBase01</h1><a id="logo" href="/.">We Are ALL Made Of Star Stuff</a><p class="description">steps-by-steps</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">DataBase01</h1><div class="post-meta"><a href="/2017/08/14/DataBase01/#comments" class="comment-count"></a><p><span class="date">Aug 14, 2017</span><span><a href="/category/MongoDB-基础命令语法/" class="category">MongoDB 基础命令语法</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><p><img src="https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" alt="MongoDB"><br><a id="more"></a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</p>
+<p>今天我们来简单梳理一下其基础的命令语法。顺带与SQL做个简单的对比。</p>
+<h3 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h3><p>我们先来了解一下基础概念：</p>
+<table>
+<thead>
+<tr>
+<th>SQL 术语/概念</th>
+<th>MongoDB 术语/概念</th>
+<th>解释/说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>database</td>
+<td>database</td>
+<td>数据库</td>
+</tr>
+<tr>
+<td>table</td>
+<td>collection</td>
+<td>数据库 表/集合</td>
+</tr>
+<tr>
+<td>row</td>
+<td>document</td>
+<td>数据表 行/文档</td>
+</tr>
+<tr>
+<td>column</td>
+<td>field</td>
+<td>数据 字段/域</td>
+</tr>
+<tr>
+<td>index</td>
+<td>index</td>
+<td>索引</td>
+</tr>
+<tr>
+<td>primary key</td>
+<td>primary key</td>
+<td>主键，MongoDB自动将 _id 置为主键</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-查询"><a href="#2-查询" class="headerlink" title="2. 查询"></a>2. 查询</h3><h4 id="2-1-查询所有结果"><a href="#2-1-查询所有结果" class="headerlink" title="2.1 查询所有结果"></a>2.1 查询所有结果</h4><blockquote>
+<p>select * from table_name </p>
+<p>db.collection_name.find()</p>
+</blockquote>
+<pre><code>下面的 table_name 和 collection_name 都以 article 代替
+</code></pre><h4 id="2-2-指定返回"><a href="#2-2-指定返回" class="headerlink" title="2.2 指定返回"></a>2.2 指定返回</h4><blockquote>
+<p>select title , auther from article</p>
+<p>db.article.find({ },{‘title’: 1,’auther’: 1})<br>//find的第一个参数为查询条件，第二个参数是用来控制输出的，1表示返回，而0则<br>不返回。默认值是0，但_id是例外，当  <code>&#39;_id&#39;: 0</code>时，默认才不会显示_id。</p>
+</blockquote>
+<h4 id="2-3-where"><a href="#2-3-where" class="headerlink" title="2.3 where"></a>2.3 where</h4><blockquote>
+<p>select * from article where title = ‘mongodb’</p>
+<p>db.article.find({‘title’ : ‘mongodb’})</p>
+</blockquote>
+<h4 id="2-4-and-与"><a href="#2-4-and-与" class="headerlink" title="2.4 and (与)"></a>2.4 and (与)</h4><blockquote>
+<p>select * from article where title = “mongodb” and author = “god”</p>
+<p>db.article.find({‘title’:’mongodb’,’author’:’god’})</p>
+</blockquote>
+<h4 id="2-5-or-或"><a href="#2-5-or-或" class="headerlink" title="2.5 or (或)"></a>2.5 or (或)</h4><blockquote>
+<p>select * from article where title = “mongodb” or author = “god”</p>
+<p>db.article.find({‘$or’: [{‘title’:’mongodb’},{‘author’:’god’}]})</p>
+</blockquote>
+<h4 id="2-6-比较"><a href="#2-6-比较" class="headerlink" title="2.6 比较"></a>2.6 比较</h4><blockquote>
+<p>select * form article where read &lt;= 100</p>
+<p>db.article.find({‘read’:{‘$lte’:100}})<br>//其中 $gt (&gt;),$lt (&lt;),$gte (&gt;=),$lte (&lt;=)</p>
+</blockquote>
+<h4 id="2-7-in"><a href="#2-7-in" class="headerlink" title="2.7 in"></a>2.7 in</h4><blockquote>
+<p>select * from article where author in (‘a’,’b’,’c’)</p>
+<p>db.article.find({‘auther’: {‘$in’:[‘a’,’b’,’c’]}})</p>
+</blockquote>
+<h4 id="2-8-like"><a href="#2-8-like" class="headerlink" title="2.8 like"></a>2.8 like</h4><blockquote>
+<p>select * from article where title like ‘%mongodb%’</p>
+<p>db.article.find({‘title’:/mongodb/})</p>
+</blockquote>
+<h4 id="2-9-count"><a href="#2-9-count" class="headerlink" title="2.9 count"></a>2.9 count</h4><blockquote>
+<p>select count(*) from article</p>
+<p>db.article.count()</p>
+</blockquote>
+<h4 id="2-10-不等于"><a href="#2-10-不等于" class="headerlink" title="2.10 不等于"></a>2.10 不等于</h4><blockquote>
+<p>select * from article where author != ‘a’</p>
+<p>db.article.find({‘author’:{‘$ne’: ‘a’}})</p>
+</blockquote>
+<h4 id="2-11-排序"><a href="#2-11-排序" class="headerlink" title="2.11 排序"></a>2.11 排序</h4><blockquote>
+<p>// 降序/升序<br>select * from article where type = ‘mongodb’ order by read desc/asc</p>
+<p>db.article.find({‘type’:’mongodb’}).sort({‘read’: -1/1}) //默认为1</p>
+</blockquote>
+<pre><code>findOne() 查询返回一条数据，其余使用方式和 find() 一直
+</code></pre><h3 id="3-insert（插入）"><a href="#3-insert（插入）" class="headerlink" title="3. insert（插入）"></a>3. insert（插入）</h3><blockquote>
+<p>insert into artical (title,author,content,types) values (‘mongodb’,’park’,’helloworld’,’mongodb’)</p>
+<p>db.article.insert({‘title’:’database’,’author’:’park’,’content’,’helloworld’,’types’:’mongodb’})</p>
+</blockquote>
+<h3 id="4-update（更新）"><a href="#4-update（更新）" class="headerlink" title="4. update（更新）"></a>4. update（更新）</h3><blockquote>
+<p>//语法<br>db.collection_name.update(query,update[,options])</p>
+</blockquote>
+<ul>
+<li>query: 必选，查询条件，类似find中的查询条件。</li>
+<li>update : 必选，update的对象和一些更新的操作符（如$,$inc…）等</li>
+<li>options：可选，一些更新配置的对象。</li>
+<li>upsert：可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。</li>
+<li>multi：可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true, 就把按条件查出来多条记录全部更新。</li>
+<li>writeConcern：可选，抛出异常的级别。</li>
+</ul>
+<blockquote>
+<p>//简单更新<br>update article set title = “mongodb” where read &gt; 100</p>
+<p>db.article.update({“read”: {“$gt”: 100}}, {“$set”: { “title”: “mongodb”}})</p>
+<p>//更新特定字段 <code>$set</code><br>update game set count = 10000 where id = 123</p>
+<p>db.game.update({“_id”: 123}, { “$set”: {“count”: 10000}})</p>
+<p>//删除特定字段 <code>$unset</code><br>db.game.update({“_id”:123}, {“$unset”: {“author”:1}})<br>$unset 指定字段的值是合法值即可</p>
+<p>db.article.update({title:’Seven’}, {$set:{read:134371}})<br>//递增 <code>$inc</code><br>db.article.update({title:’Seven’}, {$inc:{read:2}}) // 每次加2</p>
+<p>//多个同时更新，要设置 <code>{multi:true}</code> 如：<br>db.article.update({ }, {$inc:{read:10}},{multi:true})</p>
+<p>//数组追加，则应该用 <code>$push</code> 如：<br>db.article.update({‘title’:’Seven’}, {$push:{‘types’:’mysql’}})<br>db.article.update({‘title’:’Seven’}, {$push:{‘types’:[‘mysql’,’nosql’]}})<br>//注：追加字段必须是数组。如果数组字段不存在，则自动新增，然后追加。</p>
+</blockquote>
+<h3 id="5-删除"><a href="#5-删除" class="headerlink" title="5. 删除"></a>5. 删除</h3><blockquote>
+<p>//删除所有文档<br>delete from article</p>
+<p>db.article.remove()<br>    db.article.drop() //当删除一个集合中的所有文档时，直接删除一个集合效率更高</p>
+<p>//删除指定文档<br>delete from artical where title = ‘seven’</p>
+<p>db.article.remove({‘title’: ‘seven’})<br>db.article.remove({‘title’: ‘seven’},1) //删除第一个</p>
+</blockquote>
+<h3 id="6-建立索引"><a href="#6-建立索引" class="headerlink" title="6. 建立索引"></a>6. 建立索引</h3><p>为文档中的一些key加上索引(index)可以加快搜索速度。</p>
+<blockquote>
+<p>db.article.ensureIndex({‘title’:1}) //升序1，降序-1</p>
+<p>db.article.getIndexs() //将返回所有索引，包括其名字。</p>
+<p>db.article.dropIndex(‘index_name’) //删除索引</p>
+</blockquote>
+<h3 id="7-文本搜索"><a href="#7-文本搜索" class="headerlink" title="7. 文本搜索"></a>7. 文本搜索</h3><p>对文本搜索之前，我们需要先对要搜索的key建立一个text索引。假定我们要对标题进行文本搜索，我们可以先这样：</p>
+<blockquote>
+<p>db.article.ensureIndex({title:’text’})</p>
+</blockquote>
+<p>比如，查找带有”seven”的标题：</p>
+<blockquote>
+<p>db.article.find({text:{‘$search’:’seven’}})<br>//MongoDB目前支持15种语言的文本搜索，暂不支持中文。</p>
+</blockquote>
+<h3 id="8-常用命令"><a href="#8-常用命令" class="headerlink" title="8. 常用命令"></a>8. 常用命令</h3><blockquote>
+<p>db.article.find().limit(20) // <code>limit()</code> 返回限制的数量</p>
+<p>// <code>skip()</code> 跳过数据条数，此处从第六条开始返回<br>db.article.find().skip(5)  </p>
+<p>//可以结合limit()和skip()来达到分页效果：<br>select * from article limit 10, 20</p>
+<p>db.article.find().skip(10).limit(20)</p>
+<p>db.article.find().skip(5).limit(10).sort({‘title’:1})</p>
+<p>//<code>pretty()</code> 输出的是经格式美化后的数据<br>db.article.find().pretty() </p>
+<p>show databases //显示数据库<br>use database_name //切换/新建数据库<br>show collections // 显示当前数据库下的集合<br>db // 显示当前数据库</p>
+</blockquote>
+<p>参考资料: <a href="http://ghmagical.com/article/page/id/Bj7qgmJ3CJUE" target="_blank" rel="external">http://ghmagical.com/article/page/id/Bj7qgmJ3CJUE</a><br><a href="https://github.com/StevenSLXie/Tutorials-for-Web-Developers/blob/master/MongoDB%20%E6%9E%81%E7%AE%80%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8.md" target="_blank" rel="external">https://github.com/StevenSLXie/Tutorials-for-Web-Developers/blob/master/MongoDB%20%E6%9E%81%E7%AE%80%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8.md</a></p>
+</div><div class="tags"><a href="/tags/MongoDB/">MongoDB</a><a href="/tags/MySQL/">MySQL</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2017/08/13/WebJs10/" class="next">前端基础进阶10 详解面向对象、构造函数、原型与原型链</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#前言"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-基础概念"><span class="toc-text">1. 基础概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-查询"><span class="toc-text">2. 查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-查询所有结果"><span class="toc-text">2.1 查询所有结果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-指定返回"><span class="toc-text">2.2 指定返回</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-where"><span class="toc-text">2.3 where</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-and-与"><span class="toc-text">2.4 and (与)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-or-或"><span class="toc-text">2.5 or (或)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-比较"><span class="toc-text">2.6 比较</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-7-in"><span class="toc-text">2.7 in</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-8-like"><span class="toc-text">2.8 like</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-9-count"><span class="toc-text">2.9 count</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-10-不等于"><span class="toc-text">2.10 不等于</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-11-排序"><span class="toc-text">2.11 排序</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-insert（插入）"><span class="toc-text">3. insert（插入）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-update（更新）"><span class="toc-text">4. update（更新）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-删除"><span class="toc-text">5. 删除</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-建立索引"><span class="toc-text">6. 建立索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-文本搜索"><span class="toc-text">7. 文本搜索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-常用命令"><span class="toc-text">8. 常用命令</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/08/14/DataBase01/">DataBase01</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/13/WebJs10/">前端基础进阶10 详解面向对象、构造函数、原型与原型链</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/12/WebJs09/">前端基础进阶09 记忆</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/12/WebJs08/">前端基础进阶08 柯里化</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/10/WebJs07/">前端基础进阶07 函数与函数式编程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/09/WebJs06/">前端基础进阶06 Chrome开发者工具调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/09/WebJs05/">前端基础进阶05 this小解</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/08/WebJs04/">前端基础进阶04 详细图解作用域链与闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/08/WebJs03/">前端基础进阶03 变量对象详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/05/WebJs02/">前端基础进阶02 执行上下文详细图解</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/category/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/category/MongoDB-基础命令语法/">MongoDB 基础命令语法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/category/前端基础进阶/">前端基础进阶</a><span class="category-list-count">10</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/MongoDB/" style="font-size: 15px;">MongoDB</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/javascript/" style="font-size: 15px;">javascript</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">guoxiaozhou.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
