@@ -4,11 +4,31 @@
 
     
   <url>
-    <loc>http://yoursite.com/2017/08/14/DataBase01/</loc>
-    <lastmod>2017-08-14T13:42:24.457Z</lastmod>
+    <loc>http://yoursite.com/2017/08/18/javascript01/</loc>
+    <lastmod>2017-08-18T12:13:52.355Z</lastmod>
     <data>
         <display>
-        <title>DataBase01</title>
+        <title>javascript string、array常用API练习</title>
+        <pubTime>2017-08-18T08:45:21.000Z</pubTime>
+        
+        <tag>javascript</tag>
+         
+         
+           
+             
+              <breadCrumb title="小窥 javascript" url="http://yoursite.com/category/%E5%B0%8F%E7%AA%A5-javascript/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://yoursite.com/2017/08/14/DataBase01/</loc>
+    <lastmod>2017-08-14T13:46:56.179Z</lastmod>
+    <data>
+        <display>
+        <title>MongoDB 基础命令语法</title>
         <pubTime>2017-08-14T13:04:20.000Z</pubTime>
         
         <tag>MongoDB</tag>
