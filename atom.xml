@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-18T13:20:35.180Z</updated>
+  <updated>2017-08-20T04:16:11.335Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,9 +20,9 @@
     <link href="http://yoursite.com/2017/08/18/javascript01/"/>
     <id>http://yoursite.com/2017/08/18/javascript01/</id>
     <published>2017-08-18T08:45:21.000Z</published>
-    <updated>2017-08-18T13:20:35.180Z</updated>
+    <updated>2017-08-20T04:16:11.335Z</updated>
     
-    <content type="html"><![CDATA[<p>在 <a href="https://freecodecamp.cn/challenges/reverse-a-string" target="_blank" rel="external">freeCodeCamp</a> 做了一些练习，因此来总结一下有关javascript中常用的有关字符串和数组处理的官方API。<br><a id="more"></a><br><img src="http://bpic.588ku.com//back_pic/03/70/72/5257b6c12d89875.jpg!/fw/585/quality/90/unsharp/true/compress/true" alt="bg"></p>
+    <content type="html"><![CDATA[<p>在 <a href="https://freecodecamp.cn/challenges/reverse-a-string" target="_blank" rel="external">freeCodeCamp</a> 做了一些练习，因此来总结一下有关javascript中常用的有关字符串和数组处理的官方API。<br><a id="more"></a><br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
 <h3 id="1-Reverse-a-String"><a href="#1-Reverse-a-String" class="headerlink" title="1. Reverse a String"></a>1. Reverse a String</h3><p>又名 <code>翻转字符串</code> ，其要求如下：将给定的字符串进行翻转，并进行返回。</p>
 <blockquote>
 <p>提示：先把字符串转化成数组，再借助数组的reverse方法翻转数组顺序，最后把数组转化成字符串。</p>
@@ -997,9 +997,10 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/04/WebJs01/"/>
     <id>http://yoursite.com/2017/08/04/WebJs01/</id>
     <published>2017-08-04T09:00:58.000Z</published>
-    <updated>2017-08-14T13:24:33.395Z</updated>
+    <updated>2017-09-13T04:33:17.676Z</updated>
     
-    <content type="html"><![CDATA[<p><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"><br><a id="more"></a><br>因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，<strong>内存空间</strong> 并不是一个经常被提及的概念，很容易被大家忽视。想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊认知，导致了很多东西我都理解得并不明白。比如最基本的引用数据类型和引用传递到底是怎么回事儿？比如浅复制与深复制有什么不同？还有闭包，原型等等。</p>
+    <content type="html"><![CDATA[<a id="more"></a>
+<p>因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，<strong>内存空间</strong> 并不是一个经常被提及的概念，很容易被大家忽视。想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊认知，导致了很多东西我都理解得并不明白。比如最基本的引用数据类型和引用传递到底是怎么回事儿？比如浅复制与深复制有什么不同？还有闭包，原型等等。<br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
 <h3 id="1-堆-与-栈"><a href="#1-堆-与-栈" class="headerlink" title="1. 堆 与 栈"></a>1. <strong>堆</strong> 与 <strong>栈</strong></h3><blockquote>
 <p>注：栈（stack），有的地方也叫堆栈。</p>
 </blockquote>
@@ -1046,7 +1047,8 @@ fromCharCode() : 将 Unicode 编码转为字符。
     
     <summary type="html">
     
-      &lt;p&gt;&lt;img src=&quot;http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true&quot; alt=&quot;科技感&quot;&gt;&lt;br&gt;
+      &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;p&gt;因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，&lt;strong&gt;内存空间&lt;/strong&gt; 并不是一个经常被提及的概念，很容易被大家忽视。想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊
     
     </summary>
     
