@@ -997,10 +997,9 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/04/WebJs01/"/>
     <id>http://yoursite.com/2017/08/04/WebJs01/</id>
     <published>2017-08-04T09:00:58.000Z</published>
-    <updated>2017-09-13T04:33:17.676Z</updated>
+    <updated>2017-09-13T04:37:57.531Z</updated>
     
-    <content type="html"><![CDATA[<a id="more"></a>
-<p>因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，<strong>内存空间</strong> 并不是一个经常被提及的概念，很容易被大家忽视。想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊认知，导致了很多东西我都理解得并不明白。比如最基本的引用数据类型和引用传递到底是怎么回事儿？比如浅复制与深复制有什么不同？还有闭包，原型等等。<br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
+    <content type="html"><![CDATA[<p>因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，<strong>内存空间</strong> 并不是一个经常被提及的概念，很容易被大家忽视。<br><a id="more"></a><br>想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊认知，导致了很多东西我都理解得并不明白。比如最基本的引用数据类型和引用传递到底是怎么回事儿？比如浅复制与深复制有什么不同？还有闭包，原型等等。<br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
 <h3 id="1-堆-与-栈"><a href="#1-堆-与-栈" class="headerlink" title="1. 堆 与 栈"></a>1. <strong>堆</strong> 与 <strong>栈</strong></h3><blockquote>
 <p>注：栈（stack），有的地方也叫堆栈。</p>
 </blockquote>
@@ -1047,8 +1046,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     
     <summary type="html">
     
-      &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
-&lt;p&gt;因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，&lt;strong&gt;内存空间&lt;/strong&gt; 并不是一个经常被提及的概念，很容易被大家忽视。想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊
+      &lt;p&gt;因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，&lt;strong&gt;内存空间&lt;/strong&gt; 并不是一个经常被提及的概念，很容易被大家忽视。&lt;br&gt;
     
     </summary>
     
