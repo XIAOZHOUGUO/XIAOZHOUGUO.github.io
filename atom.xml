@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-20T04:16:11.335Z</updated>
+  <updated>2018-05-31T04:03:37.678Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,11 +16,66 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>regular-expression.md</title>
+    <link href="http://yoursite.com/2018/05/31/regular-expression/"/>
+    <id>http://yoursite.com/2018/05/31/regular-expression/</id>
+    <published>2018-05-31T02:16:50.000Z</published>
+    <updated>2018-05-31T04:03:37.678Z</updated>
+    
+    <content type="html"><![CDATA[<p>好久没有更新自己的博客了，今天恰好空闲，看了表哥的正则表达式，故作下记录，便于记忆和以后的查看。<a href="http://biaoyansu.com" target="_blank" rel="external">表哥链接</a>，<a href="https://regexr.com/" target="_blank" rel="external">工具网站</a>。<br><a id="more"></a><br><img src="http://www.williamlong.info//upload/433_1.jpg" alt="正则"></p>
+<h3 id="匹配任意字符"><a href="#匹配任意字符" class="headerlink" title="匹配任意字符"></a>匹配任意字符</h3><blockquote>
+<p><code>.</code> 匹配任意一个非断行字符，如 <code>/./g</code>。</p>
+</blockquote>
+<h3 id="匹配数字和字母"><a href="#匹配数字和字母" class="headerlink" title="匹配数字和字母"></a>匹配数字和字母</h3><blockquote>
+<p><code>\w</code> 匹配阿拉伯数字和英文大小写字母和下划线。注意<code>w</code>为小写字母。如 <code>/\W/g</code>。<br><code>\W</code> 匹配那些 <code>\w</code> 不能匹配到的字符(<code>\w</code>的补集),如 <code>/\W/</code>。</p>
+</blockquote>
+<h3 id="匹配数字"><a href="#匹配数字" class="headerlink" title="匹配数字"></a>匹配数字</h3><blockquote>
+<p><code>\d</code> 匹配阿拉伯数字，如 <code>/\d/g</code>。<br><code>\D</code> 匹配非阿拉伯数字(<code>\d</code>的补集)，如 <code>/\D/g</code>。</p>
+</blockquote>
+<h3 id="匹配空白字符"><a href="#匹配空白字符" class="headerlink" title="匹配空白字符"></a>匹配空白字符</h3><blockquote>
+<p><code>\s</code> 匹配空白字符，如空格、制表符、换行等，如 <code>/\s/g</code>。</p>
+</blockquote>
+<h3 id="匹配字符集"><a href="#匹配字符集" class="headerlink" title="匹配字符集"></a>匹配字符集</h3><blockquote>
+<p><code>[???]</code> 其中???为任意的字符(集)或数字或 unicode等。<br>如 <code>/[a-z]/g</code> <code>/[A-Z]/g</code> 分别匹配的是小写或大写的全部英文字符<br> <code>/[\u4e00-\u9fa5]/g</code> 匹配中文</p>
+</blockquote>
+<h3 id="重复一次或几次"><a href="#重复一次或几次" class="headerlink" title="重复一次或几次"></a>重复一次或几次</h3><blockquote>
+<p><code>[范围]+</code> 如 <code>/[aA]+/g</code> <code>/[Aa][cC]+/g</code></p>
+</blockquote>
+<h3 id="重复零次或多次"><a href="#重复零次或多次" class="headerlink" title="重复零次或多次"></a>重复零次或多次</h3><blockquote>
+<p><code>[范围]*</code> 如 <code>/[aA][cC]+[!~\.]*/g</code></p>
+</blockquote>
+<h3 id="重复零次或一次"><a href="#重复零次或一次" class="headerlink" title="重复零次或一次"></a>重复零次或一次</h3><blockquote>
+<p><code>[范围]?</code> 如 <code>/[Yy][oO]+[p]?[!~\.]*/g</code></p>
+</blockquote>
+<h3 id="指定重复范围"><a href="#指定重复范围" class="headerlink" title="指定重复范围"></a>指定重复范围</h3><blockquote>
+<p><code>/{}/</code> 如 <code>/ab{2,5}/g</code> <code>/ab{2,}/g</code> <code>/ab{2}/g</code></p>
+</blockquote>
+<h3 id="分组匹配"><a href="#分组匹配" class="headerlink" title="分组匹配"></a>分组匹配</h3><blockquote>
+<p>文字不太好描述，<a href="https://www.bilibili.com/video/av18182693/?p=11" target="_blank" rel="external">链接到表哥！</a></p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;好久没有更新自己的博客了，今天恰好空闲，看了表哥的正则表达式，故作下记录，便于记忆和以后的查看。&lt;a href=&quot;http://biaoyansu.com&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;表哥链接&lt;/a&gt;，&lt;a href=&quot;https://regexr.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;工具网站&lt;/a&gt;。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="正则表达式" scheme="http://yoursite.com/category/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"/>
+    
+    
+      <category term="javascript" scheme="http://yoursite.com/tags/javascript/"/>
+    
+      <category term="regular expression" scheme="http://yoursite.com/tags/regular-expression/"/>
+    
+  </entry>
+  
+  <entry>
     <title>javascript string、array常用API练习</title>
     <link href="http://yoursite.com/2017/08/18/javascript01/"/>
     <id>http://yoursite.com/2017/08/18/javascript01/</id>
     <published>2017-08-18T08:45:21.000Z</published>
-    <updated>2017-08-20T04:16:11.335Z</updated>
+    <updated>2017-08-20T04:16:11.336Z</updated>
     
     <content type="html"><![CDATA[<p>在 <a href="https://freecodecamp.cn/challenges/reverse-a-string" target="_blank" rel="external">freeCodeCamp</a> 做了一些练习，因此来总结一下有关javascript中常用的有关字符串和数组处理的官方API。<br><a id="more"></a><br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
 <h3 id="1-Reverse-a-String"><a href="#1-Reverse-a-String" class="headerlink" title="1. Reverse a String"></a>1. Reverse a String</h3><p>又名 <code>翻转字符串</code> ，其要求如下：将给定的字符串进行翻转，并进行返回。</p>
@@ -126,7 +181,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/14/DataBase01/"/>
     <id>http://yoursite.com/2017/08/14/DataBase01/</id>
     <published>2017-08-14T13:04:20.000Z</published>
-    <updated>2017-08-18T12:18:06.234Z</updated>
+    <updated>2017-08-18T12:18:06.235Z</updated>
     
     <content type="html"><![CDATA[<p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。<br><a id="more"></a><br><img src="https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" alt="MongoDB"></p>
 <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天我们来简单梳理一下其基础的命令语法。顺带与SQL做个简单的对比。</p>
@@ -319,7 +374,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/13/WebJs10/"/>
     <id>http://yoursite.com/2017/08/13/WebJs10/</id>
     <published>2017-08-13T09:09:01.000Z</published>
-    <updated>2017-08-13T02:19:54.173Z</updated>
+    <updated>2017-08-13T02:19:54.174Z</updated>
     
     <content type="html"><![CDATA[<p>面向对象可以说是JavaScript中很重要的一个部分，也是很难理解的重点，我们先来看一看关于面向对象的一些基本功。<br><a id="more"></a></p>
 <h3 id="1-对象的定义"><a href="#1-对象的定义" class="headerlink" title="1. 对象的定义"></a>1. 对象的定义</h3><p>ECMA-262把对象定义为：“<strong>无序属性的集合，其属性可以包含基本值、对象或者函数。</strong>”严格来讲， 这就相当于说对象是一组没有特定顺序的值。对象的每个属性或方法都有一个名字，而每个名字都映射 到一个值。正因为这样（以及其他将要讨论的原因），我们可以把ECMAScript的对象想象成散列表：无非就是一组名值对，其中值可以是数据或函数。</p>
@@ -428,7 +483,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/12/WebJs09/"/>
     <id>http://yoursite.com/2017/08/12/WebJs09/</id>
     <published>2017-08-12T02:17:06.000Z</published>
-    <updated>2017-08-13T03:23:23.648Z</updated>
+    <updated>2017-08-13T03:23:23.649Z</updated>
     
     <content type="html"><![CDATA[<p>函数可以将先前操作的结果记录在某个对象中，从而避免无谓的重复计算。这种优化被称之为 <code>记忆(Memorization)</code> 。JavaScript的数组和对象要实现这种优化是很方便的。<br><a id="more"></a></p>
 <blockquote>
@@ -747,7 +802,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/08/WebJs04/"/>
     <id>http://yoursite.com/2017/08/08/WebJs04/</id>
     <published>2017-08-08T08:35:38.000Z</published>
-    <updated>2017-08-12T03:39:58.982Z</updated>
+    <updated>2017-08-12T03:39:58.983Z</updated>
     
     <content type="html"><![CDATA[<p>初学JavaScript的时候，我在学习闭包上，走了很多弯路。而这次重新回过头来对基础知识进行梳理，要讲清楚闭包，也是一个非常大的挑战。<br><a id="more"></a></p>
 <h3 id="1-作用域与作用域链"><a href="#1-作用域与作用域链" class="headerlink" title="1. 作用域与作用域链"></a>1. 作用域与作用域链</h3><p>在详细讲解作用域链之前，我默认你已经大概明白了JavaScript中的下面这些重要概念。这些概念将会非常有帮助。</p>
@@ -940,7 +995,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/05/WebJs02/"/>
     <id>http://yoursite.com/2017/08/05/WebJs02/</id>
     <published>2017-08-05T09:51:17.000Z</published>
-    <updated>2017-08-12T03:40:46.073Z</updated>
+    <updated>2017-08-12T03:40:46.074Z</updated>
     
     <content type="html"><![CDATA[<p>今天我们来梳理一下有关 <strong>执行上下文（execution context）</strong> 的有关问题。<br><a id="more"></a></p>
 <h3 id="小例子"><a href="#小例子" class="headerlink" title="小例子"></a>小例子</h3><p>我们先来看一个有关于 <strong>变量提升</strong> 的小例子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">console</span>.log(a);</div><div class="line"><span class="keyword">var</span> a=<span class="number">666</span>;</div></pre></td></tr></table></figure></p>
@@ -997,7 +1052,7 @@ fromCharCode() : 将 Unicode 编码转为字符。
     <link href="http://yoursite.com/2017/08/04/WebJs01/"/>
     <id>http://yoursite.com/2017/08/04/WebJs01/</id>
     <published>2017-08-04T09:00:58.000Z</published>
-    <updated>2017-09-13T04:37:57.531Z</updated>
+    <updated>2017-09-13T04:37:57.532Z</updated>
     
     <content type="html"><![CDATA[<p>因为JavaScript具有自动垃圾回收机制，所以对于前端开发来说，<strong>内存空间</strong> 并不是一个经常被提及的概念，很容易被大家忽视。<br><a id="more"></a><br>想要对JS的理解更加深刻，就必须对内存空间有一个清晰的认知。发现由于对它们的模糊认知，导致了很多东西我都理解得并不明白。比如最基本的引用数据类型和引用传递到底是怎么回事儿？比如浅复制与深复制有什么不同？还有闭包，原型等等。<br><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
 <h3 id="1-堆-与-栈"><a href="#1-堆-与-栈" class="headerlink" title="1. 堆 与 栈"></a>1. <strong>堆</strong> 与 <strong>栈</strong></h3><blockquote>
