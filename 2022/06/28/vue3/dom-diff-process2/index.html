@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>完整的 DOM diff 流程下篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/dom-diff-process2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      完整的 DOM diff 流程下篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-06-28T02:08:41.000Z" itemprop="datePublished">2022年06月28日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/06/28/vue3/dom-diff-process2/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>下面我们来继续讲解上节课提到的<strong>核心 diff 算法</strong>。</p>
+<span id="more"></span>
+
+<p>新子节点数组相对于旧子节点数组的变化，无非是通过更新、删除、添加和移动节点来完成，而核心 diff 算法，就是在已知旧子节点的 DOM 结构、vnode 和新子节点的 vnode 情况下，以较低的成本完成子节点的更新为目的，求解生成新子节点 DOM 的系列操作。</p>
+<p>为了方便你理解，我先举个例子，假设有这样一个列表：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;c&quot;</span>&gt;</span>c<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们在中间插入一行，得到一个新列表：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;e&quot;</span>&gt;</span>e<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;c&quot;</span>&gt;</span>c<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在插入操作的前后，它们对应渲染生成的 vnode 可以用一张图表示：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8QHwmAHuQrAAB7807ZTzY864.png"></p>
+<p>从图中我们可以直观地感受到，差异主要在新子节点中的 b 节点后面多了一个 e 节点。</p>
+<p>我们再把这个例子稍微修改一下，多添加一个 e 节点：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;c&quot;</span>&gt;</span>c<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;e&quot;</span>&gt;</span>e<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们删除中间一项，得到一个新列表：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;e&quot;</span>&gt;</span>e<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在删除操作的前后，它们对应渲染生成的 vnode 可以用一张图表示：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxNCAbTueAABtqP8l5JI050.png"></p>
+<p>我们可以看到，这时差异主要在新子节点中的 b 节点后面少了一个 c 节点。</p>
+<p>综合这两个例子，我们很容易发现新旧 children 拥有相同的头尾节点。对于相同的节点，我们只需要做对比更新即可，所以 diff 算法的第一步<strong>从头部开始同步</strong>。</p>
+<h3 id="同步头部节点"><a href="#同步头部节点" class="headerlink" title="同步头部节点"></a>同步头部节点</h3><p>我们先来看一下头部节点同步的实现代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 3, e2 = 4</span></span><br><span class="line">  <span class="comment">// (a b) c d</span></span><br><span class="line">  <span class="comment">// (a b) e c d</span></span><br><span class="line">  <span class="keyword">while</span> (i &lt;= e1 &amp;&amp; i &lt;= e2) &#123;</span><br><span class="line">    <span class="keyword">const</span> n1 = c1[i]</span><br><span class="line">    <span class="keyword">const</span> n2 = c2[i]</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isSameVNodeType</span>(n1, n2)) &#123;</span><br><span class="line">      <span class="comment">// 相同的节点，递归执行 patch 更新节点</span></span><br><span class="line">      <span class="title function_">patch</span>(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    i++</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在整个 diff 的过程，我们需要维护几个变量：头部的索引 i、旧子节点的尾部索引 e1和新子节点的尾部索引 e2。</p>
+<p>同步头部节点就是从头部开始，依次对比新节点和旧节点，如果它们相同的则执行 patch 更新节点；如果不同或者索引 i 大于索引 e1 或者 e2，则同步过程结束。</p>
+<p>我们拿第一个例子来说，通过下图看一下同步头部节点后的结果：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxN6AMzbfAACPna55Fmk255.png"></p>
+<p>可以看到，完成头部节点同步后：i 是 2，e1 是 3，e2 是 4。</p>
+<h3 id="同步尾部节点"><a href="#同步尾部节点" class="headerlink" title="同步尾部节点"></a>同步尾部节点</h3><p>接着从尾部开始<strong>同步尾部节点</strong>，实现代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 3, e2 = 4</span></span><br><span class="line">  <span class="comment">// (a b) c d</span></span><br><span class="line">  <span class="comment">// (a b) e c d</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 3, e2 = 4</span></span><br><span class="line">  <span class="comment">// (a b) (c d)</span></span><br><span class="line">  <span class="comment">// (a b) e (c d)</span></span><br><span class="line">  <span class="keyword">while</span> (i &lt;= e1 &amp;&amp; i &lt;= e2) &#123;</span><br><span class="line">    <span class="keyword">const</span> n1 = c1[e1]</span><br><span class="line">    <span class="keyword">const</span> n2 = c2[e2]</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isSameVNodeType</span>(n1, n2)) &#123;</span><br><span class="line">      <span class="title function_">patch</span>(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    e1--</span><br><span class="line">    e2--</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同步尾部节点就是从尾部开始，依次对比新节点和旧节点，如果相同的则执行 patch 更新节点；如果不同或者索引 i 大于索引 e1 或者 e2，则同步过程结束。</p>
+<p>我们来通过下图看一下同步尾部节点后的结果：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxO2AffFhAACJ52ATnwQ480.png"></p>
+<p>可以看到，完成尾部节点同步后：i 是 2，e1 是 1，e2 是 2。</p>
+<p>接下来只有 3 种情况要处理：</p>
+<ul>
+<li>新子节点有剩余要添加的新节点；</li>
+<li>旧子节点有剩余要删除的多余节点；</li>
+<li>未知子序列。</li>
+</ul>
+<p>我们继续看一下具体是怎样操作的。</p>
+<h3 id="添加新的节点"><a href="#添加新的节点" class="headerlink" title="添加新的节点"></a>添加新的节点</h3><p>首先要判断新子节点是否有剩余的情况，如果满足则添加新子节点，实现代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 3, e2 = 4</span></span><br><span class="line">  <span class="comment">// (a b) c d</span></span><br><span class="line">  <span class="comment">// (a b) e c d</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 3, e2 = 4</span></span><br><span class="line">  <span class="comment">// (a b) (c d)</span></span><br><span class="line">  <span class="comment">// (a b) e (c d)</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="comment">// 3. 挂载剩余的新节点</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 1, e2 = 2</span></span><br><span class="line">  <span class="keyword">if</span> (i &gt; e1) &#123;</span><br><span class="line">    <span class="keyword">if</span> (i &lt;= e2) &#123;</span><br><span class="line">      <span class="keyword">const</span> nextPos = e2 + <span class="number">1</span></span><br><span class="line">      <span class="keyword">const</span> anchor = nextPos &lt; l2 ? c2[nextPos].<span class="property">el</span> : parentAnchor</span><br><span class="line">      <span class="keyword">while</span> (i &lt;= e2) &#123;</span><br><span class="line">        <span class="comment">// 挂载新节点</span></span><br><span class="line">        <span class="title function_">patch</span>(<span class="literal">null</span>, c2[i], container, anchor, parentComponent, parentSuspense, isSVG)</span><br><span class="line">        i++</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果索引 i 大于尾部索引 e1 且 i 小于 e2，那么从索引 i 开始到索引 e2 之间，我们直接挂载新子树这部分的节点。</p>
+<p>对我们的例子而言，同步完尾部节点后 i 是 2，e1 是 1，e2 是 2，此时满足条件需要添加新的节点，我们来通过下图看一下添加后的结果：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxQKAd7fjAACNTHXEkuQ335.png"></p>
+<p>添加完 e 节点后，旧子节点的 DOM 和新子节点对应的 vnode 映射一致，也就完成了更新。</p>
+<h3 id="删除多余节点"><a href="#删除多余节点" class="headerlink" title="删除多余节点"></a>删除多余节点</h3><p>如果不满足添加新节点的情况，我就要接着判断旧子节点是否有剩余，如果满足则删除旧子节点，实现代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 4, e2 = 3</span></span><br><span class="line">  <span class="comment">// (a b) c d e</span></span><br><span class="line">  <span class="comment">// (a b) d e</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 4, e2 = 3</span></span><br><span class="line">  <span class="comment">// (a b) c (d e)</span></span><br><span class="line">  <span class="comment">// (a b) (d e)</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="comment">// 3. 普通序列挂载剩余的新节点</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 2, e2 = 1</span></span><br><span class="line">  <span class="comment">// 不满足</span></span><br><span class="line">  <span class="keyword">if</span> (i &gt; e1) &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 4. 普通序列删除多余的旧节点</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 2, e2 = 1</span></span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (i &gt; e2) &#123;</span><br><span class="line">    <span class="keyword">while</span> (i &lt;= e1) &#123;</span><br><span class="line">      <span class="comment">// 删除节点</span></span><br><span class="line">      <span class="title function_">unmount</span>(c1[i], parentComponent, parentSuspense, <span class="literal">true</span>)</span><br><span class="line">      i++</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果索引 i 大于尾部索引 e2，那么从索引 i 开始到索引 e1 之间，我们直接删除旧子树这部分的节点。</p>
+<p>第二个例子是就删除节点的情况，我们从同步头部节点开始，用图的方式演示这一过程。</p>
+<p>首先从头部同步节点：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxQ-ADmRcAACCSIpni8Y429.png"></p>
+<p>此时的结果：i 是 2，e1 是 4，e2 是 3。</p>
+<p>接着从尾部同步节点：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxRqANXzyAACGFb9dacI061.png"></p>
+<p>此时的结果：i 是 2，e1 是 2，e2 是 1，满足删除条件，因此删除子节点中的多余节点：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxSeAMW8gAACCvYcKESo055.png"></p>
+<p>删除完 c 节点后，旧子节点的 DOM 和新子节点对应的 vnode 映射一致，也就完成了更新。</p>
+<h3 id="处理未知子序列"><a href="#处理未知子序列" class="headerlink" title="处理未知子序列"></a>处理未知子序列</h3><p>单纯的添加和删除节点都是比较理想的情况，操作起来也很容易，但是有些时候并非这么幸运，我们会遇到比较复杂的未知子序列，这时候 diff 算法会怎么做呢？</p>
+<p>我们再通过例子来演示存在未知子序列的情况，假设一个按照字母表排列的列表：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;c&quot;</span>&gt;</span>c<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;e&quot;</span>&gt;</span>e<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;f&quot;</span>&gt;</span>f<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;g&quot;</span>&gt;</span>g<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;h&quot;</span>&gt;</span>h<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们打乱之前的顺序得到一个新列表：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;a&quot;</span>&gt;</span>a<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;b&quot;</span>&gt;</span>b<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;e&quot;</span>&gt;</span>e<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;d&quot;</span>&gt;</span>c<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;c&quot;</span>&gt;</span>d<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;i&quot;</span>&gt;</span>i<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;g&quot;</span>&gt;</span>g<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&quot;h&quot;</span>&gt;</span>h<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在操作前，它们对应渲染生成的 vnode 可以用一张图表示：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxT6AVycJAAClkNghf-k681.png"></p>
+<p>我们还是从同步头部节点开始，用图的方式演示这一过程。</p>
+<p>首先从头部同步节点：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxUyAaCXvAAC6Lv79hSs090.png"></p>
+<p>同步头部节点后的结果：i 是 2，e1 是 7，e2 是 7。</p>
+<p>接着从尾部同步节点：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxVeAYV_ZAADCIt6XIHI609.png"></p>
+<p>同步尾部节点后的结果：i 是 2，e1 是 5，e2 是 5。可以看到它既不满足添加新节点的条件，也不满足删除旧节点的条件。那么对于这种情况，我们应该怎么处理呢？</p>
+<p>结合上图可以知道，要把旧子节点的 c、d、e、f 转变成新子节点的 e、c、d、i。从直观上看，我们把 e 节点移动到 c 节点前面，删除 f 节点，然后在 d 节点后面添加 i 节点即可。</p>
+<p>其实无论多复杂的情况，最终无非都是通过更新、删除、添加、移动这些动作来操作节点，而我们要做的就是找到相对优的解。</p>
+<p>当两个节点类型相同时，我们执行更新操作；当新子节点中没有旧子节点中的某些节点时，我们执行删除操作；当新子节点中多了旧子节点中没有的节点时，我们执行添加操作，这些操作我们在前面已经阐述清楚了。相对来说这些操作中最麻烦的就是移动，我们既要判断哪些节点需要移动也要清楚如何移动。</p>
+<h4 id="移动子节点"><a href="#移动子节点" class="headerlink" title="移动子节点"></a>移动子节点</h4><p>那么什么时候需要移动呢，就是当子节点排列顺序发生变化的时候，举个简单的例子具体看一下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> prev = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line"><span class="keyword">let</span> next = [<span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，从 prev 变成 next，数组里的一些元素的顺序发生了变化，我们可以把子节点类比为元素，现在问题就简化为我们如何用最少的移动使元素顺序从 prev 变化为 next 。</p>
+<p>一种思路是在 next 中找到一个递增子序列，比如 [1, 3, 6] 、[1, 2, 4, 5]。之后对 next 数组进行倒序遍历，移动所有不在递增序列中的元素即可。</p>
+<p>如果选择了 [1, 3, 6] 作为递增子序列，那么在倒序遍历的过程中，遇到 6、3、1 不动，遇到 5、4、2 移动即可，从<code>prev</code> -&gt; <code>next</code> 子节点移动如下图所示：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxWOAKRnGAAAzjDtkQJI201.png"></p>
+<p>如果选择了 [1, 2, 4, 5] 作为递增子序列，那么在倒序遍历的过程中，遇到 5、4、2、1 不动，遇到 6、3 移动即可，如下图所示：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxW6APB5gAAAshOjdgMY518.png"></p>
+<p>可以看到从第一种移动了三次，而第二种只移动了两次，递增子序列越长，所需要移动元素的次数越少，所以如何移动的问题就回到了求解<code>最长递增子序列</code>的问题。我们稍后会详细讲求解最长递增子序列的算法，所以先回到我们这里的问题，对未知子序列的处理。</p>
+<blockquote>
+<p>我们现在要做的是在新旧子节点序列中找出相同节点并更新，找出多余的节点删除，找出新的节点添加，找出是否有需要移动的节点，如果有该如何移动。</p>
+</blockquote>
+<p>在查找过程中需要对比新旧子序列，那么我们就要遍历某个序列，如果在遍历旧子序列的过程中需要判断某个节点是否在新子序列中存在，这就需要双重循环，而双重循环的复杂度是 O(n2) ，为了优化这个复杂度，我们可以用一种空间换时间的思路，建立索引图，把时间复杂度降低到 O(n)。</p>
+<h4 id="建立索引图"><a href="#建立索引图" class="headerlink" title="建立索引图"></a>建立索引图</h4><p>所以处理未知子序列的第一步，就是建立索引图。</p>
+<blockquote>
+<p>通常我们在开发过程中， 会给 v-for 生成的列表中的每一项分配唯一 key 作为项的唯一 ID，这个 key 在 diff 过程中起到很关键的作用。对于新旧子序列中的节点，我们认为 key 相同的就是同一个节点，直接执行 patch 更新即可。</p>
+</blockquote>
+<p>我们根据 key 建立新子序列的索引图，实现如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 7, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c d e f g h</span></span><br><span class="line">  <span class="comment">// (a b) e c d i g h</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 7, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c d e f (g h)</span></span><br><span class="line">  <span class="comment">// (a b) e c d i (g h)</span></span><br><span class="line">  <span class="comment">// 3. 普通序列挂载剩余的新节点， 不满足</span></span><br><span class="line">  <span class="comment">// 4. 普通序列删除多余的旧节点，不满足</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 5, e2 = 5</span></span><br><span class="line">  <span class="comment">// 旧子序列开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s1 = i</span><br><span class="line">  <span class="comment">// 新子序列开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s2 = i <span class="comment">//</span></span><br><span class="line">  <span class="comment">// 5.1 根据 key 建立新子序列的索引图</span></span><br><span class="line">  <span class="keyword">const</span> keyToNewIndexMap = <span class="keyword">new</span> <span class="title class_">Map</span>()</span><br><span class="line">  <span class="keyword">for</span> (i = s2; i &lt;= e2; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> nextChild = c2[i]</span><br><span class="line">    keyToNewIndexMap.<span class="title function_">set</span>(nextChild.<span class="property">key</span>, i)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>新旧子序列是从 i 开始的，所以我们先用 s1、s2 分别作为新旧子序列的开始索引，接着建立一个 <code>keyToNewIndexMap</code> 的 <code>Map&lt;key, index&gt;</code> 结构，遍历新子序列，把节点的 key 和 index 添加到这个 Map 中，注意我们这里假设所有节点都是有 key 标识的。</p>
+<p><code>keyToNewIndexMap</code> 存储的就是新子序列中每个节点在新子序列中的索引，我们来看一下示例处理后的结果，如下图所示：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxciAQJ6GAADhf7zD47s944.png"></p>
+<p>我们得到了一个值为 {e:2,c:3,d:4,i:5} 的新子序列索引图。</p>
+<h4 id="更新和移除旧节点"><a href="#更新和移除旧节点" class="headerlink" title="更新和移除旧节点"></a>更新和移除旧节点</h4><p>接下来，我们就需要遍历旧子序列，有相同的节点就通过 patch 更新，并且移除那些不在新子序列中的节点，同时找出是否有需要移动的节点，我们来看一下这部分逻辑的实现：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 7, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c d e f g h</span></span><br><span class="line">  <span class="comment">// (a b) e c d i g h</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 7, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c d e f (g h)</span></span><br><span class="line">  <span class="comment">// (a b) e c d i (g h)</span></span><br><span class="line">  <span class="comment">// 3. 普通序列挂载剩余的新节点，不满足</span></span><br><span class="line">  <span class="comment">// 4. 普通序列删除多余的旧节点，不满足</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 5, e2 = 5</span></span><br><span class="line">  <span class="comment">// 旧子序列开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s1 = i</span><br><span class="line">  <span class="comment">// 新子序列开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s2 = i</span><br><span class="line">  <span class="comment">// 5.1 根据 key 建立新子序列的索引图</span></span><br><span class="line">  <span class="comment">// 5.2 正序遍历旧子序列，找到匹配的节点更新，删除不在新子序列中的节点，判断是否有移动节点</span></span><br><span class="line">  <span class="comment">// 新子序列已更新节点的数量</span></span><br><span class="line">  <span class="keyword">let</span> patched = <span class="number">0</span></span><br><span class="line">  <span class="comment">// 新子序列待更新节点的数量，等于新子序列的长度</span></span><br><span class="line">  <span class="keyword">const</span> toBePatched = e2 - s2 + <span class="number">1</span></span><br><span class="line">  <span class="comment">// 是否存在要移动的节点</span></span><br><span class="line">  <span class="keyword">let</span> moved = <span class="literal">false</span></span><br><span class="line">  <span class="comment">// 用于跟踪判断是否有节点移动</span></span><br><span class="line">  <span class="keyword">let</span> maxNewIndexSoFar = <span class="number">0</span></span><br><span class="line">  <span class="comment">// 这个数组存储新子序列中的元素在旧子序列节点的索引，用于确定最长递增子序列</span></span><br><span class="line">  <span class="keyword">const</span> newIndexToOldIndexMap = <span class="keyword">new</span> <span class="title class_">Array</span>(toBePatched)</span><br><span class="line">  <span class="comment">// 初始化数组，每个元素的值都是 0</span></span><br><span class="line">  <span class="comment">// 0 是一个特殊的值，如果遍历完了仍有元素的值为 0，则说明这个新节点没有对应的旧节点</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; toBePatched; i++)</span><br><span class="line">    newIndexToOldIndexMap[i] = <span class="number">0</span></span><br><span class="line">  <span class="comment">// 正序遍历旧子序列</span></span><br><span class="line">  <span class="keyword">for</span> (i = s1; i &lt;= e1; i++) &#123;</span><br><span class="line">    <span class="comment">// 拿到每一个旧子序列节点</span></span><br><span class="line">    <span class="keyword">const</span> prevChild = c1[i]</span><br><span class="line">    <span class="keyword">if</span> (patched &gt;= toBePatched) &#123;</span><br><span class="line">      <span class="comment">// 所有新的子序列节点都已经更新，剩余的节点删除</span></span><br><span class="line">      <span class="title function_">unmount</span>(prevChild, parentComponent, parentSuspense, <span class="literal">true</span>)</span><br><span class="line">      <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 查找旧子序列中的节点在新子序列中的索引</span></span><br><span class="line">    <span class="keyword">let</span> newIndex = keyToNewIndexMap.<span class="title function_">get</span>(prevChild.<span class="property">key</span>)</span><br><span class="line">    <span class="keyword">if</span> (newIndex === <span class="literal">undefined</span>) &#123;</span><br><span class="line">      <span class="comment">// 找不到说明旧子序列已经不存在于新子序列中，则删除该节点</span></span><br><span class="line">      <span class="title function_">unmount</span>(prevChild, parentComponent, parentSuspense, <span class="literal">true</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 更新新子序列中的元素在旧子序列中的索引，这里加 1 偏移，是为了避免 i 为 0 的特殊情况，影响对后续最长递增子序列的求解</span></span><br><span class="line">      newIndexToOldIndexMap[newIndex - s2] = i + <span class="number">1</span></span><br><span class="line">      <span class="comment">// maxNewIndexSoFar 始终存储的是上次求值的 newIndex，如果不是一直递增，则说明有移动</span></span><br><span class="line">      <span class="keyword">if</span> (newIndex &gt;= maxNewIndexSoFar) &#123;</span><br><span class="line">        maxNewIndexSoFar = newIndex</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        moved = <span class="literal">true</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 更新新旧子序列中匹配的节点</span></span><br><span class="line">      <span class="title function_">patch</span>(prevChild, c2[newIndex], container, <span class="literal">null</span>, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">      patched++</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们建立了一个 newIndexToOldIndexMap 的数组，来存储新子序列节点的索引和旧子序列节点的索引之间的映射关系，用于确定最长递增子序列，这个数组的长度为新子序列的长度，每个元素的初始值设为 0， 它是一个特殊的值，如果遍历完了仍有元素的值为 0，则说明遍历旧子序列的过程中没有处理过这个节点，这个节点是新添加的。</p>
+<p>下面我们说说具体的操作过程：正序遍历旧子序列，根据前面建立的 keyToNewIndexMap 查找旧子序列中的节点在新子序列中的索引，如果找不到就说明新子序列中没有该节点，就删除它；如果找得到则将它在旧子序列中的索引更新到 newIndexToOldIndexMap 中。</p>
+<p>注意这里索引加了长度为 1 的偏移，是为了应对 i 为 0 的特殊情况，如果不这样处理就会影响后续求解最长递增子序列。</p>
+<p>遍历过程中，我们用变量 maxNewIndexSoFar 跟踪判断节点是否移动，maxNewIndexSoFar 始终存储的是上次求值的 newIndex，一旦本次求值的 newIndex 小于 maxNewIndexSoFar，这说明顺序遍历旧子序列的节点在新子序列中的索引并不是一直递增的，也就说明存在移动的情况。</p>
+<p>除此之外，这个过程中我们也会更新新旧子序列中匹配的节点，另外如果所有新的子序列节点都已经更新，而对旧子序列遍历还未结束，说明剩余的节点就是多余的，删除即可。</p>
+<p>至此，我们完成了新旧子序列节点的更新、多余旧节点的删除，并且建立了一个 newIndexToOldIndexMap 存储新子序列节点的索引和旧子序列节点的索引之间的映射关系，并确定是否有移动。</p>
+<p>我们来看一下示例处理后的结果，如下图所示：</p>
+<p><img src="/blog/dom-diff-process2/CgqCHl8OxdeAVdPEAAEh9JAOZ_E654.png"></p>
+<p>可以看到， c、d、e 节点被更新，f 节点被删除，newIndexToOldIndexMap 的值为 [5, 3, 4 ,0]，此时 moved 也为 true，也就是存在节点移动的情况。</p>
+<h4 id="移动和挂载新节点"><a href="#移动和挂载新节点" class="headerlink" title="移动和挂载新节点"></a>移动和挂载新节点</h4><p>接下来，就到了处理未知子序列的最后一个流程，移动和挂载新节点，我们来看一下这部分逻辑的实现：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchKeyedChildren</span> = (<span class="params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> l2 = c2.<span class="property">length</span></span><br><span class="line">  <span class="comment">// 旧子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e1 = c1.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 新子节点的尾部索引</span></span><br><span class="line">  <span class="keyword">let</span> e2 = l2 - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 1. 从头部开始同步</span></span><br><span class="line">  <span class="comment">// i = 0, e1 = 6, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c d e f g</span></span><br><span class="line">  <span class="comment">// (a b) e c d h f g</span></span><br><span class="line">  <span class="comment">// 2. 从尾部开始同步</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 6, e2 = 7</span></span><br><span class="line">  <span class="comment">// (a b) c (d e)</span></span><br><span class="line">  <span class="comment">// (a b) (d e)</span></span><br><span class="line">  <span class="comment">// 3. 普通序列挂载剩余的新节点， 不满足</span></span><br><span class="line">  <span class="comment">// 4. 普通序列删除多余的节点，不满足</span></span><br><span class="line">  <span class="comment">// i = 2, e1 = 5, e2 = 5</span></span><br><span class="line">  <span class="comment">// 旧子节点开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s1 = i</span><br><span class="line">  <span class="comment">// 新子节点开始索引，从 i 开始记录</span></span><br><span class="line">  <span class="keyword">const</span> s2 = i <span class="comment">//</span></span><br><span class="line">  <span class="comment">// 5.1 根据 key 建立新子序列的索引图</span></span><br><span class="line">  <span class="comment">// 5.2 正序遍历旧子序列，找到匹配的节点更新，删除不在新子序列中的节点，判断是否有移动节点</span></span><br><span class="line">  <span class="comment">// 5.3 移动和挂载新节点</span></span><br><span class="line">  <span class="comment">// 仅当节点移动时生成最长递增子序列</span></span><br><span class="line">  <span class="keyword">const</span> increasingNewIndexSequence = moved</span><br><span class="line">    ? <span class="title function_">getSequence</span>(newIndexToOldIndexMap)</span><br><span class="line">    : <span class="variable constant_">EMPTY_ARR</span></span><br><span class="line">  <span class="keyword">let</span> j = increasingNewIndexSequence.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">  <span class="comment">// 倒序遍历以便我们可以使用最后更新的节点作为锚点</span></span><br><span class="line">  <span class="keyword">for</span> (i = toBePatched - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">    <span class="keyword">const</span> nextIndex = s2 + i</span><br><span class="line">    <span class="keyword">const</span> nextChild = c2[nextIndex]</span><br><span class="line">    <span class="comment">// 锚点指向上一个更新的节点，如果 nextIndex 超过新子节点的长度，则指向 parentAnchor</span></span><br><span class="line">    <span class="keyword">const</span> anchor = nextIndex + <span class="number">1</span> &lt; l2 ? c2[nextIndex + <span class="number">1</span>].<span class="property">el</span> : parentAnchor</span><br><span class="line">    <span class="keyword">if</span> (newIndexToOldIndexMap[i] === <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// 挂载新的子节点</span></span><br><span class="line">      <span class="title function_">patch</span>(<span class="literal">null</span>, nextChild, container, anchor, parentComponent, parentSuspense, isSVG)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (moved) &#123;</span><br><span class="line">      <span class="comment">// 没有最长递增子序列（reverse 的场景）或者当前的节点索引不在最长递增子序列中，需要移动</span></span><br><span class="line">      <span class="keyword">if</span> (j &lt; <span class="number">0</span> || i !== increasingNewIndexSequence[j]) &#123;</span><br><span class="line">        <span class="title function_">move</span>(nextChild, container, anchor, <span class="number">2</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 倒序递增子序列</span></span><br><span class="line">        j--</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们前面已经判断了是否移动，如果 moved 为 true 就通过 getSequence(newIndexToOldIndexMap) 计算最长递增子序列，这部分算法我会放在后文详细介绍。</p>
+<p>接着我们采用倒序的方式遍历新子序列，因为倒序遍历可以方便我们使用最后更新的节点作为锚点。在倒序的过程中，锚点指向上一个更新的节点，然后判断 newIndexToOldIndexMap[i] 是否为 0，如果是则表示这是新节点，就需要挂载它；接着判断是否存在节点移动的情况，如果存在的话则看节点的索引是不是在最长递增子序列中，如果在则倒序最长递增子序列，否则把它移动到锚点的前面。</p>
+<p>为了便于你更直观地理解，我们用前面的例子展示一下这个过程，此时 toBePatched 的值为 4，j 的值为 1，最长递增子序列 increasingNewIndexSequence 的值是 [1, 2]。在倒序新子序列的过程中，首先遇到节点 i，发现它在 newIndexToOldIndexMap 中的值是 0，则说明它是新节点，我们需要挂载它；然后继续遍历遇到节点 d，因为 moved 为 true，且 d 的索引存在于最长递增子序列中，则执行 j– 倒序最长递增子序列，j 此时为 0；接着继续遍历遇到节点 c，它和 d 一样，索引也存在于最长递增子序列中，则执行 j–，j 此时为 -1；接着继续遍历遇到节点 e，此时 j 是 -1 并且 e 的索引也不在最长递增子序列中，所以做一次移动操作，把 e 节点移到上一个更新的节点，也就是 c 节点的前面。</p>
+<p>新子序列倒序完成，即完成了新节点的插入和旧节点的移动操作，也就完成了整个核心 diff 算法对节点的更新。</p>
+<p>我们来看一下示例处理后的结果，如下图所示：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxeiAIp0WAAFBcsdATCI981.png"></p>
+<p>可以看到新子序列中的新节点 i 被挂载，旧子序列中的节点 e 移动到了 c 节点前面，至此，我们就在已知旧子节点 DOM 结构和 vnode、新子节点 vnode 的情况下，求解出生成新子节点的 DOM 的更新、移动、删除、新增等系列操作，并且以一种较小成本的方式完成 DOM 更新。</p>
+<p>我们知道了子节点更新调用的是 patch 方法， Vue.js 正是通过这种递归的方式完成了整个组件树的更新。</p>
+<p>核心 diff 算法中最复杂就是求解最长递增子序列，下面我们再来详细学习一下这个算法。</p>
+<h4 id="最长递增子序列"><a href="#最长递增子序列" class="headerlink" title="最长递增子序列"></a>最长递增子序列</h4><p>求解最长递增子序列是一道经典的算法题，多数解法是使用动态规划的思想，算法的时间复杂度是 O(n^2)，而 Vue.js 内部使用的是维基百科提供的一套“贪心 + 二分查找”的算法，贪心算法的时间复杂度是 O(n)，二分查找的时间复杂度是 O(logn)，所以它的总时间复杂度是 O(nlogn)。</p>
+<p>单纯地看代码并不好理解，我们用示例来看一下这个子序列的求解过程。</p>
+<p>假设我们有这个样一个数组 arr：[2, 1, 5, 3, 6, 4, 8, 9, 7]，求解它最长递增子序列的步骤如下：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8O342ATpU7AMfwii64x74028.gif"></p>
+<p>最终求得最长递增子序列的值就是 [1, 3, 4, 8, 9]。</p>
+<p>通过演示我们可以得到这个算法的主要思路：对数组遍历，依次求解长度为 i 时的最长递增子序列，当 i 元素大于 i - 1 的元素时，添加 i 元素并更新最长子序列；否则往前查找直到找到一个比 i 小的元素，然后插在该元素后面并更新对应的最长递增子序列。</p>
+<p>这种做法的主要目的是让递增序列的差尽可能的小，从而可以获得更长的递增子序列，这便是一种贪心算法的思想。</p>
+<p>了解了算法的大致思想后，接下来我们看一下源码实现：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">getSequence</span> (arr) &#123;</span><br><span class="line">  <span class="keyword">const</span> p = arr.<span class="title function_">slice</span>()</span><br><span class="line">  <span class="keyword">const</span> result = [<span class="number">0</span>]</span><br><span class="line">  <span class="keyword">let</span> i, j, u, v, c</span><br><span class="line">  <span class="keyword">const</span> len = arr.<span class="property">length</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> arrI = arr[i]</span><br><span class="line">    <span class="keyword">if</span> (arrI !== <span class="number">0</span>) &#123;</span><br><span class="line">      j = result[result.<span class="property">length</span> - <span class="number">1</span>]</span><br><span class="line">      <span class="keyword">if</span> (arr[j] &lt; arrI) &#123;</span><br><span class="line">        <span class="comment">// 存储在 result 更新前的最后一个索引的值</span></span><br><span class="line">        p[i] = j</span><br><span class="line">        result.<span class="title function_">push</span>(i)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">      &#125;</span><br><span class="line">      u = <span class="number">0</span></span><br><span class="line">      v = result.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">      <span class="comment">// 二分搜索，查找比 arrI 小的节点，更新 result 的值</span></span><br><span class="line">      <span class="keyword">while</span> (u &lt; v) &#123;</span><br><span class="line">        c = ((u + v) / <span class="number">2</span>) | <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> (arr[result[c]] &lt; arrI) &#123;</span><br><span class="line">          u = c + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">          v = c</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (arrI &lt; arr[result[u]]) &#123;</span><br><span class="line">        <span class="keyword">if</span> (u &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          p[i] = result[u - <span class="number">1</span>]</span><br><span class="line">        &#125;</span><br><span class="line">        result[u] = i</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  u = result.<span class="property">length</span></span><br><span class="line">  v = result[u - <span class="number">1</span>]</span><br><span class="line">  <span class="comment">// 回溯数组 p，找到最终的索引</span></span><br><span class="line">  <span class="keyword">while</span> (u-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">   result[u] = v</span><br><span class="line">   v = p[v] </span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>其中 result 存储的是长度为 i 的递增子序列最小末尾值的索引。比如我们上述例子的第九步，在对数组 p 回溯之前， result 值就是 [1, 3, 4, 7, 9] ，这不是最长递增子序列，它只是存储的对应长度递增子序列的最小末尾。因此在整个遍历过程中会额外用一个数组 p，来存储在每次更新 result 前最后一个索引的值，并且它的 key 是这次要更新的 result 值：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">j = result[result.<span class="property">length</span> - <span class="number">1</span>]</span><br><span class="line">p[i] = j</span><br><span class="line">result.<span class="title function_">push</span>(i)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，result 添加的新值 i 是作为 p 存储 result 最后一个值 j 的 key。上述例子遍历后 p 的结果如图所示：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OxgOALDcQAABERFRRNqo370.png"></p>
+<p>从 result 最后一个元素 9 对应的索引 7 开始回溯，可以看到 p[7] &#x3D; 6，p[6] &#x3D; 5，p[5] &#x3D; 3，p[3] &#x3D; 1，所以通过对 p 的回溯，得到最终的 result 值是 [1, 3 ,5 ,6 ,7]，也就找到最长递增子序列的最终索引了。这里要注意，我们求解的是最长子序列索引值，它的每个元素其实对应的是数组的下标。对于我们的例子而言，[2, 1, 5, 3, 6, 4, 8, 9, 7] 的最长子序列是 [1, 3, 4, 8, 9]，而我们求解的 [1, 3 ,5 ,6 ,7] 就是最长子序列中元素在原数组中的下标所构成的新数组。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这两节课我们主要分析了组件的更新流程，知道了 Vue.js 的更新粒度是组件级别的，并且 Vue.js 在 patch 某个组件的时候，如果遇到组件这类抽象节点，在某些条件下也会触发子组件的更新。</p>
+<p>对于普通元素节点的更新，主要是更新一些属性，以及它的子节点。子节点的更新又分为多种情况，其中最复杂的情况为数组到数组的更新，内部又根据不同情况分成几个流程去 diff，遇到需要移动的情况还要去求解子节点的最长递增子序列。</p>
+<p>整个更新过程还是利用了树的深度遍历，递归执行 patch 方法，最终完成了整个组件树的更新。</p>
+<p>下面，我们通过一张图来更加直观感受组件的更新流程：</p>
+<p><img src="/blog/dom-diff-process2/Ciqc1F8OyzuASuJ7AAHSjr5SVlc999.png"></p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%B4%E9%83%A8%E8%8A%82%E7%82%B9"><span class="toc-text">同步头部节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%B0%BE%E9%83%A8%E8%8A%82%E7%82%B9"><span class="toc-text">同步尾部节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E6%96%B0%E7%9A%84%E8%8A%82%E7%82%B9"><span class="toc-text">添加新的节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E5%A4%9A%E4%BD%99%E8%8A%82%E7%82%B9"><span class="toc-text">删除多余节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%9C%AA%E7%9F%A5%E5%AD%90%E5%BA%8F%E5%88%97"><span class="toc-text">处理未知子序列</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8%E5%AD%90%E8%8A%82%E7%82%B9"><span class="toc-text">移动子节点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E7%B4%A2%E5%BC%95%E5%9B%BE"><span class="toc-text">建立索引图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E5%92%8C%E7%A7%BB%E9%99%A4%E6%97%A7%E8%8A%82%E7%82%B9"><span class="toc-text">更新和移除旧节点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8%E5%92%8C%E6%8C%82%E8%BD%BD%E6%96%B0%E8%8A%82%E7%82%B9"><span class="toc-text">移动和挂载新节点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E9%95%BF%E9%80%92%E5%A2%9E%E5%AD%90%E5%BA%8F%E5%88%97"><span class="toc-text">最长递增子序列</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/06/28/vue3/dom-diff-process2/">https://xiaozhouguo.github.io/blog/2022/06/28/vue3/dom-diff-process2/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/06/27/vue3/dom-diff-process1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          完整的 DOM diff 流程上篇
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/06/29/vue3/setup/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          setup：组件渲染前的初始化过程是怎样的？
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

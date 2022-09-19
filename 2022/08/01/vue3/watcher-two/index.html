@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>侦听器的实现原理和使用场景 - 下篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/watcher-two" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      侦听器的实现原理和使用场景 - 下篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-08-01T08:55:54.000Z" itemprop="datePublished">2022年08月01日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/08/01/vue3/watcher-two/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在前面中，我们多次提到回调函数是以一种调度的方式执行的，特别是当 flush 不是 sync 时，它会把回调函数执行的任务推到一个异步队列中执行。接下来，我们就来分析异步执行队列的设计。分析之前，我们先来思考一下，为什么会需要异步队列？</p>
+<span id="more"></span>
+
+<h3 id="异步任务队列的设计"><a href="#异步任务队列的设计" class="headerlink" title="异步任务队列的设计"></a>异步任务队列的设计</h3><p>我们把之前的例子简单修改一下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; reactive, watch &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span><br><span class="line"><span class="keyword">const</span> state = <span class="title function_">reactive</span>(&#123; <span class="attr">count</span>: <span class="number">0</span> &#125;) </span><br><span class="line"><span class="title function_">watch</span>(<span class="function">() =&gt;</span> state.<span class="property">count</span>, <span class="function">(<span class="params">count, prevCount</span>) =&gt;</span> &#123; </span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(count) </span><br><span class="line">&#125;) </span><br><span class="line">state.<span class="property">count</span>++ </span><br><span class="line">state.<span class="property">count</span>++ </span><br><span class="line">state.<span class="property">count</span>++ </span><br></pre></td></tr></table></figure>
+
+<p>这里，我们修改了三次 state.count，那么 watcher 的回调函数会执行三次吗？</p>
+<p>答案是不会，实际上只输出了一次 count 的值，也就是最终计算的值 3。这在大多数场景下都是符合预期的，因为在一个 <code>Tick（宏任务执行的生命周期）</code>内，即使多次修改侦听的值，它的回调函数也只执行一次。</p>
+<blockquote>
+<p><strong>知识延伸</strong><br>组件的更新过程是异步的，我们知道修改模板中引用的响应式对象的值时，会触发组件的重新渲染，但是在一个 Tick 内，即使你多次修改多个响应式对象的值，组件的重新渲染也只执行一次。这是因为如果每次更新数据都触发组件重新渲染，那么重新渲染的次数和代价都太高了。</p>
+</blockquote>
+<p>那么，这是怎么做到的呢？我们先从异步任务队列的创建说起。</p>
+<h4 id="异步任务队列的创建"><a href="#异步任务队列的创建" class="headerlink" title="异步任务队列的创建"></a>异步任务队列的创建</h4><p>通过前面的分析我们知道，在创建一个 watcher 时，如果配置 flush 为 pre 或不配置 flush ，那么 watcher 的回调函数就会异步执行。此时分别是通过 queueJob 和 queuePostRenderEffect 把回调函数推入异步队列中的。</p>
+<p>在不涉及 suspense 的情况下，queuePostRenderEffect 相当于 queuePostFlushCb，我们来看它们的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 异步任务队列 </span></span><br><span class="line"><span class="keyword">const</span> queue = [] </span><br><span class="line"><span class="comment">// 队列任务执行完后执行的回调函数队列 </span></span><br><span class="line"><span class="keyword">const</span> postFlushCbs = [] </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">queueJob</span>(<span class="params">job</span>) &#123; </span><br><span class="line">  <span class="keyword">if</span> (!queue.<span class="title function_">includes</span>(job)) &#123; </span><br><span class="line">    queue.<span class="title function_">push</span>(job) </span><br><span class="line">    <span class="title function_">queueFlush</span>() </span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">queuePostFlushCb</span>(<span class="params">cb</span>) &#123; </span><br><span class="line">  <span class="keyword">if</span> (!<span class="title function_">isArray</span>(cb)) &#123; </span><br><span class="line">    postFlushCbs.<span class="title function_">push</span>(cb) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">else</span> &#123; </span><br><span class="line">    <span class="comment">// 如果是数组，把它拍平成一维 </span></span><br><span class="line">    postFlushCbs.<span class="title function_">push</span>(...cb) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="title function_">queueFlush</span>() </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Vue.js 内部维护了一个 queue 数组和一个 postFlushCbs 数组，其中 queue 数组用作异步任务队列， postFlushCbs 数组用作异步任务队列执行完毕后的回调函数队列。</p>
+<p>执行 queueJob 时会把这个任务 job 添加到 queue 的队尾，而执行 queuePostFlushCb 时，会把这个 cb 回调函数添加到 postFlushCbs 的队尾。它们在添加完毕后都执行了 queueFlush 函数，我们接着看它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> p = <span class="title class_">Promise</span>.<span class="title function_">resolve</span>() </span><br><span class="line"><span class="comment">// 异步任务队列是否正在执行 </span></span><br><span class="line"><span class="keyword">let</span> isFlushing = <span class="literal">false</span> </span><br><span class="line"><span class="comment">// 异步任务队列是否等待执行 </span></span><br><span class="line"><span class="keyword">let</span> isFlushPending = <span class="literal">false</span> </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">nextTick</span>(<span class="params">fn</span>) &#123; </span><br><span class="line">  <span class="keyword">return</span> fn ? p.<span class="title function_">then</span>(fn) : p </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">queueFlush</span>(<span class="params"></span>) &#123; </span><br><span class="line">  <span class="keyword">if</span> (!isFlushing &amp;&amp; !isFlushPending) &#123; </span><br><span class="line">    isFlushPending = <span class="literal">true</span> </span><br><span class="line">    <span class="title function_">nextTick</span>(flushJobs) </span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>可以看到，Vue.js 内部还维护了 isFlushing 和 isFlushPending 变量，用来控制异步任务的刷新逻辑。</p>
+<p>在 queueFlush 首次执行时，isFlushing 和 isFlushPending 都是 false，此时会把 isFlushPending 设置为 true，并且调用 nextTick(flushJobs) 去执行队列里的任务。</p>
+<p>因为 isFlushPending 的控制，这使得即使多次执行 queueFlush，也不会多次去执行 flushJobs。另外 nextTick 在 Vue.js 3.0 中的实现也是非常简单，通过 Promise.resolve().then 去异步执行 flushJobs。</p>
+<p>因为 JavaScript 是单线程执行的，这样的异步设计使你在一个 Tick 内，可以多次执行 queueJob 或者 queuePostFlushCb 去添加任务，也可以保证在宏任务执行完毕后的微任务阶段执行一次 flushJobs。</p>
+<h4 id="异步任务队列的执行"><a href="#异步任务队列的执行" class="headerlink" title="异步任务队列的执行"></a>异步任务队列的执行</h4><p>创建完任务队列后，接下来要异步执行这个队列，我们来看一下 flushJobs 的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">getId</span> = (<span class="params">job</span>) =&gt; (job.<span class="property">id</span> == <span class="literal">null</span> ? <span class="title class_">Infinity</span> : job.<span class="property">id</span>) </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">flushJobs</span>(<span class="params">seen</span>) &#123; </span><br><span class="line">  isFlushPending = <span class="literal">false</span> </span><br><span class="line">  isFlushing = <span class="literal">true</span> </span><br><span class="line">  <span class="keyword">let</span> job </span><br><span class="line">  <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>)) &#123; </span><br><span class="line">    seen = seen || <span class="keyword">new</span> <span class="title class_">Map</span>() </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 组件的更新是先父后子 </span></span><br><span class="line">  <span class="comment">// 如果一个组件在父组件更新过程中卸载，它自身的更新应该被跳过 </span></span><br><span class="line">  queue.<span class="title function_">sort</span>(<span class="function">(<span class="params">a, b</span>) =&gt;</span> <span class="title function_">getId</span>(a) - <span class="title function_">getId</span>(b)) </span><br><span class="line">  <span class="keyword">while</span> ((job = queue.<span class="title function_">shift</span>()) !== <span class="literal">undefined</span>) &#123; </span><br><span class="line">    <span class="keyword">if</span> (job === <span class="literal">null</span>) &#123; </span><br><span class="line">      <span class="keyword">continue</span> </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>)) &#123; </span><br><span class="line">      <span class="title function_">checkRecursiveUpdates</span>(seen, job) </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="title function_">callWithErrorHandling</span>(job, <span class="literal">null</span>, <span class="number">14</span> <span class="comment">/* SCHEDULER */</span>) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="title function_">flushPostFlushCbs</span>(seen) </span><br><span class="line">  isFlushing = <span class="literal">false</span> </span><br><span class="line">  <span class="comment">// 一些 postFlushCb 执行过程中会再次添加异步任务，递归 flushJobs 会把它们都执行完毕 </span></span><br><span class="line">  <span class="keyword">if</span> (queue.<span class="property">length</span> || postFlushCbs.<span class="property">length</span>) &#123; </span><br><span class="line">    <span class="title function_">flushJobs</span>(seen) </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，flushJobs 函数开始执行的时候，会把 isFlushPending 重置为 false，把 isFlushing 设置为 true 来表示正在执行异步任务队列。</p>
+<p>对于异步任务队列 queue，在遍历执行它们前会先对它们做一次从小到大的排序，这是因为两个主要原因：</p>
+<ul>
+<li>我们创建组件的过程是由父到子，所以创建组件副作用渲染函数也是先父后子，父组件的副作用渲染函数的 effect id 是小于子组件的，每次更新组件也是通过 queueJob 把 effect 推入异步任务队列 queue 中的。所以为了保证先更新父组再更新子组件，要对 queue 做从小到大的排序。</li>
+<li>如果一个组件在父组件更新过程中被卸载，它自身的更新应该被跳过。所以也应该要保证先更新父组件再更新子组件，要对 queue 做从小到大的排序。</li>
+</ul>
+<p>接下来，就是遍历这个 queue，依次执行队列中的任务了，在遍历过程中，注意有一个 checkRecursiveUpdates 的逻辑，它是用来在非生产环境下检测是否有循环更新的，它的作用我们稍后会提。</p>
+<p>遍历完 queue 后，又会进一步执行 flushPostFlushCbs 方法去遍历执行所有推入到 postFlushCbs 的回调函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">function</span> <span class="title function_">flushPostFlushCbs</span>(<span class="params">seen</span>) &#123; </span><br><span class="line">  <span class="keyword">if</span> (postFlushCbs.<span class="property">length</span>) &#123; </span><br><span class="line">    <span class="comment">// 拷贝副本 </span></span><br><span class="line">    <span class="keyword">const</span> cbs = [...<span class="keyword">new</span> <span class="title class_">Set</span>(postFlushCbs)] </span><br><span class="line">    postFlushCbs.<span class="property">length</span> = <span class="number">0</span> </span><br><span class="line">    <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>)) &#123; </span><br><span class="line">      seen = seen || <span class="keyword">new</span> <span class="title class_">Map</span>() </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; cbs.<span class="property">length</span>; i++) &#123; </span><br><span class="line">      <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>)) &#123;                                                       </span><br><span class="line">        <span class="title function_">checkRecursiveUpdates</span>(seen, cbs[i]) </span><br><span class="line">      &#125; </span><br><span class="line">      cbs[i]() </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意这里遍历前会通过 <code>const cbs = [...new Set(postFlushCbs)]</code> 拷贝一个 postFlushCbs 的副本，这是因为在遍历的过程中，可能某些回调函数的执行会再次修改 postFlushCbs，所以拷贝一个副本循环遍历则不会受到 postFlushCbs 修改的影响。</p>
+<p>遍历完 postFlushCbs 后，会重置 isFlushing 为 false，因为一些 postFlushCb 执行过程中可能会再次添加异步任务，所以需要继续判断如果 queue 或者 postFlushCbs 队列中还存在任务，则递归执行 flushJobs 把它们都执行完毕。</p>
+<h4 id="检测循环更新"><a href="#检测循环更新" class="headerlink" title="检测循环更新"></a>检测循环更新</h4><p>前面我们提到了，在遍历执行异步任务和回调函数的过程中，都会在非生产环境下执行 checkRecursiveUpdates 检测是否有循环更新，它是用来解决什么问题的呢？</p>
+<p>我们把之前的例子改写一下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; reactive, watch &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span><br><span class="line"><span class="keyword">const</span> state = <span class="title function_">reactive</span>(&#123; <span class="attr">count</span>: <span class="number">0</span> &#125;) </span><br><span class="line"><span class="title function_">watch</span>(<span class="function">() =&gt;</span> state.<span class="property">count</span>, <span class="function">(<span class="params">count, prevCount</span>) =&gt;</span> &#123; </span><br><span class="line">  state.<span class="property">count</span>++ </span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(count) </span><br><span class="line">&#125;) </span><br><span class="line">state.<span class="property">count</span>++ </span><br></pre></td></tr></table></figure>
+
+<p>如果你去跑这个示例，你会在控制台看到输出了 101 次值，然后报了错误： <code>Maximum recursive updates exceeded</code> 。这是因为我们在 watcher 的回调函数里更新了数据，这样会再一次进入回调函数，如果我们不加任何控制，那么回调函数会一直执行，直到把内存耗尽造成浏览器假死。<br>为了避免这种情况，Vue.js 实现了 checkRecursiveUpdates 方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="variable constant_">RECURSION_LIMIT</span> = <span class="number">100</span> </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">checkRecursiveUpdates</span>(<span class="params">seen, fn</span>) &#123; </span><br><span class="line">  <span class="keyword">if</span> (!seen.<span class="title function_">has</span>(fn)) &#123; </span><br><span class="line">    seen.<span class="title function_">set</span>(fn, <span class="number">1</span>) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">else</span> &#123; </span><br><span class="line">    <span class="keyword">const</span> count = seen.<span class="title function_">get</span>(fn) </span><br><span class="line">    <span class="keyword">if</span> (count &gt; <span class="variable constant_">RECURSION_LIMIT</span>) &#123; </span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Maximum recursive updates exceeded. &#x27;</span> + </span><br><span class="line">        <span class="string">&quot;You may have code that is mutating state in your component&#x27;s &quot;</span> + </span><br><span class="line">        <span class="string">&#x27;render function or updated hook or watcher source function.&#x27;</span>) </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123; </span><br><span class="line">      seen.<span class="title function_">set</span>(fn, count + <span class="number">1</span>) </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过前面的代码，我们知道 flushJobs 一开始便创建了 seen，它是一个 Map 对象，然后在 checkRecursiveUpdates 的时候会把任务添加到 seen 中，记录引用计数 count，初始值为 1，如果 postFlushCbs 再次添加了相同的任务，则引用计数 count 加 1，如果 count 大于我们定义的限制 100 ，则说明一直在添加这个相同的任务并超过了 100 次。那么，Vue.js 会抛出这个错误，因为在正常的使用中，不应该出现这种情况，而我们上述的错误示例就会触发这种报错逻辑。</p>
+<h4 id="优化：只用一个变量"><a href="#优化：只用一个变量" class="headerlink" title="优化：只用一个变量"></a>优化：只用一个变量</h4><p>到这里，异步队列的设计就介绍完毕了，你可能会对 isFlushPending 和 isFlushing 有些疑问，为什么需要两个变量来控制呢？</p>
+<p>从语义上来看，isFlushPending 用于判断是否在等待 nextTick 执行 flushJobs，而 isFlushing 是判断是否正在执行任务队列。</p>
+<p>从功能上来看，它们的作用是为了确保以下两点：</p>
+<ol>
+<li>在一个 Tick 内可以多次添加任务到队列中，但是任务队列会在 nextTick 后执行；</li>
+<li>在执行任务队列的过程中，也可以添加新的任务到队列中，并且在当前 Tick 去执行剩余的任务队列。</li>
+</ol>
+<p>但实际上，这里我们可以进行优化。在我看来，这里用一个变量就足够了，我们来稍微修改一下源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">function <span class="title function_">queueFlush</span><span class="params">()</span> &#123; </span><br><span class="line">  <span class="keyword">if</span> (!isFlushing) &#123; </span><br><span class="line">    isFlushing = <span class="literal">true</span> </span><br><span class="line">    <span class="title function_">nextTick</span><span class="params">(flushJobs)</span> </span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br><span class="line">function <span class="title function_">flushJobs</span><span class="params">(seen)</span> &#123; </span><br><span class="line">  let job </span><br><span class="line">  <span class="title function_">if</span> <span class="params">((process.env.NODE_ENV !== <span class="string">&#x27;production&#x27;</span>)</span>) &#123; </span><br><span class="line">    seen = seen || <span class="keyword">new</span> <span class="title class_">Map</span>() </span><br><span class="line">  &#125; </span><br><span class="line">  queue.sort((a, b) =&gt; getId(a) - getId(b)) </span><br><span class="line">  <span class="keyword">while</span> ((job = queue.shift()) !== undefined) &#123; </span><br><span class="line">    <span class="keyword">if</span> (job === <span class="literal">null</span>) &#123; </span><br><span class="line">      <span class="keyword">continue</span> </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> ((process.env.NODE_ENV !== <span class="string">&#x27;production&#x27;</span>)) &#123; </span><br><span class="line">      checkRecursiveUpdates(seen, job) </span><br><span class="line">    &#125; </span><br><span class="line">    callWithErrorHandling(job, <span class="literal">null</span>, <span class="number">14</span> <span class="comment">/* SCHEDULER */</span>) </span><br><span class="line">  &#125; </span><br><span class="line">  flushPostFlushCbs(seen) </span><br><span class="line">  <span class="keyword">if</span> (queue.length || postFlushCbs.length) &#123; </span><br><span class="line">    flushJobs(seen) </span><br><span class="line">  &#125; </span><br><span class="line">  isFlushing = <span class="literal">false</span> </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>可以看到，我们只需要一个 isFlushing 来控制就可以实现相同的功能了。在执行 queueFlush 的时候，判断 isFlushing 为 false，则把它设置为 true，然后 nextTick 会执行 flushJobs。在 flushJobs 函数执行完成的最后，也就是所有的任务（包括后添加的）都执行完毕，再设置 isFlushing 为 false。</p>
+<blockquote>
+<p>我这么修改源码后也跑通了 Vue.js 3.0 的单元测试，如果你觉得这么实现有问题的话，欢迎在留言区评论与我讨论。</p>
+</blockquote>
+<p>了解完 watch API 和异步任务队列的设计后，我们再来学习侦听器提供的另一个 API—— watchEffect API。</p>
+<h3 id="watchEffect-API"><a href="#watchEffect-API" class="headerlink" title="watchEffect API"></a>watchEffect API</h3><p>watchEffect API 的作用是注册一个副作用函数，副作用函数内部可以访问到响应式对象，当内部响应式对象变化后再立即执行这个函数。</p>
+<p>可以先来看一个示例：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; ref, watchEffect &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span><br><span class="line"><span class="keyword">const</span> count = <span class="title function_">ref</span>(<span class="number">0</span>) </span><br><span class="line"><span class="title function_">watchEffect</span>(<span class="function">() =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(count.<span class="property">value</span>)) </span><br><span class="line">count.<span class="property">value</span>++ </span><br></pre></td></tr></table></figure>
+
+<p>它的结果是依次输出 0 和 1。<br>watchEffect 和前面的 watch API 有哪些不同呢？主要有三点：</p>
+<ol>
+<li><strong>侦听的源不同</strong> 。watch API 可以侦听一个或多个响应式对象，也可以侦听一个 getter 函数，而 watchEffect API 侦听的是一个普通函数，只要内部访问了响应式对象即可，这个函数并不需要返回响应式对象。</li>
+<li><strong>没有回调函数</strong> 。watchEffect API 没有回调函数，副作用函数的内部响应式对象发生变化后，会再次执行这个副作用函数。</li>
+<li><strong>立即执行</strong> 。watchEffect API 在创建好 watcher 后，会立刻执行它的副作用函数，而 watch API 需要配置 immediate 为 true，才会立即执行回调函数。</li>
+</ol>
+<p>对 watchEffect API 有大体了解后，我们来看一下在我整理的 watchEffect 场景下， doWatch 函数的简化版实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">watchEffect</span>(<span class="params">effect, options</span>) &#123; </span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">doWatch</span>(effect, <span class="literal">null</span>, options); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">doWatch</span>(<span class="params">source, cb, &#123; immediate, deep, flush, onTrack, onTrigger &#125; = EMPTY_OBJ</span>) &#123; </span><br><span class="line">  instance = currentInstance; </span><br><span class="line">  <span class="keyword">let</span> getter; </span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isFunction</span>(source)) &#123; </span><br><span class="line">    getter = <span class="function">() =&gt;</span> &#123; </span><br><span class="line">      <span class="keyword">if</span> (instance &amp;&amp; instance.<span class="property">isUnmounted</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span>; </span><br><span class="line">      &#125; </span><br><span class="line">       <span class="comment">// 执行清理函数 </span></span><br><span class="line">      <span class="keyword">if</span> (cleanup) &#123; </span><br><span class="line">        <span class="title function_">cleanup</span>(); </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="comment">// 执行 source 函数，传入 onInvalidate 作为参数 </span></span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">callWithErrorHandling</span>(source, instance, <span class="number">3</span> <span class="comment">/* WATCH_CALLBACK */</span>, [onInvalidate]); </span><br><span class="line">    &#125;; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">let</span> cleanup; </span><br><span class="line">  <span class="keyword">const</span> <span class="title function_">onInvalidate</span> = (<span class="params">fn</span>) =&gt; &#123; </span><br><span class="line">    cleanup = runner.<span class="property">options</span>.<span class="property">onStop</span> = <span class="function">() =&gt;</span> &#123; </span><br><span class="line">      <span class="title function_">callWithErrorHandling</span>(fn, instance, <span class="number">4</span> <span class="comment">/* WATCH_CLEANUP */</span>); </span><br><span class="line">    &#125;; </span><br><span class="line">  &#125;; </span><br><span class="line">  <span class="keyword">let</span> scheduler; </span><br><span class="line">  <span class="comment">// 创建 scheduler </span></span><br><span class="line">  <span class="keyword">if</span> (flush === <span class="string">&#x27;sync&#x27;</span>) &#123; </span><br><span class="line">    scheduler = invoke; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (flush === <span class="string">&#x27;pre&#x27;</span>) &#123; </span><br><span class="line">    scheduler = <span class="function"><span class="params">job</span> =&gt;</span> &#123; </span><br><span class="line">      <span class="keyword">if</span> (!instance || instance.<span class="property">isMounted</span>) &#123; </span><br><span class="line">        <span class="title function_">queueJob</span>(job); </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="keyword">else</span> &#123; </span><br><span class="line">        <span class="title function_">job</span>(); </span><br><span class="line">      &#125; </span><br><span class="line">    &#125;; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">else</span> &#123; </span><br><span class="line">    scheduler = <span class="function"><span class="params">job</span> =&gt;</span> <span class="title function_">queuePostRenderEffect</span>(job, instance &amp;&amp; instance.<span class="property">suspense</span>); </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 创建 runner </span></span><br><span class="line">  <span class="keyword">const</span> runner = <span class="title function_">effect</span>(getter, &#123; </span><br><span class="line">    <span class="attr">lazy</span>: <span class="literal">true</span>, </span><br><span class="line">    <span class="attr">computed</span>: <span class="literal">true</span>, </span><br><span class="line">    onTrack, </span><br><span class="line">    onTrigger, </span><br><span class="line">    scheduler </span><br><span class="line">  &#125;); </span><br><span class="line">  <span class="title function_">recordInstanceBoundEffect</span>(runner); </span><br><span class="line">  <span class="comment">// 立即执行 runner </span></span><br><span class="line">  <span class="title function_">runner</span>();</span><br><span class="line">  <span class="comment">// 返回销毁函数 </span></span><br><span class="line">  <span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">stop</span>(runner);</span><br><span class="line">    <span class="keyword">if</span> (instance) &#123;</span><br><span class="line">      <span class="title function_">remove</span>(instance.<span class="property">effects</span>, runner);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，getter 函数就是对 source 函数的简单封装，它会先判断组件实例是否已经销毁，然后每次执行 source 函数前执行 cleanup 清理函数。</p>
+<p>watchEffect 内部创建的 runner 对应的 scheduler 对象就是 scheduler 函数本身，这样它再次执行时，就会执行这个 scheduler 函数，并且传入 runner 函数作为参数，其实就是按照一定的调度方式去执行基于 source 封装的 getter 函数。</p>
+<p>创建完 runner 后就立刻执行了 runner，其实就是内部同步执行了基于 source 封装的 getter 函数。</p>
+<p>在执行 source 函数的时候，会传入一个 onInvalidate 函数作为参数，接下来我们就来分析它的作用。</p>
+<h4 id="注册无效回调函数"><a href="#注册无效回调函数" class="headerlink" title="注册无效回调函数"></a>注册无效回调函数</h4><p>有些时候，watchEffect 会注册一个副作用函数，在函数内部可以做一些异步操作，但是当这个 watcher 停止后，如果我们想去对这个异步操作做一些额外事情（比如取消这个异步操作），我们可以通过 onInvalidate 参数注册一个无效函数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;ref, watchEffect &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span><br><span class="line"><span class="keyword">const</span> id = <span class="title function_">ref</span>(<span class="number">0</span>) </span><br><span class="line"><span class="title function_">watchEffect</span>(<span class="function"><span class="params">onInvalidate</span> =&gt;</span> &#123; </span><br><span class="line">  <span class="comment">// 执行异步操作 </span></span><br><span class="line">  <span class="keyword">const</span> token = <span class="title function_">performAsyncOperation</span>(id.<span class="property">value</span>) </span><br><span class="line">  <span class="title function_">onInvalidate</span>(<span class="function">() =&gt;</span> &#123; </span><br><span class="line">    <span class="comment">// 如果 id 发生变化或者 watcher 停止了，则执行逻辑取消前面的异步操作 </span></span><br><span class="line">    token.<span class="title function_">cancel</span>() </span><br><span class="line">  &#125;) </span><br><span class="line">&#125;) </span><br></pre></td></tr></table></figure>
+
+<p>我们利用 watchEffect 注册了一个副作用函数，它有一个 onInvalidate 参数。在这个函数内部通过 performAsyncOperation 执行某些异步操作，并且访问了 id 这个响应式对象，然后通过 onInvalidate 注册了一个回调函数。</p>
+<p>如果 id 发生变化或者 watcher 停止了，这个回调函数将会执行，然后执行 token.cancel 取消之前的异步操作。</p>
+<p>我们来回顾 onInvalidate 在 doWatch 中的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">onInvalidate</span> = (<span class="params">fn</span>) =&gt; &#123; </span><br><span class="line">  cleanup = runner.<span class="property">options</span>.<span class="property">onStop</span> = <span class="function">() =&gt;</span> &#123; </span><br><span class="line">    <span class="title function_">callWithErrorHandling</span>(fn, instance, <span class="number">4</span> <span class="comment">/* WATCH_CLEANUP */</span>); </span><br><span class="line">  &#125;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+
+<p>实际上，当你执行 onInvalidate 的时候，就是注册了一个 cleanup 和 runner 的 onStop 方法，这个方法内部会执行 fn，也就是你注册的无效回调函数。</p>
+<p>也就是说当响应式数据发生变化，会执行 cleanup 方法，当 watcher 被停止，会执行 onStop 方法，这两者都会执行注册的无效回调函数 fn。</p>
+<p>通过这种方式，Vue.js 就很好地实现了 watcher 注册无效回调函数的需求。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>好的，到这里我们这一节的学习也要结束啦，通过这节课的学习，你应该掌握了侦听器内部实现原理，了解侦听器支持的几种配置参数的作用，以及异步任务队列的设计原理。</p>
+<p>你也应该掌握侦听器的常见应用场景：如何用 watch API 观测数据的变化去执行一些逻辑，如何利用 watchEffect API 去注册一些副作用函数，如何去注册无效回调函数，以及如何停止一个正在运行的 watcher。</p>
+<p>相比于计算属性，侦听器更适合用于在数据变化后执行某段逻辑的场景，而计算属性则用于一个数据依赖另外一些数据计算而来的场景。</p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;apiWatch.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;scheduler.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E9%98%9F%E5%88%97%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="toc-text">异步任务队列的设计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E9%98%9F%E5%88%97%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="toc-text">异步任务队列的创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E9%98%9F%E5%88%97%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="toc-text">异步任务队列的执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B%E5%BE%AA%E7%8E%AF%E6%9B%B4%E6%96%B0"><span class="toc-text">检测循环更新</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%EF%BC%9A%E5%8F%AA%E7%94%A8%E4%B8%80%E4%B8%AA%E5%8F%98%E9%87%8F"><span class="toc-text">优化：只用一个变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#watchEffect-API"><span class="toc-text">watchEffect API</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E6%97%A0%E6%95%88%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="toc-text">注册无效回调函数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/08/01/vue3/watcher-two/">https://xiaozhouguo.github.io/blog/2022/08/01/vue3/watcher-two/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/08/01/vue3/reactive-inner-two/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          响应式内部的实现原理是怎么样的？- 下篇
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/08/02/vue3/ast-one/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          构造AST的完整流程是怎么样的？ - 上篇
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

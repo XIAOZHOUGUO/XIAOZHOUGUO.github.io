@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>javascript string、array常用API练习 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-javascript01" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      javascript string、array常用API练习
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2017-08-18T08:45:21.000Z" itemprop="datePublished">2017年08月18日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2017/08/18/javascript01/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在 <a target="_blank" rel="noopener" href="https://freecodecamp.cn/challenges/reverse-a-string">freeCodeCamp</a> 做了一些练习，因此来总结一下有关javascript中常用的有关字符串和数组处理的官方API。</p>
+<span id="more"></span>
+<p><img src="http://bpic.588ku.com//back_pic/03/68/74/1657b3cea5bb265.jpg!/fh/170/quality/90/unsharp/true/compress/true" alt="科技感"></p>
+<h3 id="1-Reverse-a-String"><a href="#1-Reverse-a-String" class="headerlink" title="1. Reverse a String"></a>1. Reverse a String</h3><p>又名 <code>翻转字符串</code> ，其要求如下：将给定的字符串进行翻转，并进行返回。</p>
+<blockquote>
+<p>提示：先把字符串转化成数组，再借助数组的reverse方法翻转数组顺序，最后把数组转化成字符串。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">reverseString</span>(<span class="params">str</span>) &#123;</span><br><span class="line">  str=str.<span class="title function_">split</span>(<span class="string">&quot;&quot;</span>).<span class="title function_">reverse</span>().<span class="title function_">join</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> str;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">reverseString</span>(<span class="string">&quot;hello&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>其中应用到了 <code>split()</code> <code>reverse()</code> <code>join()</code> 方法。</p>
+<pre><code>split() : string对象方法，将字符串分割成字符串数组。如果把空字符串 (&quot;&quot;) 用作 separator，那么字符串中的每个字符之间都会被分割。此方法不改变原始字符串。
+
+reverse() : array对象方法，颠倒数组元素的顺序。
+
+join() : array对象方法，将数组的所有元素放到一个字符串里。元素是通过指定的分隔符进行分隔的。
+</code></pre>
+<h3 id="2-Factorialize-a-Number"><a href="#2-Factorialize-a-Number" class="headerlink" title="2. Factorialize a Number"></a>2. Factorialize a Number</h3><p>计算一个整数的阶乘。阶乘通常简写成 n!，例如: 5! &#x3D; 1 * 2 * 3 * 4 * 5 &#x3D; 120。要求返回运算结果。</p>
+<p>方法一：for循环</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">factorialize</span>(<span class="params">num</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span>(num&lt;<span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span>(num === <span class="number">0</span> || num === <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i=num-<span class="number">1</span>;i&gt;<span class="number">0</span>;i--)&#123;</span><br><span class="line">      num*=i;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> num;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">factorialize</span>(<span class="number">5</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>方法二：递归</p>
+<pre><code>将for循环改为：return factorialize(num-1)*num;
+</code></pre>
+<h3 id="3-Check-for-Palindromes"><a href="#3-Check-for-Palindromes" class="headerlink" title="3. Check for Palindromes"></a>3. Check for Palindromes</h3><p>又名 <code>检查回文字符串</code> ，要求：如果给定的字符串是回文，返回true，反之，返回false。</p>
+<blockquote>
+<p>如果一个字符串忽略标点符号、大小写和空格，正着读和反着读一模一样，那么这个字符串就是palindrome(回文)。提示：去掉字符串多余的标点符号和空格，然后把字符串转化成小写来验证此字符串是否为回文。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">palindrome</span>(<span class="params">str</span>) &#123;</span><br><span class="line">  str=str.<span class="title function_">replace</span>(<span class="regexp">/[\W_]/g</span>,<span class="string">&#x27;&#x27;</span>).<span class="title function_">toLowerCase</span>();</span><br><span class="line">  <span class="keyword">var</span> str2 = str.<span class="title function_">split</span>(<span class="string">&#x27;&#x27;</span>).<span class="title function_">reverse</span>().<span class="title function_">join</span>(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">  <span class="keyword">if</span>(str === str2)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">palindrome</span>(<span class="string">&quot;1 eye for of 1 eye.&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>replace()</code> <code>toLowerCase()</code> 方法。</p>
+<pre><code>replace() : string对象方法，在字符串中查找匹配的子串， 并替换与正则表达式匹配的子串。
+
+toLowerCase() : string对象方法，将字符串中的字符全部转换为小写。同理 `toUpperCase()` 转换为大写。
+</code></pre>
+<h3 id="4-Find-the-Longest-Word-in-a-String"><a href="#4-Find-the-Longest-Word-in-a-String" class="headerlink" title="4. Find the Longest Word in a String"></a>4. Find the Longest Word in a String</h3><p><code>找出最长单词</code>，在句子中找出最长的单词，并返回它的长度。函数的返回值应该是一个数字。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">findLongestWord</span>(<span class="params">str</span>) &#123;</span><br><span class="line">  str=str.<span class="title function_">split</span>(<span class="string">&#x27; &#x27;</span>).<span class="title function_">sort</span>(<span class="keyword">function</span>(<span class="params">a,b</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> b.<span class="property">length</span>-a.<span class="property">length</span>; <span class="comment">// 降序排列，return a.length - b.length 为升序</span></span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> str[<span class="number">0</span>].<span class="property">length</span>;</span><br><span class="line">  <span class="comment">//return &#x27;最长的单词：&#x27;+str[0]+&#x27; 长度：&#x27;+str[0].length;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">findLongestWord</span>(<span class="string">&quot;The quick brown fox jumped over the lazy dog&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>其中新应用到了 <code>sort()</code> 方法。</p>
+<pre><code>sort() ：array对象方法，对数组的元素进行排序。排序顺序可以是字母或数字，并按升序或降序。默认排序顺序为按字母升序。
+</code></pre>
+<h3 id="5-Title-Case-a-Sentence"><a href="#5-Title-Case-a-Sentence" class="headerlink" title="5. Title Case a Sentence"></a>5. Title Case a Sentence</h3><p>又名 <code>首字母大写</code> ，要求：确保字符串的每个单词首字母都大写，其余部分小写。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">function</span> <span class="title function_">titleCase</span>(<span class="params">str</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> arr = str.<span class="title function_">toLowerCase</span>().<span class="title function_">split</span>(<span class="string">&quot; &quot;</span>);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;arr.<span class="property">length</span>;i++)&#123;</span><br><span class="line">    arr[i] = arr[i][<span class="number">0</span>].<span class="title function_">toUpperCase</span>() + arr[i].<span class="title function_">slice</span>(<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> arr.<span class="title function_">join</span>(<span class="string">&quot; &quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*方法二：</span></span><br><span class="line"><span class="comment">  str=str.toLowerCase().split(&#x27; &#x27;);</span></span><br><span class="line"><span class="comment">  var newstr=&#x27;&#x27;;</span></span><br><span class="line"><span class="comment">  for(var i in str)&#123;</span></span><br><span class="line"><span class="comment">    newstr+=str[i].substring(0,1).toUpperCase()+str[i].substring(1)+&#x27; &#x27;;</span></span><br><span class="line"><span class="comment">  &#125;</span></span><br><span class="line"><span class="comment">  return newstr;*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">titleCase</span>(<span class="string">&quot;HERE IS MY HANDLE HERE IS MY SPOUT&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>slice()</code> <code>substring()</code> 方法。</p>
+<pre><code>slice() ：array对象方法，选取数组的的一部分，并返回一个新数组，不改变原数组。array.slice(start, end) 返回start和end之间的内容，如果没有指定end参数，那么返回包含从 start 到数组结束的所有元素。
+
+substring() : string对象方法，返回字符串中介于两个指定下标之间的字符。string.substring(from, to)，如果没有 to 参数，则从 from 一直到 结束。
+</code></pre>
+<h3 id="6-Return-Largest-Numbers-in-Arrays"><a href="#6-Return-Largest-Numbers-in-Arrays" class="headerlink" title="6. Return Largest Numbers in Arrays"></a>6. Return Largest Numbers in Arrays</h3><p>找出多个数组中的最大数形成一个新数组返回之。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">largestOfFour</span>(<span class="params">arr</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> newarr=[];</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;arr.<span class="property">length</span>;i++)&#123;</span><br><span class="line">    arr[i].<span class="title function_">sort</span>(<span class="keyword">function</span>(<span class="params">a,b</span>)&#123;</span><br><span class="line">      <span class="keyword">return</span> b-a;</span><br><span class="line">    &#125;);</span><br><span class="line">   newarr.<span class="title function_">push</span>(arr[i][<span class="number">0</span>]);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> newarr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">largestOfFour</span>([[<span class="number">4</span>, <span class="number">5</span>, <span class="number">1</span>, <span class="number">3</span>], [<span class="number">13</span>, <span class="number">27</span>, <span class="number">18</span>, <span class="number">26</span>], [<span class="number">32</span>, <span class="number">35</span>, <span class="number">37</span>, <span class="number">39</span>], [<span class="number">1000</span>, <span class="number">1001</span>, <span class="number">857</span>, <span class="number">1</span>]]);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>push()</code> 方法。</p>
+<pre><code>push() : array对象方法，向数组的末尾添加一个或更多元素，并返回新的长度。此方法改变数组的长度。同理 `pop()` 删除数组的最后一个元素并返回删除的元素。
+</code></pre>
+<h3 id="7-Confirm-the-Ending"><a href="#7-Confirm-the-Ending" class="headerlink" title="7. Confirm the Ending"></a>7. Confirm the Ending</h3><p>又名 <code>检查字符串末尾</code> 。判断一个字符串是否以给定的字符串结尾，是true，否false。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">confirmEnding</span>(<span class="params">str, target</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> len=target.<span class="property">length</span>;</span><br><span class="line">  <span class="keyword">var</span> strfrom=str.<span class="property">length</span>-len;</span><br><span class="line">  <span class="keyword">if</span>(str.<span class="title function_">substr</span>(strfrom,len)===target)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">confirmEnding</span>(<span class="string">&quot;Bastian&quot;</span>, <span class="string">&quot;n&quot;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>substr()</code> 方法。</p>
+<pre><code>substr() : string对象方法，从起始索引号提取字符串中指定数目的字符。string.substr(start,length)，如果省略了length参数，那么返回从 start 到结尾的字串。
+</code></pre>
+<h3 id="8-Repeat-a-string-repeat-a-string"><a href="#8-Repeat-a-string-repeat-a-string" class="headerlink" title="8. Repeat a string repeat a string"></a>8. Repeat a string repeat a string</h3><p>又名 <code>重复输出字符串</code> ，要求：重复一个指定的字符串 num次，如果num是一个负数则返回一个空字符串。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">repeat</span>(<span class="params">str, num</span>) &#123;</span><br><span class="line">  <span class="comment">// 请把你的代码写在这里</span></span><br><span class="line">  <span class="keyword">var</span> newstr=<span class="string">&#x27;&#x27;</span>;</span><br><span class="line">  <span class="keyword">if</span>(num&lt;<span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> newstr;</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span>(num==<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> str;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;num;i++)&#123;</span><br><span class="line">      newstr+=str;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> newstr;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">repeat</span>(<span class="string">&quot;abc&quot;</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-Truncate-a-string"><a href="#9-Truncate-a-string" class="headerlink" title="9. Truncate a string"></a>9. Truncate a string</h3><p>又名 <code>截断字符串</code> ，如果字符串的长度比指定的参数num长，则把多余的部分用…来表示。<br>切记，插入到字符串尾部的三个点号也会计入字符串的长度。<br>但是，如果指定的参数num小于或等于3，则添加的三个点号不会计入字符串的长度。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">truncate</span>(<span class="params">str, num</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span>(str.<span class="property">length</span> &lt;= num)&#123;</span><br><span class="line">    <span class="keyword">return</span> str;</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span>(num &lt;= <span class="number">3</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> str.<span class="title function_">replace</span>(str.<span class="title function_">substring</span>(num,str.<span class="property">length</span>),<span class="string">&#x27;...&#x27;</span>);</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> str.<span class="title function_">replace</span>(str.<span class="title function_">substring</span>(num-<span class="number">3</span>,str.<span class="property">length</span>),<span class="string">&#x27;...&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">truncate</span>(<span class="string">&quot;A-tisket a-tasket A green and yellow basket&quot;</span>, <span class="number">11</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-Chunky-Monkey"><a href="#10-Chunky-Monkey" class="headerlink" title="10. Chunky Monkey"></a>10. Chunky Monkey</h3><p>猴子吃香蕉, 分割数组。把一个数组arr按照指定的数组大小size分割成若干个数组块。<br>例如:</p>
+<pre><code>chunk([1,2,3,4],2)=[[1,2],[3,4]];
+chunk([1,2,3,4,5],2)=[[1,2],[3,4],[5]];
+</code></pre>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">chunk</span>(<span class="params">arr, size</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> newarr=[];</span><br><span class="line">  <span class="keyword">if</span>(size&lt;<span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span>(size === <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;arr.<span class="property">length</span>;i=i+size)&#123;</span><br><span class="line">      newarr.<span class="title function_">push</span>(arr.<span class="title function_">slice</span>(i,i+size));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> newarr;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">chunk</span>([<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>], <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-Slasher-Flick"><a href="#11-Slasher-Flick" class="headerlink" title="11. Slasher Flick"></a>11. Slasher Flick</h3><p><code>截断数组</code> ，返回一个数组被截断n个元素后还剩余的元素，截断从索引0开始。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">slasher</span>(<span class="params">arr, howMany</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> newarr=[];</span><br><span class="line">  <span class="keyword">if</span>(howMany === <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span>(arr.<span class="property">length</span> &lt;= howMany)&#123;</span><br><span class="line">    <span class="keyword">return</span> newarr;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    arr.<span class="title function_">splice</span>(<span class="number">0</span>,howMany);</span><br><span class="line">    <span class="comment">//var haha=arr.slice(howMany,arr.length);</span></span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">slasher</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>splice()</code> 方法。</p>
+<pre><code>splice() : array对象方法，从数组中添加或删除元素。这种方法会改变原始数组！。
+array.splice(index,howmany,item1,.....,itemX)，参数依次为：规定从何处添加/删除元素，规定应该删除多少元素，要添加到数组的新元素。
+</code></pre>
+<h3 id="12-Mutations"><a href="#12-Mutations" class="headerlink" title="12. Mutations"></a>12. Mutations</h3><p>又名 <code>比较字符串</code> ，如果数组第一个字符串元素包含了第二个字符串元素的所有字符，函数返回true。<br>举例，[“hello”, “Hello”]应该返回true，因为在忽略大小写的情况下，第二个字符串的所有字符都可以在第一个字符串找到。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">mutation</span>(<span class="params">arr</span>) &#123;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;arr[<span class="number">1</span>].<span class="property">length</span>;i++)&#123;</span><br><span class="line">     <span class="keyword">if</span>(arr[<span class="number">0</span>].<span class="title function_">toLowerCase</span>().<span class="title function_">indexOf</span>(arr[<span class="number">1</span>].<span class="title function_">toLowerCase</span>().<span class="title function_">charAt</span>(i)) == -<span class="number">1</span>)&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">mutation</span>([<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;hey&quot;</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>indexOf()</code> <code>charAt()</code> 方法。</p>
+<pre><code>indexOf() : string对象方法，返回某个指定的字符串值在字符串中首次出现的位置。如果没有找到匹配的字符串则返回 -1。array对象也有这个方法，搜索数组中的元素，并返回它首次所在的位置。如果在数组中没找到字符串则返回 -1。
+
+charAt() : string对象方法，返回在指定位置的字符。
+</code></pre>
+<h3 id="13-Falsy-Bouncer"><a href="#13-Falsy-Bouncer" class="headerlink" title="13. Falsy Bouncer"></a>13. Falsy Bouncer</h3><p>又名 <code>过滤假值</code> 。删除数组中的所有假值。在JavaScript中，假值有false、null、0、””、undefined 和 NaN。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">bouncer</span>(<span class="params">arr</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> a =[];</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>;i&lt;arr.<span class="property">length</span>;i++)&#123;</span><br><span class="line">    <span class="keyword">if</span>(arr[i])&#123;</span><br><span class="line">      a.<span class="title function_">push</span>(arr[i]);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">bouncer</span>([<span class="number">7</span>, <span class="string">&quot;ate&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="literal">false</span>, <span class="number">9</span>]);</span><br></pre></td></tr></table></figure>
+
+<h3 id="14-Seek-and-Destroy"><a href="#14-Seek-and-Destroy" class="headerlink" title="14. Seek and Destroy"></a>14. Seek and Destroy</h3><p>实现一个摧毁(destroyer)函数，第一个参数是待摧毁的数组，其余的参数是待摧毁的值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">destroyer</span>(<span class="params">arr</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> arg = [];</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">1</span>;i&lt;<span class="variable language_">arguments</span>.<span class="property">length</span>;i++)&#123;</span><br><span class="line">    arg.<span class="title function_">push</span>(<span class="variable language_">arguments</span>[i]);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">var</span> temp = arr.<span class="title function_">filter</span>(<span class="keyword">function</span>(<span class="params">item</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> arg.<span class="title function_">indexOf</span>(item) === -<span class="number">1</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> temp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">destroyer</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="number">2</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>filter()</code> 方法。</p>
+<pre><code>filter() : array对象方法，检测数值元素，并返回符合条件所有元素的数组。filter() 不会改变原始数组。
+</code></pre>
+<p><code>arguments</code> 是一个类似数组的对象, 对应于传递给函数的参数。它类似于数组，但除了 length 之外没有任何数组属性。</p>
+<h3 id="15-Where-do-I-belong"><a href="#15-Where-do-I-belong" class="headerlink" title="15. Where do I belong"></a>15. Where do I belong</h3><p>我身在何处？先插入数组后给数组排序，然后找到指定的值在数组的位置，最后返回位置对应的索引<br>举例：where([1,2,3,4], 1.5) 应该返回 1。因为1.5插入到数组[1,2,3,4]后变成[1,1.5,2,3,4]，而1.5对应的索引值就是1。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">where</span>(<span class="params">arr, num</span>) &#123;</span><br><span class="line">  <span class="comment">// 请把你的代码写在这里</span></span><br><span class="line"></span><br><span class="line">  arr.<span class="title function_">push</span>(num);</span><br><span class="line">  arr.<span class="title function_">sort</span>(<span class="keyword">function</span>(<span class="params">a,b</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> a-b;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> arr.<span class="title function_">indexOf</span>(num);</span><br><span class="line">  <span class="comment">/*方法二</span></span><br><span class="line"><span class="comment">   for(var i=0;i&lt;arr.length;i++)&#123;</span></span><br><span class="line"><span class="comment">    if(arr[i] === num)&#123;</span></span><br><span class="line"><span class="comment">      return i;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">  &#125;*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">where</span>([<span class="number">40</span>, <span class="number">60</span>], <span class="number">50</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-Caesars-Cipher"><a href="#16-Caesars-Cipher" class="headerlink" title="16. Caesars Cipher"></a>16. Caesars Cipher</h3><p><code>凯撒密码</code> ，下面我们来介绍风靡全球的凯撒密码Caesar cipher，又叫移位密码。<br>移位密码也就是密码中的字母会按照指定的数量来做移位。一个常见的案例就是ROT13密码，字母会移位13个位置。由’A’ ↔ ‘N’, ‘B’ ↔ ‘O’，以此类推。写一个ROT13函数，实现输入加密字符串，输出解密字符串。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">rot13</span>(<span class="params">str</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> newStr = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> str) &#123;</span><br><span class="line">        <span class="keyword">var</span> temp = str.<span class="title function_">charCodeAt</span>(i);</span><br><span class="line">        <span class="keyword">if</span> (temp &lt; <span class="number">65</span> || temp &gt; <span class="number">91</span>) &#123;</span><br><span class="line">            newStr+= str[i];</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (temp &gt; <span class="number">77</span>) &#123;</span><br><span class="line">            newStr += <span class="title class_">String</span>.<span class="title function_">fromCharCode</span>(temp - <span class="number">13</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            newStr += <span class="title class_">String</span>.<span class="title function_">fromCharCode</span>(temp + <span class="number">13</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> newStr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">rot13</span>(<span class="string">&quot;SERR PBQR PNZC&quot;</span>);  <span class="comment">// 你可以修改这一行来测试你的代码</span></span><br></pre></td></tr></table></figure>
+
+<p>其中新应用到了 <code>charCodeAt()</code> <code>fromCharCode()</code> 方法。</p>
+<pre><code>charCodeAt() : 返回在指定的位置的字符的 Unicode 编码。
+
+fromCharCode() : 将 Unicode 编码转为字符。
+</code></pre>
+<h3 id="17-other-importent"><a href="#17-other-importent" class="headerlink" title="17. other importent"></a>17. other importent</h3><p><code>map()</code> 方法可以方便的迭代数组，它会迭代数组中的每一个元素，并根据回调函数来处理每一个元素，最后返回一个新数组。注意，这个方法不会改变原始数组。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//示例</span></span><br><span class="line"><span class="keyword">var</span> oldArray = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>];</span><br><span class="line"><span class="keyword">var</span> newArray = oldArray.<span class="title function_">map</span>(<span class="keyword">function</span> (<span class="params">val</span>)&#123;</span><br><span class="line">  <span class="keyword">return</span> val+<span class="number">3</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// [4,5,6,7,8]</span></span><br></pre></td></tr></table></figure>
+
+<p>数组方法 <code>reduce()</code> 用来迭代一个数组，并且把它累积到一个值中。使用 reduce() 时，你要传入一个回调函数，这个回调函数的参数是一个 <code>累加(减)器</code> （比如例子中的 previousVal) 和当前值 (currentVal）。</p>
+<p>reduce() 有一个可选的第二参数，它可以被用来设置累加器的初始值。如果没有在这定义初始值，那么初始值将变成数组中的第一项，而 currentVal 将从数组的第二项开始。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array = [<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>];</span><br><span class="line"><span class="keyword">var</span> singleVal = <span class="number">0</span>;</span><br><span class="line">singleVal = array.<span class="title function_">reduce</span>(<span class="keyword">function</span> (<span class="params">previousVal,currentVal</span>)&#123;</span><br><span class="line">  <span class="keyword">return</span> previousVal+currentVal;</span><br><span class="line">&#125;,<span class="number">0</span>);</span><br><span class="line"><span class="comment">//30</span></span><br></pre></td></tr></table></figure>
+
+<p><code>concat()</code> 方法可以用来把两个数组的内容合并到一个数组中。concat 方法的参数应该是一个数组。参数中的数组会拼接在原数组的后面，并作为一个新数组返回。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> oldArray = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">var</span> newArray = [];</span><br><span class="line"><span class="keyword">var</span> concatMe = [<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>];</span><br><span class="line"></span><br><span class="line">newArray = oldArray.<span class="title function_">concat</span>(concatMe); <span class="comment">// [1,2,3,4,5,6]</span></span><br></pre></td></tr></table></figure>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Reverse-a-String"><span class="toc-text">1. Reverse a String</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Factorialize-a-Number"><span class="toc-text">2. Factorialize a Number</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Check-for-Palindromes"><span class="toc-text">3. Check for Palindromes</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Find-the-Longest-Word-in-a-String"><span class="toc-text">4. Find the Longest Word in a String</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-Title-Case-a-Sentence"><span class="toc-text">5. Title Case a Sentence</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-Return-Largest-Numbers-in-Arrays"><span class="toc-text">6. Return Largest Numbers in Arrays</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-Confirm-the-Ending"><span class="toc-text">7. Confirm the Ending</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-Repeat-a-string-repeat-a-string"><span class="toc-text">8. Repeat a string repeat a string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-Truncate-a-string"><span class="toc-text">9. Truncate a string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-Chunky-Monkey"><span class="toc-text">10. Chunky Monkey</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-Slasher-Flick"><span class="toc-text">11. Slasher Flick</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-Mutations"><span class="toc-text">12. Mutations</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-Falsy-Bouncer"><span class="toc-text">13. Falsy Bouncer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-Seek-and-Destroy"><span class="toc-text">14. Seek and Destroy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-Where-do-I-belong"><span class="toc-text">15. Where do I belong</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-Caesars-Cipher"><span class="toc-text">16. Caesars Cipher</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17-other-importent"><span class="toc-text">17. other importent</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2017/08/18/javascript01/">https://xiaozhouguo.github.io/blog/2017/08/18/javascript01/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2017/08/14/DataBase01/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          MongoDB 基础命令语法
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2018/05/31/regular-expression/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          正则表达式
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

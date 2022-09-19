@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>AST 节点内部做了哪些转换？- 上篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/ast-transform-one" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      AST 节点内部做了哪些转换？- 上篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-08-03T02:05:13.000Z" itemprop="datePublished">2022年08月03日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/08/03/vue3/ast-transform-one/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>上一篇文章中，我们学习了 template 的解析过程，最终拿到了一个 AST 节点对象。这个对象是对模板的完整描述，但是它还不能直接拿来生成代码，因为它的语义化还不够，没有包含和编译优化的相关属性，所以还需要进一步转换。</p>
+<span id="more"></span>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>AST 转换过程非常复杂，有非常多的分支逻辑，为了方便你理解它的核心流程，我精心准备了一个示例，我们只分析示例场景在 AST 转换过程中的相关代码逻辑，不过我希望你在学习完之后，可以举一反三，对示例做一些修改，学习更多场景的代码逻辑。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">hello</span> <span class="attr">v-if</span>=<span class="string">&quot;flag&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">hello</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">v-else</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>&gt;hello &#123;&#123; msg + test &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>static<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>static<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>示例中，我们有普通的 DOM 节点，有组件节点，有 v-bind 指令，有 v-if 指令，有文本节点，也有表达式节点。</p>
+<p>对于这个模板，我们通过 parse 生成一个 AST 对象，接下来我们就来分析这个 AST 对象的转换都做了哪些事情。</p>
+<p>我们会先通过 <code>getBaseTransformPreset</code> 方法获取节点和指令转换的方法，然后调用 transform 方法做 AST 转换，并且把这些节点和指令的转换方法作为配置的属性参数传入。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取节点和指令转换的方法</span></span><br><span class="line"><span class="keyword">const</span> [nodeTransforms, directiveTransforms] = <span class="title function_">getBaseTransformPreset</span>()</span><br><span class="line"><span class="comment">// AST 转换</span></span><br><span class="line"><span class="title function_">transform</span>(ast, <span class="title function_">extend</span>(&#123;&#125;, options, &#123;</span><br><span class="line">  prefixIdentifiers,</span><br><span class="line">  <span class="attr">nodeTransforms</span>: [</span><br><span class="line">    ...nodeTransforms,</span><br><span class="line">    ...(options.<span class="property">nodeTransforms</span> || []) <span class="comment">// 用户自定义  transforms</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">directiveTransforms</span>: <span class="title function_">extend</span>(&#123;&#125;, </span><br><span class="line">    directiveTransforms, options.<span class="property">directiveTransforms</span> || &#123;&#125; <span class="comment">// 用户自定义 transforms</span></span><br><span class="line">  )&#125;</span><br><span class="line">))</span><br></pre></td></tr></table></figure>
+
+<p>我们先来看一下 getBaseTransformPreset 返回哪些节点和指令的转换方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">getBaseTransformPreset</span>(<span class="params">prefixIdentifiers</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> [</span><br><span class="line">    [</span><br><span class="line">      transformOnce,</span><br><span class="line">      transformIf,</span><br><span class="line">      transformFor,</span><br><span class="line">      transformExpression,</span><br><span class="line">      transformSlotOutlet,</span><br><span class="line">      transformElement,</span><br><span class="line">      trackSlotScopes,</span><br><span class="line">      transformText</span><br><span class="line">    ],</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">on</span>: transformOn,</span><br><span class="line">      <span class="attr">bind</span>: transformBind,</span><br><span class="line">      <span class="attr">model</span>: transformModel</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里并不需要你进一步去看每个转换函数的实现，只要大致了解有哪些转换函数即可，这些转换函数会在后续执行 transform 的时候调用。</p>
+<blockquote>
+<p>注意这里我们只分析在 Node.js 环境下的编译过程。Web 环境的编译结果可能会有一些差别，我们会在后续章节说明。</p>
+</blockquote>
+<p>我们主要来看 transform 函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">transform</span>(<span class="params">root, options</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> context = <span class="title function_">createTransformContext</span>(root, options)</span><br><span class="line">  <span class="title function_">traverseNode</span>(root, context)</span><br><span class="line">  <span class="keyword">if</span> (options.<span class="property">hoistStatic</span>) &#123;</span><br><span class="line">    <span class="title function_">hoistStatic</span>(root, context)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!options.<span class="property">ssr</span>) &#123;</span><br><span class="line">    <span class="title function_">createRootCodegen</span>(root, context)</span><br><span class="line">  &#125;</span><br><span class="line">  root.<span class="property">helpers</span> = [...context.<span class="property">helpers</span>]</span><br><span class="line">  root.<span class="property">components</span> = [...context.<span class="property">components</span>]</span><br><span class="line">  root.<span class="property">directives</span> = [...context.<span class="property">directives</span>]</span><br><span class="line">  root.<span class="property">imports</span> = [...context.<span class="property">imports</span>]</span><br><span class="line">  root.<span class="property">hoists</span> = context.<span class="property">hoists</span></span><br><span class="line">  root.<span class="property">temps</span> = context.<span class="property">temps</span></span><br><span class="line">  root.<span class="property">cached</span> = context.<span class="property">cached</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>transform 的核心流程主要有四步：<strong>创建 transform 上下文、遍历 AST 节点、静态提升以及创建根代码生成节点</strong>。接下来，我们就好好分析一下每一步主要做了什么。</p>
+<h3 id="创建-transform-上下文"><a href="#创建-transform-上下文" class="headerlink" title="创建 transform 上下文"></a>创建 transform 上下文</h3><p>首先，我们来看创建 transform 上下文的过程，其实和 parse 过程一样，在 transform 阶段会创建一个上下文对象，它的实现过程是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">createTransformContext</span>(<span class="params">root, &#123; prefixIdentifiers = <span class="literal">false</span>, hoistStatic = <span class="literal">false</span>, cacheHandlers = <span class="literal">false</span>, nodeTransforms = [], directiveTransforms = &#123;&#125;, transformHoist = <span class="literal">null</span>, isBuiltInComponent = NOOP, expressionPlugins = [], scopeId = <span class="literal">null</span>, ssr = <span class="literal">false</span>, onError = defaultOnError &#125;</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> context = &#123;</span><br><span class="line">    <span class="comment">// 配置</span></span><br><span class="line">    prefixIdentifiers,</span><br><span class="line">    hoistStatic,</span><br><span class="line">    cacheHandlers,</span><br><span class="line">    nodeTransforms,</span><br><span class="line">    directiveTransforms,</span><br><span class="line">    transformHoist,</span><br><span class="line">    isBuiltInComponent,</span><br><span class="line">    expressionPlugins,</span><br><span class="line">    scopeId,</span><br><span class="line">    ssr,</span><br><span class="line">    onError,</span><br><span class="line">    <span class="comment">// 状态数据</span></span><br><span class="line">    root,</span><br><span class="line">    <span class="attr">helpers</span>: <span class="keyword">new</span> <span class="title class_">Set</span>(),</span><br><span class="line">    <span class="attr">components</span>: <span class="keyword">new</span> <span class="title class_">Set</span>(),</span><br><span class="line">    <span class="attr">directives</span>: <span class="keyword">new</span> <span class="title class_">Set</span>(),</span><br><span class="line">    <span class="attr">hoists</span>: [],</span><br><span class="line">    <span class="attr">imports</span>: <span class="keyword">new</span> <span class="title class_">Set</span>(),</span><br><span class="line">    <span class="attr">temps</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">cached</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">identifiers</span>: &#123;&#125;,</span><br><span class="line">    <span class="attr">scopes</span>: &#123;</span><br><span class="line">      <span class="attr">vFor</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">vSlot</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">vPre</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">vOnce</span>: <span class="number">0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">parent</span>: <span class="literal">null</span>,</span><br><span class="line">    <span class="attr">currentNode</span>: root,</span><br><span class="line">    <span class="attr">childIndex</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="comment">// methods</span></span><br><span class="line">    <span class="title function_">helper</span>(<span class="params">name</span>) &#123;</span><br><span class="line">      context.<span class="property">helpers</span>.<span class="title function_">add</span>(name)</span><br><span class="line">      <span class="keyword">return</span> name</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">helperString</span>(<span class="params">name</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`_<span class="subst">$&#123;helperNameMap[context.helper(name)]&#125;</span>`</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">replaceNode</span>(<span class="params">node</span>) &#123;</span><br><span class="line">      context.<span class="property">parent</span>.<span class="property">children</span>[context.<span class="property">childIndex</span>] = context.<span class="property">currentNode</span> = node</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">removeNode</span>(<span class="params">node</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> list = context.<span class="property">parent</span>.<span class="property">children</span></span><br><span class="line">      <span class="keyword">const</span> removalIndex = node</span><br><span class="line">        ? list.<span class="title function_">indexOf</span>(node)</span><br><span class="line">        : context.<span class="property">currentNode</span></span><br><span class="line">          ? context.<span class="property">childIndex</span></span><br><span class="line">          : -<span class="number">1</span></span><br><span class="line">      <span class="keyword">if</span> (!node || node === context.<span class="property">currentNode</span>) &#123;</span><br><span class="line">        <span class="comment">// 移除当前节点</span></span><br><span class="line">        context.<span class="property">currentNode</span> = <span class="literal">null</span></span><br><span class="line">        context.<span class="title function_">onNodeRemoved</span>()</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 移除兄弟节点</span></span><br><span class="line">        <span class="keyword">if</span> (context.<span class="property">childIndex</span> &gt; removalIndex) &#123;</span><br><span class="line">          context.<span class="property">childIndex</span>--</span><br><span class="line">          context.<span class="title function_">onNodeRemoved</span>()</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 移除节点</span></span><br><span class="line">      context.<span class="property">parent</span>.<span class="property">children</span>.<span class="title function_">splice</span>(removalIndex, <span class="number">1</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">onNodeRemoved</span>: <span class="function">() =&gt;</span> &#123; &#125;,</span><br><span class="line">    <span class="title function_">addIdentifiers</span>(<span class="params">exp</span>) &#123;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">removeIdentifiers</span>(<span class="params">exp</span>) &#123;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">hoist</span>(<span class="params">exp</span>) &#123;</span><br><span class="line">      context.<span class="property">hoists</span>.<span class="title function_">push</span>(exp)</span><br><span class="line">      <span class="keyword">const</span> identifier = <span class="title function_">createSimpleExpression</span>(<span class="string">`_hoisted_<span class="subst">$&#123;context.hoists.length&#125;</span>`</span>, <span class="literal">false</span>, exp.<span class="property">loc</span>, <span class="literal">true</span>)</span><br><span class="line">      identifier.<span class="property">hoisted</span> = exp</span><br><span class="line">      <span class="keyword">return</span> identifier</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">cache</span>(<span class="params">exp, isVNode = <span class="literal">false</span></span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">createCacheExpression</span>(++context.<span class="property">cached</span>, exp, isVNode)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> context</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实，这个上下文对象 context 维护了 transform 过程的一些配置，比如前面提到的节点和指令的转换函数等；还维护了 transform 过程的一些状态数据，比如当前处理的 AST 节点，当前 AST 节点在子节点中的索引，以及当前 AST 节点的父节点等。此外，context 还包含了在转换过程中可能会调用的一些辅助函数，和一些修改 context 对象的方法。</p>
+<p>你现在也没必要去了解它的每一个属性和方法的含义，只需要你大致有一个印象即可，未来分析某个具体场景，再回过头了解它们的实现即可。</p>
+<p>创建完上下文对象后，接下来就需要遍历 AST 节点。</p>
+<h3 id="遍历-AST-节点"><a href="#遍历-AST-节点" class="headerlink" title="遍历 AST 节点"></a>遍历 AST 节点</h3><p>遍历 AST 节点的过程很关键，因为核心的转换过程就是在遍历中实现的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">traverseNode</span>(<span class="params">node, context</span>) &#123;</span><br><span class="line">  context.<span class="property">currentNode</span> = node</span><br><span class="line">  <span class="comment">// 节点转换函数</span></span><br><span class="line">  <span class="keyword">const</span> &#123; nodeTransforms &#125; = context</span><br><span class="line">  <span class="keyword">const</span> exitFns = []</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; nodeTransforms.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="comment">// 有些转换函数会设计一个退出函数，在处理完子节点后执行</span></span><br><span class="line">    <span class="keyword">const</span> onExit = nodeTransforms[i](node, context)</span><br><span class="line">    <span class="keyword">if</span> (onExit) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="title function_">isArray</span>(onExit)) &#123;</span><br><span class="line">        exitFns.<span class="title function_">push</span>(...onExit)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        exitFns.<span class="title function_">push</span>(onExit)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!context.<span class="property">currentNode</span>) &#123;</span><br><span class="line">      <span class="comment">// 节点被移除</span></span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 因为在转换的过程中节点可能被替换，恢复到之前的节点</span></span><br><span class="line">      node = context.<span class="property">currentNode</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">switch</span> (node.<span class="property">type</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3</span> <span class="comment">/* COMMENT */</span>:</span><br><span class="line">      <span class="keyword">if</span> (!context.<span class="property">ssr</span>) &#123;</span><br><span class="line">        <span class="comment">// 需要导入 createComment 辅助函数</span></span><br><span class="line">        context.<span class="title function_">helper</span>(<span class="variable constant_">CREATE_COMMENT</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="number">5</span> <span class="comment">/* INTERPOLATION */</span>:</span><br><span class="line">      <span class="comment">// 需要导入 toString 辅助函数</span></span><br><span class="line">      <span class="keyword">if</span> (!context.<span class="property">ssr</span>) &#123;</span><br><span class="line">        context.<span class="title function_">helper</span>(<span class="variable constant_">TO_DISPLAY_STRING</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="number">9</span> <span class="comment">/* IF */</span>:</span><br><span class="line">      <span class="comment">// 递归遍历每个分支节点</span></span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; node.<span class="property">branches</span>.<span class="property">length</span>; i++) &#123;</span><br><span class="line">        <span class="title function_">traverseNode</span>(node.<span class="property">branches</span>[i], context)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="number">10</span> <span class="comment">/* IF_BRANCH */</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">11</span> <span class="comment">/* FOR */</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span> <span class="comment">/* ELEMENT */</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span> <span class="comment">/* ROOT */</span>:</span><br><span class="line">      <span class="comment">// 遍历子节点</span></span><br><span class="line">      <span class="title function_">traverseChildren</span>(node, context)</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 执行转换函数返回的退出函数</span></span><br><span class="line">  <span class="keyword">let</span> i = exitFns.<span class="property">length</span></span><br><span class="line">  <span class="keyword">while</span> (i--) &#123;</span><br><span class="line">    exitFns[i]()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里，traverseNode 函数的基本思路就是递归遍历 AST 节点，针对每个节点执行一系列的转换函数，有些转换函数还会设计一个退出函数，当你执行转换函数后，它会返回一个新函数，然后在你处理完子节点后再执行这些退出函数，这是因为有些逻辑的处理需要依赖子节点的处理结果才能继续执行。</p>
+<p>Vue.js 内部大概内置了八种转换函数，分别处理指令、表达式、元素节点、文本节点等不同的特性。限于篇幅，我不会介绍所有转换函数，感兴趣的同学可以后续自行分析。</p>
+<p>下面我会介绍四种类型的转换函数，并结合前面的示例来分析。</p>
+<h4 id="Element-节点转换函数"><a href="#Element-节点转换函数" class="headerlink" title="Element 节点转换函数"></a>Element 节点转换函数</h4><p>首先，我们来看一下 Element 节点转换函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">transformElement</span> = (<span class="params">node, context</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (!(node.<span class="property">type</span> === <span class="number">1</span> <span class="comment">/* ELEMENT */</span> &amp;&amp;</span><br><span class="line">    (node.<span class="property">tagType</span> === <span class="number">0</span> <span class="comment">/* ELEMENT */</span> ||</span><br><span class="line">      node.<span class="property">tagType</span> === <span class="number">1</span> <span class="comment">/* COMPONENT */</span>))) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 返回退出函数，在所有子表达式处理并合并后执行</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">function</span> <span class="title function_">postTransformElement</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 转换的目标是创建一个实现 VNodeCall 接口的代码生成节点</span></span><br><span class="line">    <span class="keyword">const</span> &#123; tag, props &#125; = node</span><br><span class="line">    <span class="keyword">const</span> isComponent = node.<span class="property">tagType</span> === <span class="number">1</span> <span class="comment">/* COMPONENT */</span></span><br><span class="line">    <span class="keyword">const</span> vnodeTag = isComponent</span><br><span class="line">      ? <span class="title function_">resolveComponentType</span>(node, context)</span><br><span class="line">      : <span class="string">`&quot;<span class="subst">$&#123;tag&#125;</span>&quot;`</span></span><br><span class="line">    <span class="keyword">const</span> isDynamicComponent = </span><br><span class="line">          <span class="title function_">isObject</span>(vnodeTag) &amp;&amp; vnodeTag.<span class="property">callee</span> === <span class="variable constant_">RESOLVE_DYNAMIC_COMPONENT</span></span><br><span class="line">    <span class="comment">// 属性</span></span><br><span class="line">    <span class="keyword">let</span> vnodeProps</span><br><span class="line">    <span class="comment">// 子节点</span></span><br><span class="line">    <span class="keyword">let</span> vnodeChildren</span><br><span class="line">    <span class="comment">// 标记更新的类型标识，用于运行时优化</span></span><br><span class="line">    <span class="keyword">let</span> vnodePatchFlag</span><br><span class="line">    <span class="keyword">let</span> patchFlag = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 动态绑定的属性</span></span><br><span class="line">    <span class="keyword">let</span> vnodeDynamicProps</span><br><span class="line">    <span class="keyword">let</span> dynamicPropNames</span><br><span class="line">    <span class="keyword">let</span> vnodeDirectives</span><br><span class="line">    <span class="comment">// 动态组件、svg、foreignObject 标签以及动态绑定 key prop 的节点都被视作一个 Block</span></span><br><span class="line">    <span class="keyword">let</span> shouldUseBlock =</span><br><span class="line">      isDynamicComponent ||</span><br><span class="line">      (!isComponent &amp;&amp;</span><br><span class="line">        (tag === <span class="string">&#x27;svg&#x27;</span> ||</span><br><span class="line">          tag === <span class="string">&#x27;foreignObject&#x27;</span> ||</span><br><span class="line">          <span class="title function_">findProp</span>(node, <span class="string">&#x27;key&#x27;</span>, <span class="literal">true</span>)))</span><br><span class="line">    <span class="comment">// 处理 props</span></span><br><span class="line">    <span class="keyword">if</span> (props.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> propsBuildResult = <span class="title function_">buildProps</span>(node, context)</span><br><span class="line">      vnodeProps = propsBuildResult.<span class="property">props</span></span><br><span class="line">      patchFlag = propsBuildResult.<span class="property">patchFlag</span></span><br><span class="line">      dynamicPropNames = propsBuildResult.<span class="property">dynamicPropNames</span></span><br><span class="line">      <span class="keyword">const</span> directives = propsBuildResult.<span class="property">directives</span></span><br><span class="line">      vnodeDirectives =</span><br><span class="line">        directives &amp;&amp; directives.<span class="property">length</span></span><br><span class="line">          ? <span class="title function_">createArrayExpression</span>(directives.<span class="title function_">map</span>(</span><br><span class="line">          		<span class="function"><span class="params">dir</span> =&gt;</span> <span class="title function_">buildDirectiveArgs</span>(dir, context))</span><br><span class="line">            )</span><br><span class="line">          : <span class="literal">undefined</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理 children</span></span><br><span class="line">    <span class="keyword">if</span> (node.<span class="property">children</span>.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (vnodeTag === <span class="variable constant_">KEEP_ALIVE</span>) &#123;</span><br><span class="line">        <span class="comment">// 把 KeepAlive 看做是一个 Block，这样可以避免它的子节点的动态节点被父 Block 收集</span></span><br><span class="line">        shouldUseBlock = <span class="literal">true</span></span><br><span class="line">        <span class="comment">// 2. 确保它始终更新</span></span><br><span class="line">        patchFlag |= <span class="number">1024</span> <span class="comment">/* DYNAMIC_SLOTS */</span></span><br><span class="line">        <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>) &amp;&amp; node.<span class="property">children</span>.<span class="property">length</span> &gt; <span class="number">1</span>) &#123;</span><br><span class="line">          context.<span class="title function_">onError</span>(<span class="title function_">createCompilerError</span>(<span class="number">42</span> <span class="comment">/* X_KEEP_ALIVE_INVALID_CHILDREN */</span>, &#123;</span><br><span class="line">            <span class="attr">start</span>: node.<span class="property">children</span>[<span class="number">0</span>].<span class="property">loc</span>.<span class="property">start</span>,</span><br><span class="line">            <span class="attr">end</span>: node.<span class="property">children</span>[node.<span class="property">children</span>.<span class="property">length</span> - <span class="number">1</span>].<span class="property">loc</span>.<span class="property">end</span>,</span><br><span class="line">            <span class="attr">source</span>: <span class="string">&#x27;&#x27;</span></span><br><span class="line">          &#125;))</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">const</span> shouldBuildAsSlots = isComponent &amp;&amp;</span><br><span class="line">        <span class="comment">// Teleport不是一个真正的组件，它有专门的运行时处理</span></span><br><span class="line">        vnodeTag !== <span class="variable constant_">TELEPORT</span> &amp;&amp;</span><br><span class="line">        vnodeTag !== <span class="variable constant_">KEEP_ALIVE</span></span><br><span class="line">      <span class="keyword">if</span> (shouldBuildAsSlots) &#123;</span><br><span class="line">        <span class="comment">// 组件有 children，则处理插槽</span></span><br><span class="line">        <span class="keyword">const</span> &#123; slots, hasDynamicSlots &#125; = <span class="title function_">buildSlots</span>(node, context)</span><br><span class="line">        vnodeChildren = slots</span><br><span class="line">        <span class="keyword">if</span> (hasDynamicSlots) &#123;</span><br><span class="line">          patchFlag |= <span class="number">1024</span> <span class="comment">/* DYNAMIC_SLOTS */</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (node.<span class="property">children</span>.<span class="property">length</span> === <span class="number">1</span> &amp;&amp; vnodeTag !== <span class="variable constant_">TELEPORT</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> child = node.<span class="property">children</span>[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">const</span> type = child.<span class="property">type</span></span><br><span class="line">        <span class="keyword">const</span> hasDynamicTextChild = type === <span class="number">5</span> <span class="comment">/* INTERPOLATION */</span> ||</span><br><span class="line">          type === <span class="number">8</span> <span class="comment">/* COMPOUND_EXPRESSION */</span></span><br><span class="line">        <span class="keyword">if</span> (hasDynamicTextChild &amp;&amp; !<span class="title function_">getStaticType</span>(child)) &#123;</span><br><span class="line">          patchFlag |= <span class="number">1</span> <span class="comment">/* TEXT */</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果只是一个普通文本节点、插值或者表达式，直接把节点赋值给 vnodeChildren</span></span><br><span class="line">        <span class="keyword">if</span> (hasDynamicTextChild || type === <span class="number">2</span> <span class="comment">/* TEXT */</span>) &#123;</span><br><span class="line">          vnodeChildren = child</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">          vnodeChildren = node.<span class="property">children</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        vnodeChildren = node.<span class="property">children</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理 patchFlag 和 dynamicPropNames</span></span><br><span class="line">    <span class="keyword">if</span> (patchFlag !== <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (patchFlag &lt; <span class="number">0</span>) &#123;</span><br><span class="line">          vnodePatchFlag = patchFlag + <span class="string">` /* <span class="subst">$&#123;PatchFlagNames[patchFlag]&#125;</span> */`</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">// 获取 flag 对应的名字，生成注释，方便理解生成代码对应节点的 pathFlag</span></span><br><span class="line">          <span class="keyword">const</span> flagNames = <span class="title class_">Object</span>.<span class="title function_">keys</span>(<span class="title class_">PatchFlagNames</span>)</span><br><span class="line">            .<span class="title function_">map</span>(<span class="title class_">Number</span>)</span><br><span class="line">            .<span class="title function_">filter</span>(<span class="function"><span class="params">n</span> =&gt;</span> n &gt; <span class="number">0</span> &amp;&amp; patchFlag &amp; n)</span><br><span class="line">            .<span class="title function_">map</span>(<span class="function"><span class="params">n</span> =&gt;</span> <span class="title class_">PatchFlagNames</span>[n])</span><br><span class="line">            .<span class="title function_">join</span>(<span class="string">`, `</span>)</span><br><span class="line">          vnodePatchFlag = patchFlag + <span class="string">` /* <span class="subst">$&#123;flagNames&#125;</span> */`</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        vnodePatchFlag = <span class="title class_">String</span>(patchFlag)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (dynamicPropNames &amp;&amp; dynamicPropNames.<span class="property">length</span>) &#123;</span><br><span class="line">        vnodeDynamicProps = <span class="title function_">stringifyDynamicPropNames</span>(dynamicPropNames)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    node.<span class="property">codegenNode</span> = <span class="title function_">createVNodeCall</span>(context, vnodeTag, vnodeProps, </span><br><span class="line">         vnodeChildren, vnodePatchFlag, vnodeDynamicProps,</span><br><span class="line">         vnodeDirectives, !!shouldUseBlock, <span class="literal">false</span> <span class="comment">/* disableTracking */</span>,</span><br><span class="line">         node.<span class="property">loc</span></span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，只有当 AST 节点是组件或者普通元素节点时，才会返回一个退出函数，而且它会在该节点的子节点逻辑处理完毕后执行。</p>
+<p>分析这个退出函数前，我们需要知道节点函数的转换目标，即创建一个实现 VNodeCall 接口的代码生成节点，也就是说，生成这个代码生成节点后，后续的代码生成阶段可以根据这个节点对象生成目标代码。</p>
+<p>知道了这个目标，我们再去理解 transformElement 函数的实现就不难了。</p>
+<p>首先，<strong>判断这个节点是不是一个 Block 节点</strong>。</p>
+<p>为了运行时的更新优化，Vue.js 3.0 设计了一个 Block tree 的概念。Block tree 是一个将模版基于动态节点指令切割的嵌套区块，每个区块只需要以一个 Array 来追踪自身包含的动态节点。借助 Block tree，Vue.js 将 vnode 更新性能由与模版整体大小相关提升为与动态内容的数量相关，极大优化了 diff 的效率，模板的动静比越大，这个优化就会越明显。</p>
+<p>因此在编译阶段，我们需要找出哪些节点可以构成一个 Block，<strong>其中动态组件、svg、foreignObject 标签以及动态绑定的 prop 的节点都被视作一个 Block</strong>。</p>
+<p>其次，<strong>是处理节点的 props</strong>。</p>
+<p>这个过程主要是从 AST 节点的 props 对象中进一步解析出指令 vnodeDirectives、动态属性 dynamicPropNames，以及更新标识 patchFlag。patchFlag 主要用于标识节点更新的类型，在组件更新的优化中会用到，我们在后续章节会详细讲。</p>
+<p>接着，<strong>是处理节点的 children</strong>。</p>
+<p>对于一个组件节点而言，如果它有子节点，则说明是组件的插槽，另外还会有对一些内置组件比如 KeepAlive、Teleport 的处理逻辑。</p>
+<p>对于一个普通元素节点，我们通常直接拿节点的 children 属性给 vnodeChildren 即可，但有一种特殊情况，<strong>如果节点只有一个子节点</strong>，<strong>并且是一个普通文本节点</strong>、<strong>插值或者表达式</strong>，<strong>那么直接把节点赋值给 vnodeChildren</strong>。</p>
+<p>然后，<strong>会对前面解析 props 求得的 patchFlag 和 dynamicPropNames 做进一步处理</strong>。</p>
+<p>在这个过程中，我们会根据 patchFlag 的值从 PatchFlagNames 中获取 flag 对应的名字，从而生成注释，因为 patchFlag 本身就是一个个数字，通过名字注释的方式，我们就可以一眼从最终生成的代码中了解到 patchFlag 代表的含义。</p>
+<p>另外，我们还会把数组 dynamicPropNames 转化生成 vnodeDynamicProps 字符串，便于后续对节点生成代码逻辑的处理。</p>
+<p>最后，<strong>通过 createVNodeCall 创建了实现 VNodeCall 接口的代码生成节点</strong>，我们来看它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">createVNodeCall</span>(<span class="params">context, tag, props, children, patchFlag, dynamicProps,   directives, isBlock = <span class="literal">false</span>, disableTracking = <span class="literal">false</span>, loc = locStub</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (context) &#123;</span><br><span class="line">    <span class="keyword">if</span> (isBlock) &#123;</span><br><span class="line">      context.<span class="title function_">helper</span>(<span class="variable constant_">OPEN_BLOCK</span>)</span><br><span class="line">      context.<span class="title function_">helper</span>(<span class="variable constant_">CREATE_BLOCK</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      context.<span class="title function_">helper</span>(<span class="variable constant_">CREATE_VNODE</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (directives) &#123;</span><br><span class="line">      context.<span class="title function_">helper</span>(<span class="variable constant_">WITH_DIRECTIVES</span>) </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="number">13</span> <span class="comment">/* VNODE_CALL */</span>,</span><br><span class="line">    tag,</span><br><span class="line">    props,</span><br><span class="line">    children,</span><br><span class="line">    patchFlag,</span><br><span class="line">    dynamicProps,</span><br><span class="line">    directives,</span><br><span class="line">    isBlock,</span><br><span class="line">    disableTracking,</span><br><span class="line">    loc</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>createVNodeCall 的实现很简单，它最后返回了一个对象，包含了传入的参数数据。这里要注意 context.helper 函数的调用，它会把一些 Symbol 对象添加到 context.helpers 数组中，目的是为了后续代码生成阶段，生成一些辅助代码。</p>
+<p>对于我们示例中的根节点：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">  // ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>它转换后生成的 node.codegenNode ：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;children&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="comment">// 子节点</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;directives&quot;</span><span class="punctuation">:</span> undefined<span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;dynamicProps&quot;</span><span class="punctuation">:</span> undefined<span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;isBlock&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;isForBlock&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;patchFlag&quot;</span><span class="punctuation">:</span> undefined<span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;props&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="comment">// 属性相关</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;div&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="number">13</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个 codegenNode 相比之前的 AST 节点对象，多了很多和编译优化相关的属性，它们会在代码生成阶段会起到非常重要作用，在后续的章节你就可以深入了解到。</p>
+<p>这个 codegenNode 相比之前的 AST 节点对象，多了很多和编译优化相关的属性，它们会在代码生成阶段会起到非常重要作用，在后续的章节你就可以深入了解到。</p>
+<h4 id="表达式节点转换函数"><a href="#表达式节点转换函数" class="headerlink" title="表达式节点转换函数"></a>表达式节点转换函数</h4><p>接下来，我们来看一下表达式节点转换函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">transformExpression</span> = (<span class="params">node, context</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (node.<span class="property">type</span> === <span class="number">5</span> <span class="comment">/* INTERPOLATION */</span>) &#123;</span><br><span class="line">    <span class="comment">// 处理插值中的动态表达式</span></span><br><span class="line">    node.<span class="property">content</span> = <span class="title function_">processExpression</span>(node.<span class="property">content</span>, context)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (node.<span class="property">type</span> === <span class="number">1</span> <span class="comment">/* ELEMENT */</span>) &#123;</span><br><span class="line">    <span class="comment">// 处理元素指令中的动态表达式</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; node.<span class="property">props</span>.<span class="property">length</span>; i++) &#123;</span><br><span class="line">      <span class="keyword">const</span> dir = node.<span class="property">props</span>[i]</span><br><span class="line">      <span class="comment">// v-on 和 v-for 不处理，因为它们都有各自的处理逻辑</span></span><br><span class="line">      <span class="keyword">if</span> (dir.<span class="property">type</span> === <span class="number">7</span> <span class="comment">/* DIRECTIVE */</span> &amp;&amp; dir.<span class="property">name</span> !== <span class="string">&#x27;for&#x27;</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> exp = dir.<span class="property">exp</span></span><br><span class="line">        <span class="keyword">const</span> arg = dir.<span class="property">arg</span></span><br><span class="line">        <span class="keyword">if</span> (exp &amp;&amp;</span><br><span class="line">          exp.<span class="property">type</span> === <span class="number">4</span> <span class="comment">/* SIMPLE_EXPRESSION */</span> &amp;&amp;</span><br><span class="line">          !(dir.<span class="property">name</span> === <span class="string">&#x27;on&#x27;</span> &amp;&amp; arg)) &#123;</span><br><span class="line">          dir.<span class="property">exp</span> = <span class="title function_">processExpression</span>(exp, context, dir.<span class="property">name</span> === <span class="string">&#x27;slot&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (arg &amp;&amp; arg.<span class="property">type</span> === <span class="number">4</span> <span class="comment">/* SIMPLE_EXPRESSION */</span> &amp;&amp; !arg.<span class="property">isStatic</span>) &#123;</span><br><span class="line">          dir.<span class="property">arg</span> = <span class="title function_">processExpression</span>(arg, context)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于表达式本身不会再有子节点，所以它也不需要退出函数，直接在进入函数时做转换处理即可。</p>
+<p>需要注意的是，<strong>只有在 Node.js 环境下的编译或者是 Web 端的非生产环境下才会执行 transformExpression</strong>，原因我稍后会告诉你。</p>
+<p>transformExpression 主要做的事情就是转换插值和元素指令中的动态表达式，把简单的表达式对象转换成复合表达式对象，内部主要是通过 processExpression 函数完成。举个例子，比如这个模板：<code>&#123;&#123; msg + test &#125;&#125;</code>，它执行 parse 后生成的表达式节点 node.content 值为一个简单的表达式对象：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;isStatic&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;isConstant&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;msg + test&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>经过 processExpression 处理后，node.content 的值变成了一个复合表达式对象：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;children&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;isConstant&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;_ctx.msg&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;isStatic&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot; + &quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;isConstant&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;_ctx.test&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;isStatic&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;identifiers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里，我们重点关注对象中的 children 属性，它是一个长度为 3 的数组，其实就是把表达式<code>msg + test</code>拆成了三部分，其中变量 msg 和 test 对应都加上了前缀 _ctx。</p>
+<p>那么为什么需要加这个前缀呢？</p>
+<p>我们就要想到模板中引用的的 msg 和 test 对象最终都是在组件实例中访问的，但为了书写模板方便，Vue.js 并没有让我们在模板中手动加组件实例的前缀，例如：<code>&#123;&#123; this.msg + this.test &#125;&#125;</code>，这样写起来就会不够方便，但如果用 JSX 写的话，通常要手动写 this。</p>
+<p>你可能会有疑问，为什么 Vue.js 2.x 编译的结果没有 _ctx 前缀呢？这是因为 Vue.js 2.x 的编译结果使用了”黑魔法“ with，比如上述模板，在 Vue.js 2.x 最终编译的结果：<code>with(this)&#123;return _s(msg + test)&#125;</code>。</p>
+<p>它利用 with 的特性动态去 this 中查找 msg 和 test 属性，所以不需要手动加前缀。</p>
+<p>但是，Vue.js 3.0 在 Node.js 端的编译结果舍弃了 with，它会在 processExpression 过程中对表达式动态分析，给该加前缀的地方加上前缀。</p>
+<p>processExpression 的详细实现我们不会分析，但你需要知道，这个过程肯定有一定的成本，因为它内部依赖了 <code>@babel/parser</code> 库去解析表达式生成 AST 节点，并依赖了 <code>estree-walker</code> 库去遍历这个 AST 节点，然后对节点分析去判断是否需要加前缀，接着对 AST 节点修改，最终转换生成新的表达式对象。</p>
+<blockquote>
+<p>@babel&#x2F;parser 这个库通常是在 Node.js 端用的，而且这库本身体积非常大，如果打包进 Vue.js 的话会让包体积膨胀 4 倍，所以我们并不会在生产环境的 Web 端引入这个库，Web 端生产环境下的运行时编译最终仍然会用 with 的方式。</p>
+</blockquote>
+<p>因为用 with 的话就完全不需要对表达式做转换了，这也就回答我前面的问题：只有在 Node.js 环境下的编译或者是 Web 端的非生产环境下才会执行 <code>transformExpression</code>。</p>
+<p>这部分内容比较多，所以本课时的内容就先到这。下篇文章，我们接着分析遍历 AST 节点中的 Text 节点的转换函数。</p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;compiler-core&#x2F;src&#x2F;compile.ts<br>packages&#x2F;compiler-core&#x2F;src&#x2F;transform.ts<br>packages&#x2F;compiler-core&#x2F;src&#x2F;ast.ts<br>packages&#x2F;compiler-core&#x2F;src&#x2F;transforms&#x2F;transformElement.ts<br>packages&#x2F;compiler-core&#x2F;src&#x2F;transforms&#x2F;transformExpression.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-transform-%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-text">创建 transform 上下文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%8D%E5%8E%86-AST-%E8%8A%82%E7%82%B9"><span class="toc-text">遍历 AST 节点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Element-%E8%8A%82%E7%82%B9%E8%BD%AC%E6%8D%A2%E5%87%BD%E6%95%B0"><span class="toc-text">Element 节点转换函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%8A%82%E7%82%B9%E8%BD%AC%E6%8D%A2%E5%87%BD%E6%95%B0"><span class="toc-text">表达式节点转换函数</span></a></li></ol></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/08/03/vue3/ast-transform-one/">https://xiaozhouguo.github.io/blog/2022/08/03/vue3/ast-transform-one/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/08/02/vue3/ast-one/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          构造AST的完整流程是怎么样的？ - 上篇
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/08/31/vue3/ast-two/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          构造AST的完整流程是怎样的？ -下篇
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

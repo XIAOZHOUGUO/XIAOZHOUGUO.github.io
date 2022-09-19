@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>MongoDB 基础命令语法 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-DataBase01" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      MongoDB 基础命令语法
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2017-08-14T13:04:20.000Z" itemprop="datePublished">2017年08月14日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/MongoDB/">MongoDB</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2017/08/14/DataBase01/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</p>
+<span id="more"></span>
+<p><img src="https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26/sign=a5c7b08df603918fc3dc359830544df2/3b292df5e0fe99257ad18e3d35a85edf8cb171fa.jpg" alt="MongoDB"></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天我们来简单梳理一下其基础的命令语法。顺带与SQL做个简单的对比。</p>
+<h3 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h3><p>我们先来了解一下基础概念：</p>
+<p>|  SQL 术语&#x2F;概念  | MongoDB 术语&#x2F;概念 |  解释&#x2F;说明  |<br>|  : — : | : —- : | : —– :|<br>| database | database | 数据库 |<br>| table | collection | 数据库 表&#x2F;集合 |<br>| row | document | 数据表 行&#x2F;文档 |<br>| column | field | 数据 字段&#x2F;域 |<br>| index | index | 索引 |<br>| primary key | primary key | 主键，MongoDB自动将 _id 置为主键 |</p>
+<h3 id="2-查询"><a href="#2-查询" class="headerlink" title="2. 查询"></a>2. 查询</h3><h4 id="2-1-查询所有结果"><a href="#2-1-查询所有结果" class="headerlink" title="2.1 查询所有结果"></a>2.1 查询所有结果</h4><blockquote>
+<p>select * from table_name</p>
+<p>db.collection_name.find()</p>
+</blockquote>
+<pre><code>下面的 table_name 和 collection_name 都以 article 代替
+</code></pre>
+<h4 id="2-2-指定返回"><a href="#2-2-指定返回" class="headerlink" title="2.2 指定返回"></a>2.2 指定返回</h4><blockquote>
+<p>select title , auther from article</p>
+<p>db.article.find({ },{‘title’: 1,’auther’: 1})<br>&#x2F;&#x2F;find的第一个参数为查询条件，第二个参数是用来控制输出的，1表示返回，而0则<br>不返回。默认值是0，但_id是例外，当  <code>&#39;_id&#39;: 0 </code>时，默认才不会显示_id。</p>
+</blockquote>
+<h4 id="2-3-where"><a href="#2-3-where" class="headerlink" title="2.3 where"></a>2.3 where</h4><blockquote>
+<p>select * from article where title &#x3D; ‘mongodb’</p>
+<p>db.article.find({‘title’ : ‘mongodb’})</p>
+</blockquote>
+<h4 id="2-4-and-与"><a href="#2-4-and-与" class="headerlink" title="2.4 and (与)"></a>2.4 and (与)</h4><blockquote>
+<p>select * from article where title &#x3D; “mongodb” and author &#x3D; “god”</p>
+<p>db.article.find({‘title’:’mongodb’,’author’:’god’})</p>
+</blockquote>
+<h4 id="2-5-or-或"><a href="#2-5-or-或" class="headerlink" title="2.5 or (或)"></a>2.5 or (或)</h4><blockquote>
+<p>select * from article where title &#x3D; “mongodb” or author &#x3D; “god”</p>
+<p>db.article.find({‘$or’: [{‘title’:’mongodb’},{‘author’:’god’}]})</p>
+</blockquote>
+<h4 id="2-6-比较"><a href="#2-6-比较" class="headerlink" title="2.6 比较"></a>2.6 比较</h4><blockquote>
+<p>select * form article where read &lt;&#x3D; 100</p>
+<p>db.article.find({‘read’:{‘$lte’:100}})<br>&#x2F;&#x2F;其中 $gt (&gt;),$lt (&lt;),$gte (&gt;&#x3D;),$lte (&lt;&#x3D;)</p>
+</blockquote>
+<h4 id="2-7-in"><a href="#2-7-in" class="headerlink" title="2.7 in"></a>2.7 in</h4><blockquote>
+<p>select * from article where author in (‘a’,’b’,’c’)</p>
+<p>db.article.find({‘auther’: {‘$in’:[‘a’,’b’,’c’]}})</p>
+</blockquote>
+<h4 id="2-8-like"><a href="#2-8-like" class="headerlink" title="2.8 like"></a>2.8 like</h4><blockquote>
+<p>select * from article where title like ‘%mongodb%’</p>
+<p>db.article.find({‘title’:&#x2F;mongodb&#x2F;})</p>
+</blockquote>
+<h4 id="2-9-count"><a href="#2-9-count" class="headerlink" title="2.9 count"></a>2.9 count</h4><blockquote>
+<p>select count(*) from article</p>
+<p>db.article.count()</p>
+</blockquote>
+<h4 id="2-10-不等于"><a href="#2-10-不等于" class="headerlink" title="2.10 不等于"></a>2.10 不等于</h4><blockquote>
+<p>select * from article where author !&#x3D; ‘a’</p>
+<p>db.article.find({‘author’:{‘$ne’: ‘a’}})</p>
+</blockquote>
+<h4 id="2-11-排序"><a href="#2-11-排序" class="headerlink" title="2.11 排序"></a>2.11 排序</h4><blockquote>
+<p>&#x2F;&#x2F; 降序&#x2F;升序<br>select * from article where type &#x3D; ‘mongodb’ order by read desc&#x2F;asc</p>
+<p>db.article.find({‘type’:’mongodb’}).sort({‘read’: -1&#x2F;1}) &#x2F;&#x2F;默认为1</p>
+</blockquote>
+<pre><code>findOne() 查询返回一条数据，其余使用方式和 find() 一直
+</code></pre>
+<h3 id="3-insert（插入）"><a href="#3-insert（插入）" class="headerlink" title="3. insert（插入）"></a>3. insert（插入）</h3><blockquote>
+<p>insert into artical (author,content,types) values (park’,’helloworld’,’mongodb’)<br>db.article.insert({‘author’:’park’,’content’,’helloworld’,’types’:’mongodb’})</p>
+</blockquote>
+<h3 id="4-update（更新）"><a href="#4-update（更新）" class="headerlink" title="4. update（更新）"></a>4. update（更新）</h3><blockquote>
+<p>&#x2F;&#x2F;语法<br>db.collection_name.update(query,update[,options])</p>
+</blockquote>
+<ul>
+<li>query: 必选，查询条件，类似find中的查询条件。</li>
+<li>update : 必选，update的对象和一些更新的操作符（如$,$inc…）等</li>
+<li>options：可选，一些更新配置的对象。</li>
+<li>upsert：可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。</li>
+<li>multi：可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true, 就把按条件查出来多条记录全部更新。</li>
+<li>writeConcern：可选，抛出异常的级别。</li>
+</ul>
+<blockquote>
+<p>&#x2F;&#x2F;简单更新<br>update article set title &#x3D; “mongodb” where read &gt; 100</p>
+<p>db.article.update({“read”: {“$gt”: 100}}, {“$set”: { “title”: “mongodb”}})</p>
+</blockquote>
+<p>更新特定字段 <code>$set</code></p>
+<blockquote>
+<p>update game set count &#x3D; 10000 where id &#x3D; 123</p>
+<p>db.game.update({“_id”: 123}, { “$set”: {“count”: 10000}})</p>
+</blockquote>
+<p>删除特定字段 <code>$unset</code></p>
+<blockquote>
+<p>db.game.update({“_id”:123}, {“$unset”: {“author”:1}})<br>    $unset 指定字段的值是合法值即可</p>
+</blockquote>
+<blockquote>
+<p>db.article.update({title:’Seven’}, {$set:{read:134371}})<br>&#x2F;&#x2F;递增 <code>$inc</code><br>db.article.update({title:’Seven’}, {$inc:{read:2}}) &#x2F;&#x2F; 每次加2</p>
+</blockquote>
+<p>多个同时更新，要设置 <code>&#123;multi:true&#125;</code> 如：</p>
+<blockquote>
+<p>db.article.update({ }, {$inc:{read:10}},{multi:true})</p>
+</blockquote>
+<p>数组追加，则应该用 <code>$push</code> 如：</p>
+<blockquote>
+<p>db.article.update({‘title’:’Seven’}, {$push:{‘types’:’mysql’}})<br>db.article.update({‘title’:’Seven’}, {$push:{‘types’:[‘mysql’,’nosql’]}})<br>&#x2F;&#x2F;注：追加字段必须是数组。如果数组字段不存在，则自动新增，然后追加。</p>
+</blockquote>
+<h3 id="5-删除"><a href="#5-删除" class="headerlink" title="5. 删除"></a>5. 删除</h3><blockquote>
+<p>&#x2F;&#x2F;删除所有文档<br>delete from article</p>
+<p>db.article.remove()<br>    db.article.drop() &#x2F;&#x2F;当删除一个集合中的所有文档时，直接删除一个集合效率更高</p>
+</blockquote>
+<blockquote>
+<p>&#x2F;&#x2F;删除指定文档<br>delete from artical where title &#x3D; ‘seven’</p>
+<p>db.article.remove({‘title’: ‘seven’})<br>db.article.remove({‘title’: ‘seven’},1) &#x2F;&#x2F;删除第一个</p>
+</blockquote>
+<h3 id="6-建立索引"><a href="#6-建立索引" class="headerlink" title="6. 建立索引"></a>6. 建立索引</h3><p>为文档中的一些key加上索引(index)可以加快搜索速度。</p>
+<blockquote>
+<p>db.article.ensureIndex({‘title’:1}) &#x2F;&#x2F;升序1，降序-1</p>
+</blockquote>
+<blockquote>
+<p>db.article.getIndexs() &#x2F;&#x2F;将返回所有索引，包括其名字。</p>
+</blockquote>
+<blockquote>
+<p>db.article.dropIndex(‘index_name’) &#x2F;&#x2F;删除索引</p>
+</blockquote>
+<h3 id="7-文本搜索"><a href="#7-文本搜索" class="headerlink" title="7. 文本搜索"></a>7. 文本搜索</h3><p>对文本搜索之前，我们需要先对要搜索的key建立一个text索引。假定我们要对标题进行文本搜索，我们可以先这样：</p>
+<blockquote>
+<p>db.article.ensureIndex({title:’text’})</p>
+</blockquote>
+<p>比如，查找带有”seven”的标题：</p>
+<blockquote>
+<p>db.article.find({text:{‘$search’:’seven’}})<br>&#x2F;&#x2F;MongoDB目前支持15种语言的文本搜索，暂不支持中文。</p>
+</blockquote>
+<h3 id="8-常用命令"><a href="#8-常用命令" class="headerlink" title="8. 常用命令"></a>8. 常用命令</h3><p>第一组：</p>
+<blockquote>
+<p>db.article.find().limit(20) &#x2F;&#x2F; <code>limit()</code> 返回限制的数量</p>
+<p>&#x2F;&#x2F; <code>skip()</code> 跳过数据条数，此处从第六条开始返回<br>db.article.find().skip(5)</p>
+</blockquote>
+<p>第二组：</p>
+<blockquote>
+<p>&#x2F;&#x2F;可以结合limit()和skip()来达到分页效果：<br>select * from article limit 10, 20</p>
+<p>db.article.find().skip(10).limit(20)</p>
+</blockquote>
+<p>第三组：</p>
+<blockquote>
+<p>db.article.find().skip(5).limit(10).sort({‘title’:1})</p>
+</blockquote>
+<p>第四组：</p>
+<blockquote>
+<p>&#x2F;&#x2F;<code>pretty()</code> 输出的是经格式美化后的数据<br>db.article.find().pretty()</p>
+</blockquote>
+<p>第五组：</p>
+<blockquote>
+<p>show databases &#x2F;&#x2F;显示数据库<br>use database_name &#x2F;&#x2F;切换&#x2F;新建数据库<br>show collections &#x2F;&#x2F; 显示当前数据库下的集合<br>db &#x2F;&#x2F; 显示当前数据库</p>
+</blockquote>
+<p>参考资料:[参考资料1] (<a target="_blank" rel="noopener" href="http://ghmagical.com/article/page/id/Bj7qgmJ3CJUE">http://ghmagical.com/article/page/id/Bj7qgmJ3CJUE</a>)<br><a target="_blank" rel="noopener" href="https://github.com/StevenSLXie/Tutorials-for-Web-Developers/blob/master/MongoDB%20%E6%9E%81%E7%AE%80%E5%AE%9E%E8%B7%B5%E5%85%A5%E9%97%A8.md">参考资料2</a></p>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-text">1. 基础概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%9F%A5%E8%AF%A2"><span class="toc-text">2. 查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E6%9F%A5%E8%AF%A2%E6%89%80%E6%9C%89%E7%BB%93%E6%9E%9C"><span class="toc-text">2.1 查询所有结果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E6%8C%87%E5%AE%9A%E8%BF%94%E5%9B%9E"><span class="toc-text">2.2 指定返回</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-where"><span class="toc-text">2.3 where</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-and-%E4%B8%8E"><span class="toc-text">2.4 and (与)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-or-%E6%88%96"><span class="toc-text">2.5 or (或)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-%E6%AF%94%E8%BE%83"><span class="toc-text">2.6 比较</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-7-in"><span class="toc-text">2.7 in</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-8-like"><span class="toc-text">2.8 like</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-9-count"><span class="toc-text">2.9 count</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-10-%E4%B8%8D%E7%AD%89%E4%BA%8E"><span class="toc-text">2.10 不等于</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-11-%E6%8E%92%E5%BA%8F"><span class="toc-text">2.11 排序</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-insert%EF%BC%88%E6%8F%92%E5%85%A5%EF%BC%89"><span class="toc-text">3. insert（插入）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-update%EF%BC%88%E6%9B%B4%E6%96%B0%EF%BC%89"><span class="toc-text">4. update（更新）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%88%A0%E9%99%A4"><span class="toc-text">5. 删除</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%BB%BA%E7%AB%8B%E7%B4%A2%E5%BC%95"><span class="toc-text">6. 建立索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E6%96%87%E6%9C%AC%E6%90%9C%E7%B4%A2"><span class="toc-text">7. 文本搜索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">8. 常用命令</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2017/08/14/DataBase01/">https://xiaozhouguo.github.io/blog/2017/08/14/DataBase01/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2017/08/13/WebJs10/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          前端基础进阶10 详解面向对象、构造函数、原型与原型链
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2017/08/18/javascript01/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          javascript string、array常用API练习
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

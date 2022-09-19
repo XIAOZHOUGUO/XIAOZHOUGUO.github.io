@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>完整的 DOM diff 流程上篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/dom-diff-process1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      完整的 DOM diff 流程上篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-06-27T01:36:20.000Z" itemprop="datePublished">2022年06月27日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/06/27/vue3/dom-diff-process1/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>上一节课我们梳理了组件渲染的过程，本质上就是把各种类型的 vnode 渲染成真实 DOM。我们也知道了组件是由模板、组件描述对象和数据构成的，数据的变化会影响组件的变化。组件的渲染过程中创建了一个带副作用的渲染函数，当数据变化的时候就会执行这个渲染函数来触发组件的更新。那么接下来，我们就具体分析一下组件的更新过程。</p>
+<span id="more"></span>
+
+<h3 id="副作用渲染函数更新组件的过程"><a href="#副作用渲染函数更新组件的过程" class="headerlink" title="副作用渲染函数更新组件的过程"></a>副作用渲染函数更新组件的过程</h3><p>我们先来回顾一下带副作用渲染函数 <code>setupRenderEffect</code> 的实现，但是这次我们要重点关注更新组件部分的逻辑：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">setupRenderEffect</span> = (<span class="params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 创建响应式的副作用渲染函数</span></span><br><span class="line">  instance.<span class="property">update</span> = <span class="title function_">effect</span>(<span class="keyword">function</span> <span class="title function_">componentEffect</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!instance.<span class="property">isMounted</span>) &#123;</span><br><span class="line">      <span class="comment">// 渲染组件</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 更新组件</span></span><br><span class="line">      <span class="keyword">let</span> &#123; next, vnode &#125; = instance</span><br><span class="line">      <span class="comment">// next 表示新的组件 vnode</span></span><br><span class="line">      <span class="keyword">if</span> (next) &#123;</span><br><span class="line">        <span class="comment">// 更新组件 vnode 节点信息</span></span><br><span class="line">        <span class="title function_">updateComponentPreRender</span>(instance, next, optimized)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        next = vnode</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 渲染新的子树 vnode</span></span><br><span class="line">      <span class="keyword">const</span> nextTree = <span class="title function_">renderComponentRoot</span>(instance)</span><br><span class="line">      <span class="comment">// 缓存旧的子树 vnode</span></span><br><span class="line">      <span class="keyword">const</span> prevTree = instance.<span class="property">subTree</span></span><br><span class="line">      <span class="comment">// 更新子树 vnode</span></span><br><span class="line">      instance.<span class="property">subTree</span> = nextTree</span><br><span class="line">      <span class="comment">// 组件更新核心逻辑，根据新旧子树 vnode 做 patch</span></span><br><span class="line">      <span class="title function_">patch</span>(prevTree, nextTree,</span><br><span class="line">        <span class="comment">// 如果在 teleport 组件中父节点可能已经改变，所以容器直接找旧树 DOM 元素的父节点</span></span><br><span class="line">        <span class="title function_">hostParentNode</span>(prevTree.<span class="property">el</span>),</span><br><span class="line">        <span class="comment">// 参考节点在 fragment 的情况可能改变，所以直接找旧树 DOM 元素的下一个节点</span></span><br><span class="line">        <span class="title function_">getNextHostNode</span>(prevTree),</span><br><span class="line">        instance,</span><br><span class="line">        parentSuspense,</span><br><span class="line">        isSVG)</span><br><span class="line">      <span class="comment">// 缓存更新后的 DOM 节点</span></span><br><span class="line">      next.<span class="property">el</span> = nextTree.<span class="property">el</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, prodEffectOptions)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，更新组件主要做三件事情：<strong>更新组件 vnode 节点、渲染新的子树 vnode、根据新旧子树 vnode 执行 patch 逻辑</strong>。</p>
+<p>首先是更新组件 vnode 节点，这里会有一个条件判断，判断组件实例中是否有新的组件 vnode（用 next 表示），有则更新组件 vnode，没有 next 指向之前的组件 vnode。为什么需要判断，这其实涉及一个组件更新策略的逻辑，我们稍后会讲。</p>
+<p>接着是渲染新的子树 vnode，因为数据发生了变化，模板又和数据相关，所以渲染生成的子树 vnode 也会发生相应的变化。</p>
+<p>最后就是<strong>核心的 patch 逻辑</strong>，用来找出新旧子树 vnode 的不同，并找到一种合适的方式更新 DOM，接下来我们就来分析这个过程。</p>
+<h3 id="核心逻辑：patch-流程"><a href="#核心逻辑：patch-流程" class="headerlink" title="核心逻辑：patch 流程"></a>核心逻辑：patch 流程</h3><p>我们先来看 patch 流程的实现代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patch</span> = (<span class="params">n1, n2, container, anchor = <span class="literal">null</span>, parentComponent = <span class="literal">null</span>, parentSuspense = <span class="literal">null</span>, isSVG = <span class="literal">false</span>, optimized = <span class="literal">false</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 如果存在新旧节点, 且新旧节点类型不同，则销毁旧节点</span></span><br><span class="line">  <span class="keyword">if</span> (n1 &amp;&amp; !<span class="title function_">isSameVNodeType</span>(n1, n2)) &#123;</span><br><span class="line">    anchor = <span class="title function_">getNextHostNode</span>(n1)</span><br><span class="line">    <span class="title function_">unmount</span>(n1, parentComponent, parentSuspense, <span class="literal">true</span>)</span><br><span class="line">    <span class="comment">// n1 设置为 null 保证后续都走 mount 逻辑</span></span><br><span class="line">    n1 = <span class="literal">null</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> &#123; type, shapeFlag &#125; = n2</span><br><span class="line">  <span class="keyword">switch</span> (type) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="title class_">Text</span>:</span><br><span class="line">      <span class="comment">// 处理文本节点</span></span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="title class_">Comment</span>:</span><br><span class="line">      <span class="comment">// 处理注释节点</span></span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="title class_">Static</span>:</span><br><span class="line">      <span class="comment">// 处理静态节点</span></span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">case</span> <span class="title class_">Fragment</span>:</span><br><span class="line">      <span class="comment">// 处理 Fragment 元素</span></span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    <span class="attr">default</span>:</span><br><span class="line">      <span class="keyword">if</span> (shapeFlag &amp; <span class="number">1</span> <span class="comment">/* ELEMENT */</span>) &#123;</span><br><span class="line">        <span class="comment">// 处理普通 DOM 元素</span></span><br><span class="line">        <span class="title function_">processElement</span>(n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (shapeFlag &amp; <span class="number">6</span> <span class="comment">/* COMPONENT */</span>) &#123;</span><br><span class="line">        <span class="comment">// 处理组件</span></span><br><span class="line">        <span class="title function_">processComponent</span>(n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (shapeFlag &amp; <span class="number">64</span> <span class="comment">/* TELEPORT */</span>) &#123;</span><br><span class="line">        <span class="comment">// 处理 TELEPORT</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (shapeFlag &amp; <span class="number">128</span> <span class="comment">/* SUSPENSE */</span>) &#123;</span><br><span class="line">        <span class="comment">// 处理 SUSPENSE</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isSameVNodeType</span> (n1, n2) &#123;</span><br><span class="line">  <span class="comment">// n1 和 n2 节点的 type 和 key 都相同，才是相同节点</span></span><br><span class="line">  <span class="keyword">return</span> n1.<span class="property">type</span> === n2.<span class="property">type</span> &amp;&amp; n1.<span class="property">key</span> === n2.<span class="property">key</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个过程中，首先判断新旧节点是否是相同的 vnode 类型，如果不同，比如一个 div 更新成一个 ul，那么最简单的操作就是删除旧的 div 节点，再去挂载新的 ul 节点。</p>
+<p>如果是相同的 vnode 类型，就需要走 diff 更新流程了，接着会根据不同的 vnode 类型执行不同的处理逻辑，这里我们仍然只分析普通元素类型和组件类型的处理过程。</p>
+<h5 id="1-处理组件"><a href="#1-处理组件" class="headerlink" title="1. 处理组件"></a>1. 处理组件</h5><p>如何<strong>处理组件</strong>的呢？举个例子，我们在父组件 App 中里引入了 Hello 组件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>This is an app.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hello</span> <span class="attr">:msg</span>=<span class="string">&quot;msg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">hello</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">&quot;toggle&quot;</span>&gt;</span>Toggle msg<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line"><span class="language-javascript">    <span class="title function_">data</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">return</span> &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">msg</span>: <span class="string">&#x27;Vue&#x27;</span></span></span><br><span class="line"><span class="language-javascript">      &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;,</span></span><br><span class="line"><span class="language-javascript">    <span class="attr">methods</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="title function_">toggle</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">this</span>.<span class="property">msg</span> = <span class="variable language_">this</span>.<span class="property">msg</span> ==== <span class="string">&#x27;Vue&#x27;</span>? <span class="string">&#x27;World&#x27;</span>: <span class="string">&#x27;Vue&#x27;</span></span></span><br><span class="line"><span class="language-javascript">      &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">  &#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Hello 组件中是 <code>&lt;div&gt;</code> 包裹着一个 <code>&lt;p&gt;</code> 标签， 如下所示：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hello&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Hello, &#123;&#123;msg&#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line"><span class="language-javascript">    <span class="attr">props</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="attr">msg</span>: <span class="title class_">String</span></span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">  &#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>点击 App 组件中的按钮执行 toggle 函数，就会修改 data 中的 msg，并且会触发App 组件的重新渲染。</p>
+<p>结合前面对渲染函数的流程分析，这里 App 组件的根节点是 div 标签，重新渲染的子树 vnode 节点是一个普通元素的 vnode，应该先走 processElement 逻辑。组件的更新最终还是要转换成内部真实 DOM 的更新，而实际上普通元素的处理流程才是真正做 DOM 的更新，由于稍后我们会详细分析普通元素的处理流程，所以我们先跳过这里，继续往下看。</p>
+<p>和渲染过程类似，更新过程也是一个树的深度优先遍历过程，更新完当前节点后，就会遍历更新它的子节点，因此在遍历的过程中会遇到 hello 这个组件 vnode 节点，就会执行到 processComponent 处理逻辑中，我们再来看一下它的实现，我们重点关注一下组件更新的相关逻辑：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">processComponent</span> = (<span class="params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (n1 == <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 挂载组件</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 更新子组件</span></span><br><span class="line">    <span class="title function_">updateComponent</span>(n1, n2, parentComponent, optimized)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">updateComponent</span> = (<span class="params">n1, n2, parentComponent, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> instance = (n2.<span class="property">component</span> = n1.<span class="property">component</span>)</span><br><span class="line">  <span class="comment">// 根据新旧子组件 vnode 判断是否需要更新子组件</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">shouldUpdateComponent</span>(n1, n2, parentComponent, optimized)) &#123;</span><br><span class="line">    <span class="comment">// 新的子组件 vnode 赋值给 instance.next</span></span><br><span class="line">    instance.<span class="property">next</span> = n2</span><br><span class="line">    <span class="comment">// 子组件也可能因为数据变化被添加到更新队列里了，移除它们防止对一个子组件重复更新</span></span><br><span class="line">    <span class="title function_">invalidateJob</span>(instance.<span class="property">update</span>)</span><br><span class="line">    <span class="comment">// 执行子组件的副作用渲染函数</span></span><br><span class="line">    instance.<span class="title function_">update</span>()</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 不需要更新，只复制属性</span></span><br><span class="line">    n2.<span class="property">component</span> = n1.<span class="property">component</span></span><br><span class="line">    n2.<span class="property">el</span> = n1.<span class="property">el</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，processComponent 主要通过执行 updateComponent 函数来更新子组件，updateComponent 函数在更新子组件的时候，会先执行 shouldUpdateComponent 函数，根据新旧子组件 vnode 来判断是否需要更新子组件。这里你只需要知道，在 shouldUpdateComponent 函数的内部，主要是通过检测和对比组件 vnode 中的 props、chidren、dirs、transiton 等属性，来决定子组件是否需要更新。</p>
+<p>这是很好理解的，因为在一个组件的子组件是否需要更新，我们主要依据子组件 vnode 是否存在一些会影响组件更新的属性变化进行判断，如果存在就会更新子组件。</p>
+<p>虽然 Vue.js 的更新粒度是组件级别的，组件的数据变化只会影响当前组件的更新，但是在组件更新的过程中，也会对子组件做一定的检查，判断子组件是否也要更新，并通过某种机制避免子组件重复更新。</p>
+<p>我们接着看 updateComponent 函数，如果 shouldUpdateComponent 返回 true ，那么在它的最后，先执行 invalidateJob（instance.update）避免子组件由于自身数据变化导致的重复更新，然后又执行了子组件的副作用渲染函数 instance.update 来主动触发子组件的更新。</p>
+<p>再回到副作用渲染函数中，有了前面的讲解，我们再看组件更新的这部分代码，就能很好地理解它的逻辑了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 更新组件</span></span><br><span class="line"><span class="keyword">let</span> &#123; next, vnode &#125; = instance</span><br><span class="line"><span class="comment">// next 表示新的组件 vnode</span></span><br><span class="line"><span class="keyword">if</span> (next) &#123;</span><br><span class="line">  <span class="comment">// 更新组件 vnode 节点信息</span></span><br><span class="line">  <span class="title function_">updateComponentPreRender</span>(instance, next, optimized)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  next = vnode</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">updateComponentPreRender</span> = (<span class="params">instance, nextVNode, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 新组件 vnode 的 component 属性指向组件实例</span></span><br><span class="line">  nextVNode.<span class="property">component</span> = instance</span><br><span class="line">  <span class="comment">// 旧组件 vnode 的 props 属性</span></span><br><span class="line">  <span class="keyword">const</span> prevProps = instance.<span class="property">vnode</span>.<span class="property">props</span></span><br><span class="line">  <span class="comment">// 组件实例的 vnode 属性指向新的组件 vnode</span></span><br><span class="line">  instance.<span class="property">vnode</span> = nextVNode</span><br><span class="line">  <span class="comment">// 清空 next 属性，为了下一次重新渲染准备</span></span><br><span class="line">  instance.<span class="property">next</span> = <span class="literal">null</span></span><br><span class="line">  <span class="comment">// 更新 props</span></span><br><span class="line">  <span class="title function_">updateProps</span>(instance, nextVNode.<span class="property">props</span>, prevProps, optimized)</span><br><span class="line">  <span class="comment">// 更新 插槽</span></span><br><span class="line">  <span class="title function_">updateSlots</span>(instance, nextVNode.<span class="property">children</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结合上面的代码，我们在更新组件的 DOM 前，需要先更新组件 vnode 节点信息，包括更改组件实例的 vnode 指针、更新 props 和更新插槽等一系列操作，因为组件在稍后执行 renderComponentRoot 时会重新渲染新的子树 vnode ，它依赖了更新后的组件 vnode 中的 props 和 slots 等数据。</p>
+<p>所以我们现在知道了一个组件重新渲染可能会有两种场景，一种是组件本身的数据变化，这种情况下 next 是 null；另一种是父组件在更新的过程中，遇到子组件节点，先判断子组件是否需要更新，如果需要则主动执行子组件的重新渲染方法，这种情况下 next 就是新的子组件 vnode。</p>
+<p>你可能还会有疑问，这个子组件对应的新的组件 vnode 是什么时候创建的呢？答案很简单，它是在父组件重新渲染的过程中，通过 renderComponentRoot 渲染子树 vnode 的时候生成，因为子树 vnode 是个树形结构，通过遍历它的子节点就可以访问到其对应的组件 vnode。再拿我们前面举的例子说，当 App 组件重新渲染的时候，在执行 renderComponentRoot 生成子树 vnode 的过程中，也生成了 hello 组件对应的新的组件 vnode。</p>
+<p>所以 processComponent 处理组件 vnode，本质上就是去判断子组件是否需要更新，如果需要则递归执行子组件的副作用渲染函数来更新，否则仅仅更新一些 vnode 的属性，并让子组件实例保留对组件 vnode 的引用，用于子组件自身数据变化引起组件重新渲染的时候，在渲染函数内部可以拿到新的组件 vnode。</p>
+<p>前面也说过，组件是抽象的，组件的更新最终还是会落到对普通 DOM 元素的更新。所以接下来我们详细分析一下组件更新中<strong>对普通元素</strong>的处理流程。</p>
+<h5 id="2-处理普通元素"><a href="#2-处理普通元素" class="headerlink" title="2. 处理普通元素"></a>2. 处理普通元素</h5><p>我们再来看如何处理普通元素，我把之前的示例稍加修改，将其中的 Hello 组件删掉，如下所示：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>This is &#123;&#123;msg&#125;&#125;.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">&quot;toggle&quot;</span>&gt;</span>Toggle msg<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line"><span class="language-javascript">    <span class="title function_">data</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">return</span> &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">msg</span>: <span class="string">&#x27;Vue&#x27;</span></span></span><br><span class="line"><span class="language-javascript">      &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;,</span></span><br><span class="line"><span class="language-javascript">    <span class="attr">methods</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="title function_">toggle</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">this</span>.<span class="property">msg</span> = <span class="string">&#x27;Vue&#x27;</span>? <span class="string">&#x27;World&#x27;</span>: <span class="string">&#x27;Vue&#x27;</span></span></span><br><span class="line"><span class="language-javascript">      &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">  &#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们点击 App 组件中的按钮会执行 toggle 函数，然后修改 data 中的 msg，这就触发了 App 组件的重新渲染。</p>
+<p>App 组件的根节点是 div 标签，重新渲染的子树 vnode 节点是一个普通元素的 vnode，所以应该先走 processElement 逻辑，我们来看这个函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">processElement</span> = (<span class="params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  isSVG = isSVG || n2.<span class="property">type</span> === <span class="string">&#x27;svg&#x27;</span></span><br><span class="line">  <span class="keyword">if</span> (n1 == <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 挂载元素</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 更新元素</span></span><br><span class="line">    <span class="title function_">patchElement</span>(n1, n2, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">patchElement</span> = (<span class="params">n1, n2, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> el = (n2.<span class="property">el</span> = n1.<span class="property">el</span>)</span><br><span class="line">  <span class="keyword">const</span> oldProps = (n1 &amp;&amp; n1.<span class="property">props</span>) || <span class="variable constant_">EMPTY_OBJ</span></span><br><span class="line">  <span class="keyword">const</span> newProps = n2.<span class="property">props</span> || <span class="variable constant_">EMPTY_OBJ</span></span><br><span class="line">  <span class="comment">// 更新 props</span></span><br><span class="line">  <span class="title function_">patchProps</span>(el, n2, oldProps, newProps, parentComponent, parentSuspense, isSVG)</span><br><span class="line">  <span class="keyword">const</span> areChildrenSVG = isSVG &amp;&amp; n2.<span class="property">type</span> !== <span class="string">&#x27;foreignObject&#x27;</span></span><br><span class="line">  <span class="comment">// 更新子节点</span></span><br><span class="line">  <span class="title function_">patchChildren</span>(n1, n2, el, <span class="literal">null</span>, parentComponent, parentSuspense, areChildrenSVG)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，更新元素的过程主要做两件事情：更新 props 和更新子节点。其实这是很好理解的，因为一个 DOM 节点元素就是由它自身的一些属性和子节点构成的。</p>
+<p>首先是更新 props，这里的 patchProps 函数就是在更新 DOM 节点的 class、style、event 以及其它的一些 DOM 属性，这个过程我不再深入分析了，感兴趣的同学可以自己看这部分代码。</p>
+<p>其次是更新子节点，我们来看一下这里的 patchChildren 函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">patchChildren</span> = (<span class="params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized = <span class="literal">false</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> c1 = n1 &amp;&amp; n1.<span class="property">children</span></span><br><span class="line">  <span class="keyword">const</span> prevShapeFlag = n1 ? n1.<span class="property">shapeFlag</span> : <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> c2 = n2.<span class="property">children</span></span><br><span class="line">  <span class="keyword">const</span> &#123; shapeFlag &#125; = n2</span><br><span class="line">  <span class="comment">// 子节点有 3 种可能情况：文本、数组、空</span></span><br><span class="line">  <span class="keyword">if</span> (shapeFlag &amp; <span class="number">8</span> <span class="comment">/* TEXT_CHILDREN */</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (prevShapeFlag &amp; <span class="number">16</span> <span class="comment">/* ARRAY_CHILDREN */</span>) &#123;</span><br><span class="line">      <span class="comment">// 数组 -&gt; 文本，则删除之前的子节点</span></span><br><span class="line">      <span class="title function_">unmountChildren</span>(c1, parentComponent, parentSuspense)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (c2 !== c1) &#123;</span><br><span class="line">      <span class="comment">// 文本对比不同，则替换为新文本</span></span><br><span class="line">      <span class="title function_">hostSetElementText</span>(container, c2)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (prevShapeFlag &amp; <span class="number">16</span> <span class="comment">/* ARRAY_CHILDREN */</span>) &#123;</span><br><span class="line">      <span class="comment">// 之前的子节点是数组</span></span><br><span class="line">      <span class="keyword">if</span> (shapeFlag &amp; <span class="number">16</span> <span class="comment">/* ARRAY_CHILDREN */</span>) &#123;</span><br><span class="line">        <span class="comment">// 新的子节点仍然是数组，则做完整地 diff</span></span><br><span class="line">        <span class="title function_">patchKeyedChildren</span>(c1, c2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 数组 -&gt; 空，则仅仅删除之前的子节点</span></span><br><span class="line">        <span class="title function_">unmountChildren</span>(c1, parentComponent, parentSuspense, <span class="literal">true</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 之前的子节点是文本节点或者为空</span></span><br><span class="line">      <span class="comment">// 新的子节点是数组或者为空</span></span><br><span class="line">      <span class="keyword">if</span> (prevShapeFlag &amp; <span class="number">8</span> <span class="comment">/* TEXT_CHILDREN */</span>) &#123;</span><br><span class="line">        <span class="comment">// 如果之前子节点是文本，则把它清空</span></span><br><span class="line">        <span class="title function_">hostSetElementText</span>(container, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (shapeFlag &amp; <span class="number">16</span> <span class="comment">/* ARRAY_CHILDREN */</span>) &#123;</span><br><span class="line">        <span class="comment">// 如果新的子节点是数组，则挂载新子节点</span></span><br><span class="line">        <span class="title function_">mountChildren</span>(c2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于一个元素的子节点 vnode 可能会有三种情况：纯文本、vnode 数组和空。那么根据排列组合对于新旧子节点来说就有九种情况，我们可以通过三张图来表示。</p>
+<p>首先来看一下<strong>旧子节点是纯文本</strong>的情况：</p>
+<ul>
+<li>如果新子节点也是纯文本，那么做简单地文本替换即可；</li>
+<li>如果新子节点是空，那么删除旧子节点即可；</li>
+<li>如果新子节点是 vnode 数组，那么先把旧子节点的文本清空，再去旧子节点的父容器下添加多个新子节点。</li>
+</ul>
+<p><img src="/blog/dom-diff-process1/Ciqc1F8MBDWAfUAXAADe59XvjHY701.png"></p>
+<p>接下来看一下<strong>旧子节点是空</strong>的情况：</p>
+<ul>
+<li>如果新子节点是纯文本，那么在旧子节点的父容器下添加新文本节点即可；</li>
+<li>如果新子节点也是空，那么什么都不需要做；</li>
+<li>如果新子节点是 vnode 数组，那么直接去旧子节点的父容器下添加多个新子节点即可。</li>
+</ul>
+<p><img src="/blog/dom-diff-process1/CgqCHl8MBEOANnFmAADYr-_R5mM894.png"></p>
+<p>最后来看一下<strong>旧子节点是 vnode 数组</strong>的情况：</p>
+<ul>
+<li>如果新子节点是纯文本，那么先删除旧子节点，再去旧子节点的父容器下添加新文本节点；</li>
+<li>如果新子节点是空，那么删除旧子节点即可；</li>
+<li>如果新子节点也是 vnode 数组，那么就需要做完整的 diff 新旧子节点了，这是最复杂的情况，内部运用了核心 diff 算法。</li>
+</ul>
+<p><img src="/blog/dom-diff-process1/CgqCHl8MBCuAUZksAADplAU2718113.png"></p>
+<p>下节课我们就来深入探究一下这个复杂的 diff 算法。</p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;componentRenderUtils.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%AF%E4%BD%9C%E7%94%A8%E6%B8%B2%E6%9F%93%E5%87%BD%E6%95%B0%E6%9B%B4%E6%96%B0%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-text">副作用渲染函数更新组件的过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%EF%BC%9Apatch-%E6%B5%81%E7%A8%8B"><span class="toc-text">核心逻辑：patch 流程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6"><span class="toc-text">1. 处理组件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E5%A4%84%E7%90%86%E6%99%AE%E9%80%9A%E5%85%83%E7%B4%A0"><span class="toc-text">2. 处理普通元素</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/06/27/vue3/dom-diff-process1/">https://xiaozhouguo.github.io/blog/2022/06/27/vue3/dom-diff-process1/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/06/24/vue3/component-render/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          组件渲染，从VNode到真实DOM的转变
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/06/28/vue3/dom-diff-process2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          完整的 DOM diff 流程下篇
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

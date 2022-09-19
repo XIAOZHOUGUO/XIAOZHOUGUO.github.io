@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>type-challanges 记录 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-typescript/type-challanges" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      type-challanges 记录
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-05-30T03:43:03.000Z" itemprop="datePublished">2022年05月30日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/TypeScript/">TypeScript</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/05/30/typescript/type-challanges/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>TypeScript 类型体操姿势合集记录 <a target="_blank" rel="noopener" href="https://github.com/type-challenges/type-challenges/blob/main/README.zh-CN.md">type-challenges&#x2F;README.zh-CN.md at main · type-challenges&#x2F;type-challenges (github.com)</a></p>
+<span id="more"></span>
+<h4 id="298-Length-of-String"><a href="#298-Length-of-String" class="headerlink" title="298 - Length of String"></a>298 - Length of String</h4><blockquote>
+<p>计算字符串的长度，类似于 <code>String#length</code>，<a target="_blank" rel="noopener" href="https://tsch.js.org/298/zh-CN">在 Github 上查看</a>。</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">LengthOfString</span>&lt;</span><br><span class="line">    S <span class="keyword">extends</span> <span class="built_in">string</span>,</span><br><span class="line">    arr <span class="keyword">extends</span> <span class="built_in">unknown</span>[] = []</span><br><span class="line">&gt; = S <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer first&#125;</span><span class="subst">$&#123;infer rest&#125;</span>`</span></span><br><span class="line">	? <span class="title class_">LengthOfString</span>&lt;rest,[...arr,first]&gt; : arr[<span class="string">&#x27;length&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<h4 id="459-Flatten"><a href="#459-Flatten" class="headerlink" title="459 - Flatten"></a>459 - Flatten</h4><blockquote>
+<p>在这个挑战中，你需要写一个接受数组的类型，并且返回扁平化的数组类型。<a target="_blank" rel="noopener" href="https://tsch.js.org/459/zh-CN">在 Github 上查看</a>，例如:</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> flatten = <span class="title class_">Flatten</span>&lt;[<span class="number">1</span>, <span class="number">2</span>, [<span class="number">3</span>, <span class="number">4</span>], [[[<span class="number">5</span>]]]]&gt; <span class="comment">// [1, 2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">FlattenArrayVal</span>&lt;S <span class="keyword">extends</span> <span class="built_in">any</span>,T <span class="keyword">extends</span> <span class="built_in">unknown</span>[]=[]&gt; = S <span class="keyword">extends</span> <span class="built_in">unknown</span>[]</span><br><span class="line">	? S <span class="keyword">extends</span> [infer first,...infer rest]</span><br><span class="line">		?  <span class="title class_">FlattenArrayVal</span>&lt;rest, first <span class="keyword">extends</span> <span class="built_in">unknown</span>[]</span><br><span class="line">        	? <span class="title class_">FlattenArrayVal</span>&lt;first,T&gt;</span><br><span class="line">            : [...T,first]&gt;</span><br><span class="line">		: T</span><br><span class="line">	: S</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Flatten</span>&lt;S <span class="keyword">extends</span> <span class="built_in">unknown</span>[],T <span class="keyword">extends</span> <span class="built_in">unknown</span>[]=[]&gt; =</span><br><span class="line">	S <span class="keyword">extends</span> [infer first,...infer rest]</span><br><span class="line">	? <span class="title class_">Flatten</span>&lt;<span class="title class_">FlattenArrayVal</span>&lt;rest&gt;, [...T,<span class="title class_">FlattenArrayVal</span>&lt;first&gt;]&gt;</span><br><span class="line">	: T</span><br></pre></td></tr></table></figure>
+
+<p>解释：类型 <code>flattenArrayVal</code>的作用是处理数组中的每一项，非数组类型直接返回原样，数组类型返回扁平化后的数组，给<code>Flatten</code>使用。</p>
+<h4 id="527-Append-to-object"><a href="#527-Append-to-object" class="headerlink" title="527 - Append to object"></a>527 - Append to object</h4><blockquote>
+<p>实现一个为接口添加一个新字段的类型。该类型接收三个参数，返回带有新字段的接口类型。<a target="_blank" rel="noopener" href="https://tsch.js.org/527/zh-CN">在 Github 上查看</a>，例如:</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Test</span> = &#123; <span class="attr">id</span>: <span class="string">&#x27;1&#x27;</span> &#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">AppendToObject</span>&lt;<span class="title class_">Test</span>, <span class="string">&#x27;value&#x27;</span>, <span class="number">4</span>&gt; <span class="comment">// expected to be &#123; id: &#x27;1&#x27;, value: 4 &#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">AppendToObject</span>&lt;T <span class="keyword">extends</span> <span class="title class_">Object</span>, U <span class="keyword">extends</span> <span class="built_in">string</span>, V&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof T | U]:  K <span class="keyword">extends</span> keyof T ? T[K] : V</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="529-Absolute"><a href="#529-Absolute" class="headerlink" title="529 - Absolute"></a>529 - Absolute</h4><blockquote>
+<p>实现一个接收string,number或bigInt类型参数的<code>Absolute</code>类型,返回一个正数字符串。<a target="_blank" rel="noopener" href="https://tsch.js.org/529/zh-CN">在 Github 上查看</a>，例如：</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Test</span> = -<span class="number">100</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">Absolute</span>&lt;<span class="title class_">Test</span>&gt;; <span class="comment">// expected to be &quot;100&quot;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Absolute</span>&lt;T <span class="keyword">extends</span> <span class="built_in">number</span> | <span class="built_in">string</span> | <span class="built_in">bigint</span>&gt; =</span><br><span class="line">	<span class="string">`<span class="subst">$&#123;T&#125;</span>`</span> <span class="keyword">extends</span> <span class="string">`-<span class="subst">$&#123;infer V&#125;</span>`</span> ? V : <span class="string">`<span class="subst">$&#123;T&#125;</span>`</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="501-String-to-Union"><a href="#501-String-to-Union" class="headerlink" title="501 - String to Union"></a>501 - String to Union</h4><blockquote>
+<p>实现一个将接收到的String参数转换为一个字母Union的类型。<a target="_blank" rel="noopener" href="https://tsch.js.org/531/zh-CN">在Github 上查看</a>，例如：</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Test</span> = <span class="string">&#x27;123&#x27;</span>;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">StringToUnion</span>&lt;<span class="title class_">Test</span>&gt;; <span class="comment">// expected to be &quot;1&quot; | &quot;2&quot; | &quot;3&quot;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">StringToUnion</span>&lt;T <span class="keyword">extends</span> <span class="built_in">string</span>&gt; = T <span class="keyword">extends</span> <span class="string">&quot;&quot;</span></span><br><span class="line">	? <span class="built_in">never</span></span><br><span class="line">	:  T <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer first&#125;</span><span class="subst">$&#123;infer rest&#125;</span>`</span></span><br><span class="line">		? first | <span class="title class_">StringToUnion</span>&lt;rest&gt;</span><br><span class="line">		: T</span><br></pre></td></tr></table></figure>
+
+<h4 id="599-Merge"><a href="#599-Merge" class="headerlink" title="599 - Merge"></a>599 - Merge</h4><blockquote>
+<p>将两个类型合并成一个类型，第二个类型的键会覆盖第一个类型的键。<a target="_blank" rel="noopener" href="https://tsch.js.org/599/zh-CN">在 Github 上查看</a>，例如：</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> foo = &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> coo = &#123;</span><br><span class="line">  <span class="attr">age</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">sex</span>: <span class="built_in">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result</span> = <span class="title class_">Merge</span>&lt;foo,coo&gt;; <span class="comment">// expected to be &#123;name: string, age: number, sex: string&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Merge</span>&lt;F <span class="keyword">extends</span> <span class="title class_">Object</span>, S <span class="keyword">extends</span> <span class="title class_">Object</span>&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof F | keyof S]: K <span class="keyword">extends</span> keyof S ? S[K] : K <span class="keyword">extends</span> keyof F ? F[K] : <span class="built_in">never</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="612-KebabCase"><a href="#612-KebabCase" class="headerlink" title="612 - KebabCase"></a>612 - KebabCase</h4><blockquote>
+<p>FooBarBaz<code>-&gt;</code>foo-bar-baz，<a target="_blank" rel="noopener" href="https://tsch.js.org/612">在Github上查看</a>。</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">FirstLowcase</span>&lt;T <span class="keyword">extends</span> <span class="built_in">string</span>&gt; = T <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer F&#125;</span><span class="subst">$&#123;infer R&#125;</span>`</span></span><br><span class="line">  ? F <span class="keyword">extends</span> <span class="title class_">Lowercase</span>&lt;F&gt; ? T : <span class="string">`<span class="subst">$&#123;Lowercase&lt;F&gt;&#125;</span><span class="subst">$&#123;R&#125;</span>`</span></span><br><span class="line">  : T</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">KebabCase</span>&lt;S <span class="keyword">extends</span> <span class="built_in">string</span>&gt; = S <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer F&#125;</span><span class="subst">$&#123;infer R&#125;</span>`</span></span><br><span class="line">  ? R <span class="keyword">extends</span> <span class="title class_">FirstLowcase</span>&lt;R&gt;</span><br><span class="line">      ? <span class="string">`<span class="subst">$&#123;FirstLowcase&lt;F&gt;&#125;</span><span class="subst">$&#123;KebabCase&lt;R&gt;&#125;</span>`</span></span><br><span class="line">      : <span class="string">`<span class="subst">$&#123;FirstLowcase&lt;F&gt;&#125;</span>-<span class="subst">$&#123;KebabCase&lt;FirstLowcase&lt;R&gt;&gt;&#125;</span>`</span></span><br><span class="line">  : S</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">KebabMap</span> = &#123;</span><br><span class="line">  <span class="attr">A</span>: <span class="string">&quot;a&quot;</span></span><br><span class="line">  <span class="attr">B</span>: <span class="string">&quot;b&quot;</span></span><br><span class="line">  <span class="attr">C</span>: <span class="string">&quot;c&quot;</span></span><br><span class="line">  <span class="attr">D</span>: <span class="string">&quot;d&quot;</span></span><br><span class="line">  <span class="attr">E</span>: <span class="string">&quot;e&quot;</span></span><br><span class="line">  <span class="attr">F</span>: <span class="string">&quot;f&quot;</span></span><br><span class="line">  <span class="attr">G</span>: <span class="string">&quot;g&quot;</span></span><br><span class="line">  <span class="attr">H</span>: <span class="string">&quot;h&quot;</span></span><br><span class="line">  <span class="attr">I</span>: <span class="string">&quot;i&quot;</span></span><br><span class="line">  <span class="attr">J</span>: <span class="string">&quot;j&quot;</span></span><br><span class="line">  <span class="attr">K</span>: <span class="string">&quot;k&quot;</span></span><br><span class="line">  <span class="attr">L</span>: <span class="string">&quot;l&quot;</span></span><br><span class="line">  <span class="attr">M</span>: <span class="string">&quot;m&quot;</span></span><br><span class="line">  <span class="attr">N</span>: <span class="string">&quot;n&quot;</span></span><br><span class="line">  <span class="attr">O</span>: <span class="string">&quot;o&quot;</span></span><br><span class="line">  <span class="attr">P</span>: <span class="string">&quot;p&quot;</span></span><br><span class="line">  <span class="attr">Q</span>: <span class="string">&quot;q&quot;</span></span><br><span class="line">  <span class="attr">R</span>: <span class="string">&quot;r&quot;</span></span><br><span class="line">  <span class="attr">S</span>: <span class="string">&quot;s&quot;</span></span><br><span class="line">  <span class="attr">T</span>: <span class="string">&quot;t&quot;</span></span><br><span class="line">  <span class="attr">U</span>: <span class="string">&quot;u&quot;</span></span><br><span class="line">  <span class="attr">V</span>: <span class="string">&quot;v&quot;</span></span><br><span class="line">  <span class="attr">W</span>: <span class="string">&quot;w&quot;</span></span><br><span class="line">  <span class="attr">X</span>: <span class="string">&quot;x&quot;</span></span><br><span class="line">  <span class="attr">Y</span>: <span class="string">&quot;y&quot;</span></span><br><span class="line">  <span class="attr">Z</span>: <span class="string">&quot;z&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">KebabCase</span>&lt;</span><br><span class="line">  S <span class="keyword">extends</span> <span class="built_in">string</span>,</span><br><span class="line">  U <span class="keyword">extends</span> <span class="built_in">string</span> = <span class="string">&quot;&quot;</span></span><br><span class="line">&gt; = S <span class="keyword">extends</span> <span class="string">`<span class="subst">$&#123;infer Target&#125;</span><span class="subst">$&#123;infer R&#125;</span>`</span></span><br><span class="line">  ? <span class="title class_">Target</span> <span class="keyword">extends</span> keyof <span class="title class_">KebabMap</span></span><br><span class="line">    ? U <span class="keyword">extends</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      ? <span class="title class_">KebabCase</span>&lt;R, <span class="string">`<span class="subst">$&#123;U&#125;</span><span class="subst">$&#123;KebabMap[Target]&#125;</span>`</span>&gt;</span><br><span class="line">      : <span class="title class_">KebabCase</span>&lt;R, <span class="string">`<span class="subst">$&#123;U&#125;</span>-<span class="subst">$&#123;KebabMap[Target]&#125;</span>`</span>&gt;</span><br><span class="line">    : <span class="title class_">KebabCase</span>&lt;R, <span class="string">`<span class="subst">$&#123;U&#125;</span><span class="subst">$&#123;Target&#125;</span>`</span>&gt;</span><br><span class="line">  : U</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="645-Diff"><a href="#645-Diff" class="headerlink" title="645 - Diff"></a>645 - Diff</h4><blockquote>
+<p>获取两个接口类型中的差值属性。<a target="_blank" rel="noopener" href="https://tsch.js.org/645/zh-CN">在 Github 上查看</a>，例如：</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Foo</span> = &#123;</span><br><span class="line">  <span class="attr">a</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">b</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Bar</span> = &#123;</span><br><span class="line">  <span class="attr">a</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">c</span>: <span class="built_in">boolean</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result1</span> = <span class="title class_">Diff</span>&lt;<span class="title class_">Foo</span>,<span class="title class_">Bar</span>&gt; <span class="comment">// &#123; b: number, c: boolean &#125;</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Result2</span> = <span class="title class_">Diff</span>&lt;<span class="title class_">Bar</span>,<span class="title class_">Foo</span>&gt; <span class="comment">// &#123; b: number, c: boolean &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>第一种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Diff</span>&lt;O <span class="keyword">extends</span> <span class="built_in">object</span>, <span class="variable constant_">O1</span> <span class="keyword">extends</span> <span class="built_in">object</span>&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> (keyof <span class="title class_">Omit</span>&lt;O &amp; <span class="variable constant_">O1</span>, keyof (O | <span class="variable constant_">O1</span>)&gt;)]:</span><br><span class="line">    K <span class="keyword">extends</span> keyof O ? O[K] : K <span class="keyword">extends</span> keyof <span class="variable constant_">O1</span> ? <span class="variable constant_">O1</span>[K]:neve</span><br></pre></td></tr></table></figure>
+
+<p>第二种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Diff</span>&lt;O <span class="keyword">extends</span> <span class="built_in">object</span>, <span class="variable constant_">O1</span> <span class="keyword">extends</span> <span class="built_in">object</span>&gt; = &#123;</span><br><span class="line">  [K <span class="keyword">in</span> keyof <span class="title class_">Omit</span>&lt;<span class="variable constant_">O1</span>, keyof O&gt; | keyof <span class="title class_">Omit</span>&lt;O, keyof <span class="variable constant_">O1</span>&gt;]:</span><br><span class="line">    K <span class="keyword">extends</span> keyof O ? O[K] : K <span class="keyword">extends</span> keyof <span class="variable constant_">O1</span> ? <span class="variable constant_">O1</span>[K]:<span class="built_in">never</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="949-AnyOf"><a href="#949-AnyOf" class="headerlink" title="949 AnyOf"></a>949 AnyOf</h4><blockquote>
+<p>在类型系统中实现类似于 Python 中 <code>any</code> 函数。类型接收一个数组，如果数组中任一个元素为真，则返回 <code>true</code>，否则返回 <code>fasle</code>。如果数组为空，返回 <code>false</code>。<a target="_blank" rel="noopener" href="https://tsch.js.org/949/zh-CN">在Github上查看</a>，例如：</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Sample1</span> = <span class="title class_">AnyOf</span>&lt;[<span class="number">1</span>, <span class="string">&#x27;&#x27;</span>, <span class="literal">false</span>, [], &#123;&#125;]&gt; <span class="comment">// expected to be true.</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">Sample2</span> = <span class="title class_">AnyOf</span>&lt;[<span class="number">0</span>, <span class="string">&#x27;&#x27;</span>, <span class="literal">false</span>, [], &#123;&#125;]&gt; <span class="comment">// expected to be false.</span></span><br></pre></td></tr></table></figure>
+
+<p>第一种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">FalsyVal</span>&lt;V&gt; = V <span class="keyword">extends</span> [] | <span class="title class_">Record</span>&lt;<span class="built_in">string</span>, <span class="built_in">never</span>&gt; | <span class="string">&#x27;&#x27;</span> | <span class="number">0</span> | <span class="literal">false</span> ? <span class="literal">false</span> : <span class="literal">true</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AnyOf</span>&lt;T <span class="keyword">extends</span> <span class="keyword">readonly</span> <span class="built_in">any</span>[]&gt; = <span class="literal">true</span> <span class="keyword">extends</span> <span class="title class_">FalsyVal</span>&lt;T[<span class="built_in">number</span>]&gt; ? <span class="literal">true</span> : <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>第二种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">FalsyVal</span> = [] | <span class="title class_">Record</span>&lt;<span class="built_in">string</span>, <span class="built_in">never</span>&gt; | <span class="string">&#x27;&#x27;</span> | <span class="number">0</span> | <span class="literal">false</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">AnyOf</span>&lt;T <span class="keyword">extends</span> <span class="keyword">readonly</span> <span class="built_in">any</span>[]&gt; = T <span class="keyword">extends</span> [infer <span class="title class_">Head</span>, ...infer <span class="title class_">Tail</span>] ? <span class="title class_">Head</span> <span class="keyword">extends</span> <span class="title class_">FalsyVal</span> ? <span class="title class_">AnyOf</span>&lt;<span class="title class_">Tail</span>&gt; : <span class="literal">true</span> : <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="1042-IsNever"><a href="#1042-IsNever" class="headerlink" title="1042 IsNever"></a>1042 IsNever</h4><blockquote>
+<p>Implement a type IsNever, which takes input type <code>T</code>. If the type of resolves to <code>never</code>, return <code>true</code>, otherwise <code>false</code>. <a target="_blank" rel="noopener" href="https://tsch.js.org/1042">在Github上查看</a>。For example:</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> A = <span class="title class_">IsNever</span>&lt;<span class="built_in">never</span>&gt;  <span class="comment">// expected to be true</span></span><br><span class="line"><span class="keyword">type</span> B = <span class="title class_">IsNever</span>&lt;<span class="literal">undefined</span>&gt; <span class="comment">// expected to be false</span></span><br><span class="line"><span class="keyword">type</span> C = <span class="title class_">IsNever</span>&lt;<span class="literal">null</span>&gt; <span class="comment">// expected to be false</span></span><br><span class="line"><span class="keyword">type</span> D = <span class="title class_">IsNever</span>&lt;[]&gt; <span class="comment">// expected to be false</span></span><br><span class="line"><span class="keyword">type</span> E = <span class="title class_">IsNever</span>&lt;<span class="built_in">number</span>&gt; <span class="comment">// expected to be false</span></span><br></pre></td></tr></table></figure>
+
+<p>第一种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// https://github.com/microsoft/TypeScript/issues/31751#issuecomment-498526919</span></span><br><span class="line"><span class="comment">// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">IsNever</span>&lt;T&gt; = [T] <span class="keyword">extends</span> [<span class="built_in">never</span>] ? <span class="literal">true</span> : <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>第二种：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">IsNever</span>&lt;T&gt; = &#123;[<span class="attr">key</span>: <span class="built_in">string</span>]: T&#125; <span class="keyword">extends</span> &#123;[<span class="attr">key</span>: <span class="built_in">string</span>]: <span class="built_in">never</span>&#125; ? <span class="literal">true</span> : <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#298-Length-of-String"><span class="toc-text">298 - Length of String</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#459-Flatten"><span class="toc-text">459 - Flatten</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#527-Append-to-object"><span class="toc-text">527 - Append to object</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#529-Absolute"><span class="toc-text">529 - Absolute</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#501-String-to-Union"><span class="toc-text">501 - String to Union</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#599-Merge"><span class="toc-text">599 - Merge</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#612-KebabCase"><span class="toc-text">612 - KebabCase</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#645-Diff"><span class="toc-text">645 - Diff</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#949-AnyOf"><span class="toc-text">949 AnyOf</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1042-IsNever"><span class="toc-text">1042 IsNever</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/05/30/typescript/type-challanges/">https://xiaozhouguo.github.io/blog/2022/05/30/typescript/type-challanges/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/05/25/vue3/simple-reactive/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          一窥 vue3 响应式系统
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/06/23/vue3/vue3-optimization-summary/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          Vue3.0的优化简述
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>构造AST的完整流程是怎样的？ -下篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/ast-two" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      构造AST的完整流程是怎样的？ -下篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-08-31T06:52:33.000Z" itemprop="datePublished">2022年08月31日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/08/31/vue3/ast-two/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>这一节课我们依然要<strong>解析 template 生成 AST 背后的实现原理</strong>，之前，我们知道了baseParse 主要就做三件事情：<strong>创建解析上下文</strong>，<strong>解析子节点</strong>，<strong>创建 AST 根节点</strong></p>
+<span id="more"></span>
+
+<p>我们讲到了解析子节点，主要有四种情况，分别是注释节点的解析、插值的解析、普通文本的解析，以及元素节点的解析，这节课我们就到了最后的元素节点。</p>
+<h3 id="解析子节点"><a href="#解析子节点" class="headerlink" title="解析子节点"></a>解析子节点</h3><h4 id="元素节点的解析"><a href="#元素节点的解析" class="headerlink" title="元素节点的解析"></a>元素节点的解析</h4><p>我们来看元素节点的解析过程，它会解析模板中的标签节点，举个例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">hello</span> <span class="attr">:msg</span>=<span class="string">&quot;msg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">hello</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>相对于前面三种类型的解析过程，元素节点的解析过程应该是最复杂的了，即当前代码 s 是以 &lt; 开头，并且后面跟着字母，说明它是一个标签的开头，则走到元素节点的解析处理逻辑，我们来看 <code>parseElement</code> 的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseElement</span>(<span class="params">context, ancestors</span>) &#123;</span><br><span class="line">  <span class="comment">// 是否在 pre 标签内</span></span><br><span class="line">  <span class="keyword">const</span> wasInPre = context.<span class="property">inPre</span></span><br><span class="line">  <span class="comment">// 是否在 v-pre 指令内</span></span><br><span class="line">  <span class="keyword">const</span> wasInVPre = context.<span class="property">inVPre</span></span><br><span class="line">  <span class="comment">// 获取当前元素的父标签节点</span></span><br><span class="line">  <span class="keyword">const</span> parent = <span class="title function_">last</span>(ancestors)</span><br><span class="line">  <span class="comment">// 解析开始标签，生成一个标签节点，并前进代码到开始标签后</span></span><br><span class="line">  <span class="keyword">const</span> element = <span class="title function_">parseTag</span>(context, <span class="number">0</span> <span class="comment">/* Start */</span>, parent)</span><br><span class="line">  <span class="comment">// 是否在 pre 标签的边界</span></span><br><span class="line">  <span class="keyword">const</span> isPreBoundary = context.<span class="property">inPre</span> &amp;&amp; !wasInPre</span><br><span class="line">  <span class="comment">// 是否在 v-pre 指令的边界</span></span><br><span class="line">  <span class="keyword">const</span> isVPreBoundary = context.<span class="property">inVPre</span> &amp;&amp; !wasInVPre</span><br><span class="line">  <span class="keyword">if</span> (element.<span class="property">isSelfClosing</span> || context.<span class="property">options</span>.<span class="title function_">isVoidTag</span>(element.<span class="property">tag</span>)) &#123;</span><br><span class="line">    <span class="comment">// 如果是自闭和标签，直接返回标签节点</span></span><br><span class="line">    <span class="keyword">return</span> element</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 下面是处理子节点的逻辑</span></span><br><span class="line">  <span class="comment">// 先把标签节点添加到 ancestors，入栈</span></span><br><span class="line">  ancestors.<span class="title function_">push</span>(element)</span><br><span class="line">  <span class="keyword">const</span> mode = context.<span class="property">options</span>.<span class="title function_">getTextMode</span>(element, parent)</span><br><span class="line">  <span class="comment">// 递归解析子节点，传入 ancestors</span></span><br><span class="line">  <span class="keyword">const</span> children = <span class="title function_">parseChildren</span>(context, mode, ancestors)</span><br><span class="line">  <span class="comment">// ancestors 出栈</span></span><br><span class="line">  ancestors.<span class="title function_">pop</span>()</span><br><span class="line">  <span class="comment">// 添加到 children 属性中</span></span><br><span class="line">  element.<span class="property">children</span> = children</span><br><span class="line">  <span class="comment">// 结束标签</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">startsWithEndTagOpen</span>(context.<span class="property">source</span>, element.<span class="property">tag</span>)) &#123;</span><br><span class="line">    <span class="comment">// 解析结束标签，并前进代码到结束标签后</span></span><br><span class="line">    <span class="title function_">parseTag</span>(context, <span class="number">1</span> <span class="comment">/* End */</span>, parent)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">emitError</span>(context, <span class="number">24</span> <span class="comment">/* X_MISSING_END_TAG */</span>, <span class="number">0</span>, element.<span class="property">loc</span>.<span class="property">start</span>);</span><br><span class="line">    <span class="keyword">if</span> (context.<span class="property">source</span>.<span class="property">length</span> === <span class="number">0</span> &amp;&amp; element.<span class="property">tag</span>.<span class="title function_">toLowerCase</span>() === <span class="string">&#x27;script&#x27;</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> first = children[<span class="number">0</span>];</span><br><span class="line">      <span class="keyword">if</span> (first &amp;&amp; <span class="title function_">startsWith</span>(first.<span class="property">loc</span>.<span class="property">source</span>, <span class="string">&#x27;&lt;!--&#x27;</span>)) &#123;</span><br><span class="line">        <span class="title function_">emitError</span>(context, <span class="number">8</span> <span class="comment">/* EOF_IN_SCRIPT_HTML_COMMENT_LIKE_TEXT */</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 更新标签节点的代码位置，结束位置到结束标签后</span></span><br><span class="line">  element.<span class="property">loc</span> = <span class="title function_">getSelection</span>(context, element.<span class="property">loc</span>.<span class="property">start</span>)</span><br><span class="line">  <span class="keyword">if</span> (isPreBoundary) &#123;</span><br><span class="line">    context.<span class="property">inPre</span> = <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (isVPreBoundary) &#123;</span><br><span class="line">    context.<span class="property">inVPre</span> = <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> element</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这个过程中 parseElement 主要做了三件事情：解析开始标签，解析子节点，解析闭合标签。</p>
+<p>首先，我们来看解析开始标签的过程。主要通过 <code>parseTag</code> 方法来解析并创建一个标签节点，来看它的实现原理：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseTag</span>(<span class="params">context, type, parent</span>) &#123;</span><br><span class="line">  <span class="comment">// 标签打开</span></span><br><span class="line">  <span class="keyword">const</span> start = <span class="title function_">getCursor</span>(context)</span><br><span class="line">  <span class="comment">// 匹配标签文本结束的位置</span></span><br><span class="line">  <span class="keyword">const</span> match = <span class="regexp">/^&lt;\/?([a-z][^\t\r\n\f /&gt;]*)/i</span>.<span class="title function_">exec</span>(context.<span class="property">source</span>);</span><br><span class="line">  <span class="keyword">const</span> tag = match[<span class="number">1</span>];</span><br><span class="line">  <span class="keyword">const</span> ns = context.<span class="property">options</span>.<span class="title function_">getNamespace</span>(tag, parent);</span><br><span class="line">  <span class="comment">// 前进代码到标签文本结束位置</span></span><br><span class="line">  <span class="title function_">advanceBy</span>(context, match[<span class="number">0</span>].<span class="property">length</span>);</span><br><span class="line">  <span class="comment">// 前进代码到标签文本后面的空白字符后</span></span><br><span class="line">  <span class="title function_">advanceSpaces</span>(context);</span><br><span class="line">  <span class="comment">// 保存当前状态以防我们需要用 v-pre 重新解析属性</span></span><br><span class="line">  <span class="keyword">const</span> cursor = <span class="title function_">getCursor</span>(context);</span><br><span class="line">  <span class="keyword">const</span> currentSource = context.<span class="property">source</span>;</span><br><span class="line">  <span class="comment">// 解析标签中的属性，并前进代码到属性后</span></span><br><span class="line">  <span class="keyword">let</span> props = <span class="title function_">parseAttributes</span>(context, type);</span><br><span class="line">  <span class="comment">// 检查是不是一个 pre 标签</span></span><br><span class="line">  <span class="keyword">if</span> (context.<span class="property">options</span>.<span class="title function_">isPreTag</span>(tag)) &#123;</span><br><span class="line">    context.<span class="property">inPre</span> = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 检查属性中有没有 v-pre 指令</span></span><br><span class="line">  <span class="keyword">if</span> (!context.<span class="property">inVPre</span> &amp;&amp;</span><br><span class="line">    props.<span class="title function_">some</span>(<span class="function"><span class="params">p</span> =&gt;</span> p.<span class="property">type</span> === <span class="number">7</span> <span class="comment">/* DIRECTIVE */</span> &amp;&amp; p.<span class="property">name</span> === <span class="string">&#x27;pre&#x27;</span>)) &#123;</span><br><span class="line">    context.<span class="property">inVPre</span> = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">// 重置 context</span></span><br><span class="line">    <span class="title function_">extend</span>(context, cursor);</span><br><span class="line">    context.<span class="property">source</span> = currentSource;</span><br><span class="line">    <span class="comment">// 重新解析属性，并把 v-pre 过滤了</span></span><br><span class="line">    props = <span class="title function_">parseAttributes</span>(context, type).<span class="title function_">filter</span>(<span class="function"><span class="params">p</span> =&gt;</span> p.<span class="property">name</span> !== <span class="string">&#x27;v-pre&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 标签闭合</span></span><br><span class="line">  <span class="keyword">let</span> isSelfClosing = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">if</span> (context.<span class="property">source</span>.<span class="property">length</span> === <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="title function_">emitError</span>(context, <span class="number">9</span> <span class="comment">/* EOF_IN_TAG */</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 判断是否自闭合标签</span></span><br><span class="line">    isSelfClosing = <span class="title function_">startsWith</span>(context.<span class="property">source</span>, <span class="string">&#x27;/&gt;&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (type === <span class="number">1</span> <span class="comment">/* End */</span> &amp;&amp; isSelfClosing) &#123;</span><br><span class="line">      <span class="comment">// 结束标签不应该是自闭和标签</span></span><br><span class="line">      <span class="title function_">emitError</span>(context, <span class="number">4</span> <span class="comment">/* END_TAG_WITH_TRAILING_SOLIDUS */</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 前进代码到闭合标签后</span></span><br><span class="line">    <span class="title function_">advanceBy</span>(context, isSelfClosing ? <span class="number">2</span> : <span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> tagType = <span class="number">0</span> <span class="comment">/* ELEMENT */</span>;</span><br><span class="line">  <span class="keyword">const</span> options = context.<span class="property">options</span>;</span><br><span class="line">  <span class="comment">// 接下来判断标签类型，是组件、插槽还是模板</span></span><br><span class="line">  <span class="keyword">if</span> (!context.<span class="property">inVPre</span> &amp;&amp; !options.<span class="title function_">isCustomElement</span>(tag)) &#123;</span><br><span class="line">    <span class="comment">// 判断是否有 is 属性</span></span><br><span class="line">    <span class="keyword">const</span> hasVIs = props.<span class="title function_">some</span>(<span class="function"><span class="params">p</span> =&gt;</span> p.<span class="property">type</span> === <span class="number">7</span> <span class="comment">/* DIRECTIVE */</span> &amp;&amp; p.<span class="property">name</span> === <span class="string">&#x27;is&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (options.<span class="property">isNativeTag</span> &amp;&amp; !hasVIs) &#123;</span><br><span class="line">      <span class="keyword">if</span> (!options.<span class="title function_">isNativeTag</span>(tag))</span><br><span class="line">        tagType = <span class="number">1</span> <span class="comment">/* COMPONENT */</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (hasVIs ||</span><br><span class="line">      <span class="title function_">isCoreComponent</span>(tag) ||</span><br><span class="line">      (options.<span class="property">isBuiltInComponent</span> &amp;&amp; options.<span class="title function_">isBuiltInComponent</span>(tag)) ||</span><br><span class="line">      <span class="regexp">/^[A-Z]/</span>.<span class="title function_">test</span>(tag) ||</span><br><span class="line">      tag === <span class="string">&#x27;component&#x27;</span>) &#123;</span><br><span class="line">      tagType = <span class="number">1</span> <span class="comment">/* COMPONENT */</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (tag === <span class="string">&#x27;slot&#x27;</span>) &#123;</span><br><span class="line">      tagType = <span class="number">2</span> <span class="comment">/* SLOT */</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (tag === <span class="string">&#x27;template&#x27;</span> &amp;&amp;</span><br><span class="line">      props.<span class="title function_">some</span>(<span class="function"><span class="params">p</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (p.<span class="property">type</span> === <span class="number">7</span> <span class="comment">/* DIRECTIVE */</span> &amp;&amp; <span class="title function_">isSpecialTemplateDirective</span>(p.<span class="property">name</span>));</span><br><span class="line">      &#125;)) &#123;</span><br><span class="line">      tagType = <span class="number">3</span> <span class="comment">/* TEMPLATE */</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="number">1</span> <span class="comment">/* ELEMENT */</span>,</span><br><span class="line">    ns,</span><br><span class="line">    tag,</span><br><span class="line">    tagType,</span><br><span class="line">    props,</span><br><span class="line">    isSelfClosing,</span><br><span class="line">    <span class="attr">children</span>: [],</span><br><span class="line">    <span class="attr">loc</span>: <span class="title function_">getSelection</span>(context, start),</span><br><span class="line">    <span class="attr">codegenNode</span>: <span class="literal">undefined</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parseTag 首先匹配标签文本结束的位置，并前进代码到标签文本后面的空白字符后，然后解析标签中的属性，比如 class、style 和指令等，parseAttributes 函数的实现我就不多说了，感兴趣的同学可以自己去看，它最终会解析生成一个 props 的数组，并前进代码到属性后。</p>
+<p>接着去检查是不是一个 pre 标签，如果是则设置 context.inPre 为 true；再去检查属性中有没有 v-pre 指令，如果有则设置 context.inVPre 为 true，并重置上下文 context 和重新解析属性；接下来再去判断是不是一个自闭和标签，并前进代码到闭合标签后；最后判断标签类型，是组件、插槽还是模板。</p>
+<p>parseTag 最终返回的值就是一个描述标签节点的对象，其中 type 表示它是一个标签节点，tag 表示标签名称，tagType 表示标签的类型，content 表示文本的内容，isSelfClosing 表示是否是一个闭合标签，loc 表示文本的代码开头和结束的位置信息，children 是标签的子节点数组，会先初始化为空。</p>
+<p>解析完开始标签后，再回到 parseElement，接下来第二步就是解析子节点，它把解析好的 element 节点添加到 ancestors 数组中，然后执行 parseChildren 去解析子节点，并传入 ancestors。</p>
+<p>如果有嵌套的标签，那么就会递归执行 parseElement，可以看到，在 parseElement 的一开始，我们能获取 ancestors 数组的最后一个值拿到父元素的标签节点，这个就是我们在执行 parseChildren 前添加到数组尾部的。</p>
+<p>解析完子节点后，我们再把 element 从 ancestors 中弹出，然后把 children 数组添加到 element.children 中，同时也把代码前进到子节点的末尾。</p>
+<p>最后，就是解析结束标签，并前进代码到结束标签后，然后更新标签节点的代码位置。parseElement 最终返回的值就是这样一个标签节点 element。</p>
+<p>其实 HTML 的嵌套结构的解析过程，就是一个递归解析元素节点的过程，为了维护父子关系，当需要解析子节点时，我们就把当前节点入栈，子节点解析完毕后，我们就把当前节点出栈，因此 ancestors 的设计就是一个栈的数据结构，整个过程是一个不断入栈和出栈的过程。</p>
+<p>通过不断地递归解析，我们就可以完整地解析整个模板，并且标签类型的 AST 节点会保持对子节点数组的引用，这样就构成了一个树形的数据结构，所以整个解析过程构造出的 AST 节点数组就能很好地映射整个模板的 DOM 结构。</p>
+<h4 id="空白字符管理"><a href="#空白字符管理" class="headerlink" title="空白字符管理"></a>空白字符管理</h4><p>在前面的解析过程中，有些时候我们会遇到空白字符的情况，比如前面的例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">hello</span> <span class="attr">:msg</span>=<span class="string">&quot;msg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">hello</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>div 标签到下一行会有一个换行符，hello 标签前面也有空白字符，这些空白字符在解析的过程中会被当作文本节点解析处理。但这些空白节点显然是没有什么意义的，所以我们需要移除这些节点，减少后续对这些没用意义的节点的处理，以提高编译效率。</p>
+<p>我们先来看一下空白字符管理相关逻辑代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseChildren</span>(<span class="params">context, mode, ancestors</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> parent = <span class="title function_">last</span>(ancestors)</span><br><span class="line">  <span class="keyword">const</span> ns = parent ? parent.<span class="property">ns</span> : <span class="number">0</span> <span class="comment">/* HTML */</span></span><br><span class="line">  <span class="keyword">const</span> nodes = []</span><br><span class="line">  <span class="comment">// 自顶向下分析代码，生成 nodes</span></span><br><span class="line">  <span class="keyword">let</span> removedWhitespace = <span class="literal">false</span></span><br><span class="line">  <span class="keyword">if</span> (mode !== <span class="number">2</span> <span class="comment">/* RAWTEXT */</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!context.<span class="property">inPre</span>) &#123;</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; nodes.<span class="property">length</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">const</span> node = nodes[i]</span><br><span class="line">        <span class="keyword">if</span> (node.<span class="property">type</span> === <span class="number">2</span> <span class="comment">/* TEXT */</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (!<span class="regexp">/[^\t\r\n\f ]/</span>.<span class="title function_">test</span>(node.<span class="property">content</span>)) &#123;</span><br><span class="line">            <span class="comment">// 匹配空白字符</span></span><br><span class="line">            <span class="keyword">const</span> prev = nodes[i - <span class="number">1</span>]</span><br><span class="line">            <span class="keyword">const</span> next = nodes[i + <span class="number">1</span>]</span><br><span class="line">            <span class="comment">// 如果空白字符是开头或者结尾节点</span></span><br><span class="line">            <span class="comment">// 或者空白字符与注释节点相连</span></span><br><span class="line">            <span class="comment">// 或者空白字符在两个元素之间并包含换行符</span></span><br><span class="line">            <span class="comment">// 那么这些空白字符节点都应该被移除</span></span><br><span class="line">            <span class="keyword">if</span> (!prev ||</span><br><span class="line">              !next ||</span><br><span class="line">              prev.<span class="property">type</span> === <span class="number">3</span> <span class="comment">/* COMMENT */</span> ||</span><br><span class="line">              next.<span class="property">type</span> === <span class="number">3</span> <span class="comment">/* COMMENT */</span> ||</span><br><span class="line">              (prev.<span class="property">type</span> === <span class="number">1</span> <span class="comment">/* ELEMENT */</span> &amp;&amp;</span><br><span class="line">                next.<span class="property">type</span> === <span class="number">1</span> <span class="comment">/* ELEMENT */</span> &amp;&amp;</span><br><span class="line">                <span class="regexp">/[\r\n]/</span>.<span class="title function_">test</span>(node.<span class="property">content</span>))) &#123;</span><br><span class="line">              removedWhitespace = <span class="literal">true</span></span><br><span class="line">              nodes[i] = <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="comment">// 否则压缩这些空白字符到一个空格</span></span><br><span class="line">              node.<span class="property">content</span> = <span class="string">&#x27; &#x27;</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 替换内容中的空白空间到一个空格</span></span><br><span class="line">            node.<span class="property">content</span> = node.<span class="property">content</span>.<span class="title function_">replace</span>(<span class="regexp">/[\t\r\n\f ]+/g</span>, <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!(process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>) &amp;&amp; node.<span class="property">type</span> === <span class="number">3</span> <span class="comment">/* COMMENT */</span>) &#123;</span><br><span class="line">          <span class="comment">// 生产环境移除注释节点</span></span><br><span class="line">          removedWhitespace = <span class="literal">true</span></span><br><span class="line">          nodes[i] = <span class="literal">null</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (parent &amp;&amp; context.<span class="property">options</span>.<span class="title function_">isPreTag</span>(parent.<span class="property">tag</span>)) &#123;</span><br><span class="line">      <span class="comment">// 根据 HTML 规范删除前导换行符</span></span><br><span class="line">      <span class="keyword">const</span> first = nodes[<span class="number">0</span>]</span><br><span class="line">      <span class="keyword">if</span> (first &amp;&amp; first.<span class="property">type</span> === <span class="number">2</span> <span class="comment">/* TEXT */</span>) &#123;</span><br><span class="line">        first.<span class="property">content</span> = first.<span class="property">content</span>.<span class="title function_">replace</span>(<span class="regexp">/^\r?\n/</span>, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 过滤空白字符节点</span></span><br><span class="line">  <span class="keyword">return</span> removedWhitespace ? nodes.<span class="title function_">filter</span>(<span class="title class_">Boolean</span>) : nodes</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-AST-根节点"><a href="#创建-AST-根节点" class="headerlink" title="创建 AST 根节点"></a>创建 AST 根节点</h3><p>子节点解析完毕，baseParse 过程就剩最后一步创建 AST 根节点了，我们来看一下<code> createRoot</code> 的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">createRoot</span>(<span class="params">children, loc = locStub</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="number">0</span> <span class="comment">/* ROOT */</span>,</span><br><span class="line">    children,</span><br><span class="line">    <span class="attr">helpers</span>: [],</span><br><span class="line">    <span class="attr">components</span>: [],</span><br><span class="line">    <span class="attr">directives</span>: [],</span><br><span class="line">    <span class="attr">hoists</span>: [],</span><br><span class="line">    <span class="attr">imports</span>: [],</span><br><span class="line">    <span class="attr">cached</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">temps</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">codegenNode</span>: <span class="literal">undefined</span>,</span><br><span class="line">    loc</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>createRoot 的实现非常简单，它就是返回一个 JavaScript 对象，作为 AST 根节点。其中 type 表示它是一个根节点类型，children 是我们前面解析的子节点数组。除此之外，这个根节点还添加了其它的属性，当前我们并不需要搞清楚每一个属性代表的含义，这些属性我们在分析后续的处理流程中会介绍。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>好的，到这里我们这一节的学习也要结束啦，通过这节课的学习，你应该掌握 Vue.js 编译过程的第一步，即<strong>把 template 解析生成 AST 对象</strong>，整个解析过程是一个自顶向下的分析过程，也就是从代码开始，通过语法分析，找到对应的解析处理逻辑，创建 AST 节点，处理的过程中也在不断前进代码，更新解析上下文，最终根据生成的 AST 节点数组创建 AST 根节点。</p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;compiler-core&#x2F;src&#x2F;parse.ts<br>packages&#x2F;compiler-core&#x2F;src&#x2F;ast.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90%E5%AD%90%E8%8A%82%E7%82%B9"><span class="toc-text">解析子节点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%83%E7%B4%A0%E8%8A%82%E7%82%B9%E7%9A%84%E8%A7%A3%E6%9E%90"><span class="toc-text">元素节点的解析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A9%BA%E7%99%BD%E5%AD%97%E7%AC%A6%E7%AE%A1%E7%90%86"><span class="toc-text">空白字符管理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-AST-%E6%A0%B9%E8%8A%82%E7%82%B9"><span class="toc-text">创建 AST 根节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/08/31/vue3/ast-two/">https://xiaozhouguo.github.io/blog/2022/08/31/vue3/ast-two/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/08/03/vue3/ast-transform-one/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          AST 节点内部做了哪些转换？- 上篇
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>

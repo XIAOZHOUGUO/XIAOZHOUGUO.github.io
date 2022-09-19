@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>生命周期：各个生命周期的执行时机和应用场景是怎么样的？ | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/blog/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/blog/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/blog/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/life-cycle" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      生命周期：各个生命周期的执行时机和应用场景是怎么样的？
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-07-07T08:44:51.000Z" itemprop="datePublished">2022年07月07日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/blog/2022/07/07/vue3/life-cycle/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Vue.js 组件的生命周期包括创建、更新、销毁等过程。在这些过程中也会运行叫生命周期钩子的函数，这给了用户在不同阶段添加自己的代码的机会。</p>
+<span id="more"></span>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在 Vue.js 2.x 中，我们通常会在组件对象中定义一些生命周期钩子函数，到了 Vue.js 3.0，依然兼容 Vue.js 2.x 生命周期的语法，但是 Composition API 提供了一些生命周期函数的 API，让我们可以主动注册不同的生命周期。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Vue.js 2.x 定义生命周期钩子函数 </span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123; </span><br><span class="line">  <span class="title function_">created</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="comment">// 做一些初始化工作 </span></span><br><span class="line">  &#125;, </span><br><span class="line">  <span class="title function_">mounted</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="comment">// 可以拿到 DOM 节点 </span></span><br><span class="line">  &#125;, </span><br><span class="line">  <span class="title function_">beforeDestroy</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="comment">// 做一些清理操作 </span></span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  Vue.js 3.x 生命周期 API 改写上例 </span></span><br><span class="line"><span class="keyword">import</span> &#123; onMounted, onBeforeUnmount &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123; </span><br><span class="line">  <span class="title function_">setup</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="comment">// 做一些初始化工作 </span></span><br><span class="line"></span><br><span class="line">    <span class="title function_">onMounted</span>(<span class="function">() =&gt;</span> &#123; </span><br><span class="line">      <span class="comment">// 可以拿到 DOM 节点 </span></span><br><span class="line">    &#125;) </span><br><span class="line">    <span class="title function_">onBeforeUnmount</span>(<span class="function">()=&gt;</span>&#123; </span><br><span class="line">      <span class="comment">// 做一些清理操作 </span></span><br><span class="line">    &#125;) </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，在 Vue.js 3.0 中，setup 函数已经替代了 Vue.js 2.x 的 <code>beforeCreate</code> 和 <code>created</code> 钩子函数，我们可以在 setup 函数做一些初始化工作，比如发送一个异步 Ajax 请求获取数据。</p>
+<p>我们用 onMounted API 替代了 Vue.js 2.x 的 mounted 钩子函数，用 onBeforeUnmount API 替代了 Vue.js 2.x 的 beforeDestroy 钩子函数。</p>
+<p>其实，Vue.js 3.0 针对 Vue.js 2.x 的生命周期钩子函数做了全面替换，映射关系如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">beforeCreate -&gt; 使用 <span class="title function_">setup</span>() </span><br><span class="line">created -&gt; 使用 use <span class="title function_">setup</span>() </span><br><span class="line">beforeMount -&gt; onBeforeMount </span><br><span class="line">mounted -&gt; onMounted </span><br><span class="line">beforeUpdate -&gt; onBeforeUpdate </span><br><span class="line">updated -&gt; onUpdated </span><br><span class="line">beforeDestroy-&gt; onBeforeUnmount </span><br><span class="line">destroyed -&gt; onUnmounted </span><br><span class="line">activated -&gt; onActivated </span><br><span class="line">deactivated -&gt; onDeactivated </span><br><span class="line">errorCaptured -&gt; onErrorCaptured</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，Vue.js 3.0 还新增了两个用于调试的生命周期 API：onRenderTracked 和 onRenderTriggered。</p>
+<p>那么，这些生命周期钩子函数内部是如何实现的？它们又分别在组件生命周期的哪些阶段执行的？分别适用于哪些开发场景？</p>
+<p>带着这些疑问，我们来深入学习生命周期钩子函数背后的实现原理。</p>
+<h3 id="注册钩子函数"><a href="#注册钩子函数" class="headerlink" title="注册钩子函数"></a>注册钩子函数</h3><p>首先，我们来看这些钩子函数是如何注册的，先来看一下它们的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> onBeforeMount = <span class="title function_">createHook</span>(<span class="string">&#x27;bm&#x27;</span> <span class="comment">/* BEFORE_MOUNT */</span>) </span><br><span class="line"><span class="keyword">const</span> onMounted = <span class="title function_">createHook</span>(<span class="string">&#x27;m&#x27;</span> <span class="comment">/* MOUNTED */</span>) </span><br><span class="line"><span class="keyword">const</span> onBeforeUpdate = <span class="title function_">createHook</span>(<span class="string">&#x27;bu&#x27;</span> <span class="comment">/* BEFORE_UPDATE */</span>) </span><br><span class="line"><span class="keyword">const</span> onUpdated = <span class="title function_">createHook</span>(<span class="string">&#x27;u&#x27;</span> <span class="comment">/* UPDATED */</span>) </span><br><span class="line"><span class="keyword">const</span> onBeforeUnmount = <span class="title function_">createHook</span>(<span class="string">&#x27;bum&#x27;</span> <span class="comment">/* BEFORE_UNMOUNT */</span>) </span><br><span class="line"><span class="keyword">const</span> onUnmounted = <span class="title function_">createHook</span>(<span class="string">&#x27;um&#x27;</span> <span class="comment">/* UNMOUNTED */</span>) </span><br><span class="line"><span class="keyword">const</span> onRenderTriggered = <span class="title function_">createHook</span>(<span class="string">&#x27;rtg&#x27;</span> <span class="comment">/* RENDER_TRIGGERED */</span>) </span><br><span class="line"><span class="keyword">const</span> onRenderTracked = <span class="title function_">createHook</span>(<span class="string">&#x27;rtc&#x27;</span> <span class="comment">/* RENDER_TRACKED */</span>) </span><br><span class="line"><span class="keyword">const</span> <span class="title function_">onErrorCaptured</span> = (<span class="params">hook, target = currentInstance</span>) =&gt; &#123; </span><br><span class="line">  <span class="title function_">injectHook</span>(<span class="string">&#x27;ec&#x27;</span> <span class="comment">/* ERROR_CAPTURED */</span>, hook, target) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们发现除了 onErrorCaptured，其他钩子函数都是通过 <code>createHook</code> 函数创建的，通过传入不同的字符串来表示不同的钩子函数。</p>
+<p>那么，我们就来分析一下 createHook 钩子函数的实现原理：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> createHook = <span class="keyword">function</span>(<span class="params">lifecycle</span>)  &#123; </span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">function</span> (<span class="params">hook, target = currentInstance</span>) &#123; </span><br><span class="line">    <span class="title function_">injectHook</span>(lifecycle, hook, target) </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>createHook 会返回一个函数，它的内部通过 injectHook 注册钩子函数。你可能会问，这里为什么要用 createHook 做一层封装而不直接使用 injectHook API 呢？比如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> onBeforeMount = <span class="keyword">function</span>(<span class="params">hook,target = currentInstance</span>) &#123; </span><br><span class="line">  <span class="title function_">injectHook</span>(<span class="string">&#x27;bm&#x27;</span>, hook, target) </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">const</span> onMounted = <span class="keyword">function</span>(<span class="params">hook,target = currentInstance</span>) &#123; </span><br><span class="line">  <span class="title function_">injectHook</span>(<span class="string">&#x27;m&#x27;</span>, hook, target) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样实现当然也是可以的，不过，我们可以发现，这些钩子函数内部执行逻辑很类似，都是执行 injectHook，唯一的区别是第一个参数字符串不同，所以这样的代码是可以进一步封装的，即用 createHook 封装，这就是一个典型的函数柯里化技巧。</p>
+<p>在调用 createHook 返回的函数时，也就不需要传入 lifecycle 字符串，因为它在执行 createHook 函数时就已经实现了该参数的保留。</p>
+<p>所以，当我们通过 <code>onMounted(hook)</code> 注册一个钩子函数时，内部就是通过 <code>injectHook(&#39;m&#39;, hook)</code> 去注册的，接下来我们来进一步看 injectHook 函数的实现原理：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">injectHook</span>(<span class="params">type, hook, target = currentInstance, prepend = <span class="literal">false</span></span>) &#123; </span><br><span class="line">  <span class="keyword">const</span> hooks = target[type] || (target[type] = []) </span><br><span class="line">  <span class="comment">// 封装 hook 钩子函数并缓存 </span></span><br><span class="line">  <span class="keyword">const</span> wrappedHook = hook.<span class="property">__weh</span> || </span><br><span class="line">    (hook.<span class="property">__weh</span> = <span class="function">(<span class="params">...args</span>) =&gt;</span> &#123; </span><br><span class="line">      <span class="keyword">if</span> (target.<span class="property">isUnmounted</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span> </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="comment">// 停止依赖收集 </span></span><br><span class="line">      <span class="title function_">pauseTracking</span>() </span><br><span class="line">      <span class="comment">// 设置 target 为当前运行的组件实例 </span></span><br><span class="line">      <span class="title function_">setCurrentInstance</span>(target) </span><br><span class="line">      <span class="comment">// 执行钩子函数 </span></span><br><span class="line">      <span class="keyword">const</span> res = <span class="title function_">callWithAsyncErrorHandling</span>(hook, target, type, args) </span><br><span class="line">      <span class="title function_">setCurrentInstance</span>(<span class="literal">null</span>) </span><br><span class="line">      <span class="comment">// 恢复依赖收集 </span></span><br><span class="line">      <span class="title function_">resetTracking</span>() </span><br><span class="line">      <span class="keyword">return</span> res </span><br><span class="line">    &#125;) </span><br><span class="line">  <span class="keyword">if</span> (prepend) &#123; </span><br><span class="line">    hooks.<span class="title function_">unshift</span>(wrappedHook) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="keyword">else</span> &#123; </span><br><span class="line">    hooks.<span class="title function_">push</span>(wrappedHook) </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结合代码来看，该函数主要是对用户注册的钩子函数 hook 做了一层封装，然后添加到一个数组中，把数组保存在当前组件实例的 target 上，这里，key 是用来区分钩子函数的字符串。比如， onMounted 注册的钩子函数在组件实例上就是通过 instance.m 来保存。</p>
+<p>这样的设计其实非常好理解，因为生命周期的钩子函数，是在组件生命周期的各个阶段执行，所以钩子函数必须要保存在当前的组件实例上，这样后面就可以在组件实例上通过不同的字符串 key 找到对应的钩子函数数组并执行。</p>
+<p>对于相同的钩子函数，会把封装的 wrappedHook 钩子函数缓存到 hook.__weh 中，这样后续通过 scheduler 方式执行的钩子函数就会被去重。</p>
+<p>在后续执行 wrappedHook 函数时，会先停止依赖收集，因为钩子函数内部访问的响应式对象，通常都已经执行过依赖收集，所以钩子函数执行的时候没有必要再次收集依赖，毕竟这个过程也有一定的性能消耗。</p>
+<p>接着是设置 target 为当前组件实例。在 Vue.js 的内部，会一直维护当前运行的组件实例 currentInstance，在注册钩子函数的过程中，我们可以拿到当前运行组件实例 currentInstance，并用 target 保存，然后在钩子函数执行时，为了确保此时的 currentInstance 和注册钩子函数时一致，会通过 <code>setCurrentInstance(target)</code> 设置 target 为当前组件实例。</p>
+<p>接下来就是通过 callWithAsyncErrorHandling 方法去执行我们注册的 hook 钩子函数，函数执行完毕则设置当前运行组件实例为 null，并恢复依赖收集。</p>
+<p>到这里，我们就了解了生命周期钩子函数是如何注册以及如何执行的，接下来，我们来依次分析各个钩子函数的执行时机和应用场景。</p>
+<p>首先，我们来看通过 onBeforeMount 和 onMounted 注册的钩子函数。</p>
+<h3 id="onBeforeMount-和-onMounted"><a href="#onBeforeMount-和-onMounted" class="headerlink" title="onBeforeMount 和 onMounted"></a>onBeforeMount 和 onMounted</h3><p><strong>onBeforeMount 注册的 beforeMount 钩子函数会在组件挂载之前执行</strong>，<strong>onMounted 注册的 mounted 钩子函数会在组件挂载之后执行</strong>。我们来回顾一下组件副作用渲染函数关于组件挂载部分的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">setupRenderEffect</span> = (<span class="params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; &#123; </span><br><span class="line">  <span class="comment">// 创建响应式的副作用渲染函数 </span></span><br><span class="line">  instance.<span class="property">update</span> = <span class="title function_">effect</span>(<span class="keyword">function</span> <span class="title function_">componentEffect</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="keyword">if</span> (!instance.<span class="property">isMounted</span>) &#123; </span><br><span class="line">      <span class="comment">// 获取组件实例上通过 onBeforeMount 钩子函数和 onMounted 注册的钩子函数 </span></span><br><span class="line">      <span class="keyword">const</span> &#123; bm, m &#125; = instance; </span><br><span class="line">      <span class="comment">// 渲染组件生成子树 vnode </span></span><br><span class="line">      <span class="keyword">const</span> subTree = (instance.<span class="property">subTree</span> = <span class="title function_">renderComponentRoot</span>(instance)) </span><br><span class="line">      <span class="comment">// 执行 beforemount 钩子函数 </span></span><br><span class="line">      <span class="keyword">if</span> (bm) &#123; </span><br><span class="line">        <span class="title function_">invokeArrayFns</span>(bm) </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="comment">// 把子树 vnode 挂载到 container 中 </span></span><br><span class="line">      <span class="title function_">patch</span>(<span class="literal">null</span>, subTree, container, anchor, instance, parentSuspense, isSVG) </span><br><span class="line">      <span class="comment">// 保留渲染生成的子树根 DOM 节点 </span></span><br><span class="line">      initialVNode.<span class="property">el</span> = subTree.<span class="property">el</span> </span><br><span class="line">      <span class="comment">// 执行 mounted 钩子函数 </span></span><br><span class="line">      <span class="keyword">if</span> (m) &#123; </span><br><span class="line">        <span class="title function_">queuePostRenderEffect</span>(m, parentSuspense) </span><br><span class="line">      &#125; </span><br><span class="line">      instance.<span class="property">isMounted</span> = <span class="literal">true</span> </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123; </span><br><span class="line">      <span class="comment">// 更新组件 </span></span><br><span class="line">    &#125; </span><br><span class="line">  &#125;, prodEffectOptions) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行 patch 挂载组件之前，会检测组件实例上是有否有注册的 beforeMount 钩子函数 bm，如果有则通过 invokeArrayFns 执行它，因为用户可以通过多次执行 onBeforeMount 函数注册多个 beforeMount 钩子函数，所以这里 instance.bm 是一个数组，通过遍历这个数组来依次执行 beforeMount 钩子函数。</p>
+<p>在执行 patch 挂载组件之后，会检查组件实例上是否有注册的 mounted 钩子函数 m，如果有的话则执行 queuePostRenderEffect，把 mounted 钩子函数推入 postFlushCbs 中，然后在整个应用 render 完毕后，同步执行 flushPostFlushCbs 函数调用 mounted 钩子函数。</p>
+<p>我经常在社区里听到一种争论：在组件初始化阶段，对于发送一些 Ajax 异步请求的逻辑，是应该放在 created 钩子函数中，还是应该放在 mounted 钩子函数中？</p>
+<p>其实都可以，因为 created 和 mounted 钩子函数执行的时候都能拿到组件数据，它们执行的顺序虽然有先后，但都会在一个 Tick 内执行完毕，而异步请求是有网络耗时的，其耗时远远大于一个 Tick 的时间。所以，你无论在 created 还是在 mounted 里发请求，都要等请求的响应回来，然后更新数据，再触发组件的重新渲染。</p>
+<p>前面说过，Vue.js 2.x 中的 beforeCreate 和 created 钩子函数可以用 setup 函数替代。所以，对于组件初始化阶段发送异步请求的逻辑，放在 setup 函数中、beforeMount 钩子函数中或者 mounted 钩子函数中都可以，它们都可以拿到组件相关的数据。当然，我更推荐在 setup 函数中执行，因为从语义化的角度来看这样更合适。</p>
+<p>不过，如果你想依赖 DOM 去做一些初始化操作，那就只能把相关逻辑放在 mounted 钩子函数中了，这样你才能拿到组件渲染后的 DOM。</p>
+<p>对于嵌套组件，组件在挂载相关的生命周期钩子函数时，先执行父组件的 beforeMount，然后是子组件的 beforeMount，接着是子组件的 mounted ，最后执行父组件的 mounted。</p>
+<p>接下来，我们来看通过 onBeforeUpdate 和 onUpdated 注册的钩子函数。</p>
+<h3 id="onBeforeUpdate-和-onUpdated"><a href="#onBeforeUpdate-和-onUpdated" class="headerlink" title="onBeforeUpdate 和 onUpdated"></a>onBeforeUpdate 和 onUpdated</h3><p><strong>onBeforeUpdate 注册的 beforeUpdate 钩子函数会在组件更新之前执行</strong>，<strong>onUpdated 注册的 updated 钩子函数会在组件更新之后执行</strong>。我们来回顾一下组件副作用渲染函数关于组件更新的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">setupRenderEffect</span> = (<span class="params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; &#123; </span><br><span class="line">  <span class="comment">// 创建响应式的副作用渲染函数 </span></span><br><span class="line">  instance.<span class="property">update</span> = <span class="title function_">effect</span>(<span class="keyword">function</span> <span class="title function_">componentEffect</span>(<span class="params"></span>) &#123; </span><br><span class="line">    <span class="keyword">if</span> (!instance.<span class="property">isMounted</span>) &#123; </span><br><span class="line">      <span class="comment">// 渲染组件 </span></span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123; </span><br><span class="line">      <span class="comment">// 更新组件 </span></span><br><span class="line">      <span class="comment">// 获取组件实例上通过 onBeforeUpdate 钩子函数和 onUpdated 注册的钩子函数 </span></span><br><span class="line">      <span class="keyword">let</span> &#123; next, vnode, bu, u &#125; = instance </span><br><span class="line">      <span class="comment">// next 表示新的组件 vnode </span></span><br><span class="line">      <span class="keyword">if</span> (next) &#123; </span><br><span class="line">        <span class="comment">// 更新组件 vnode 节点信息 </span></span><br><span class="line">        <span class="title function_">updateComponentPreRender</span>(instance, next, optimized) </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="keyword">else</span> &#123; </span><br><span class="line">        next = vnode </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="comment">// 渲染新的子树 vnode </span></span><br><span class="line">      <span class="keyword">const</span> nextTree = <span class="title function_">renderComponentRoot</span>(instance) </span><br><span class="line">      <span class="comment">// 缓存旧的子树 vnode </span></span><br><span class="line">      <span class="keyword">const</span> prevTree = instance.<span class="property">subTree</span> </span><br><span class="line">      <span class="comment">// 更新子树 vnode </span></span><br><span class="line">      instance.<span class="property">subTree</span> = nextTree </span><br><span class="line">      <span class="comment">// 执行 beforeUpdate 钩子函数 </span></span><br><span class="line">      <span class="keyword">if</span> (bu) &#123; </span><br><span class="line">        <span class="title function_">invokeArrayFns</span>(bu) </span><br><span class="line">      &#125; </span><br><span class="line">      <span class="comment">// 组件更新核心逻辑，根据新旧子树 vnode 做 patch </span></span><br><span class="line">      <span class="title function_">patch</span>(</span><br><span class="line">        prevTree, nextTree, </span><br><span class="line"> 		<span class="comment">// 如果在 teleport 组件中父节点可能已经改变，所以容器直接找旧树 DOM 元素的父节点 </span></span><br><span class="line">        <span class="title function_">hostParentNode</span>(prevTree.<span class="property">el</span>), </span><br><span class="line">   		<span class="comment">// 缓存更新后的 DOM 节点 </span></span><br><span class="line">        <span class="title function_">getNextHostNode</span>(prevTree), </span><br><span class="line">        instance, </span><br><span class="line">        parentSuspense, </span><br><span class="line">        isSVG) </span><br><span class="line">      <span class="comment">// 缓存更新后的 DOM 节点 </span></span><br><span class="line">      next.<span class="property">el</span> = nextTree.<span class="property">el</span> </span><br><span class="line">      <span class="comment">// 执行 updated 钩子函数 </span></span><br><span class="line">      <span class="keyword">if</span> (u) &#123; </span><br><span class="line">        <span class="title function_">queuePostRenderEffect</span>(u, parentSuspense) </span><br><span class="line">      &#125; </span><br><span class="line">    &#125; </span><br><span class="line">  &#125;, prodEffectOptions) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在执行 patch 更新组件之前，会检测组件实例上是有否有注册的 beforeUpdate 钩子函数 bu，如果有则通过 invokeArrayFns 执行它。</p>
+<p>在执行 patch 更新组件之后，会检查组件实例上是否有注册的 updated 钩子函数 u，如果有，则通过 queuePostRenderEffect 把 updated 钩子函数推入 postFlushCbs 中，因为组件的更新本身就是在 nextTick 后进行 flushJobs，因此此时再次执行 queuePostRenderEffect 推入到队列的任务，会在同一个 Tick 内执行这些 postFlushCbs，也就是执行所有 updated 的钩子函数。</p>
+<p>在 beforeUpdate 钩子函数执行时，组件的 DOM 还未更新，如果你想在组件更新前访问 DOM，比如手动移除已添加的事件监听器，你可以注册这个钩子函数。</p>
+<p>在 updated 钩子函数执行时，组件 DOM 已经更新，所以你现在可以执行依赖于 DOM 的操作。如果要监听数据的改变并执行某些逻辑，最好不要使用 updated 钩子函数而用计算属性或 watcher 取而代之，因为任何数据的变化导致的组件更新都会执行 updated 钩子函数。另外注意， <strong>不要在 updated 钩子函数中更改数据，因为这样会再次触发组件更新，导致无限递归更新</strong> 。</p>
+<p>还有，父组件的更新不一定会导致子组件的更新，因为 Vue.js 的更新粒度是组件级别的。</p>
+<p>接下来，我们来看通过 onBeforeUnmount 和 onUnmounted 注册的钩子函数。</p>
+<h3 id="onBeforeUnmount-和-onUnmounted"><a href="#onBeforeUnmount-和-onUnmounted" class="headerlink" title="onBeforeUnmount 和 onUnmounted"></a>onBeforeUnmount 和 onUnmounted</h3><p><strong>onBeforeUnmount 注册的 beforeUnMount 钩子函数会在组件销毁之前执行</strong>，onUnmounted <strong>注册的 unmounted 钩子函数会在组件销毁之后执行</strong> 。我们来看一下组件销毁相关逻辑实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="variable">unmountComponent</span> <span class="operator">=</span> (instance, parentSuspense, doRemove) =&gt; &#123; </span><br><span class="line">  const &#123; bum, effects, update, subTree, um &#125; = instance </span><br><span class="line">  <span class="comment">// 执行 beforeUnmount 钩子函数 </span></span><br><span class="line">  <span class="keyword">if</span> (bum) &#123; </span><br><span class="line">    invokeArrayFns(bum) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 清理组件引用的 effects 副作用函数 </span></span><br><span class="line">  <span class="keyword">if</span> (effects) &#123; </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">let</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; effects.length; i++) &#123; </span><br><span class="line">      stop(effects[i]) </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 如果一个异步组件在加载前就销毁了，则不会注册副作用渲染函数 </span></span><br><span class="line">  <span class="keyword">if</span> (update) &#123; </span><br><span class="line">    stop(update) </span><br><span class="line">    <span class="comment">// 调用 unmount 销毁子树 </span></span><br><span class="line">    unmount(subTree, instance, parentSuspense, doRemove) </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 执行 unmounted 钩子函数 </span></span><br><span class="line">  <span class="keyword">if</span> (um) &#123; </span><br><span class="line">    queuePostRenderEffect(um, parentSuspense) </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实整个组件销毁的逻辑很简单，主要就是<strong>清理组件实例上绑定的 effects 副作用函数和注册的副作用渲染函数 update</strong>，以及<strong>调用 unmount 销毁子树</strong></p>
+<p>unmount 主要就是遍历子树，它会通过递归的方式来销毁子节点，遇到组件节点时执行 unmountComponent，遇到普通节点时则删除 DOM 元素。组件的销毁过程和渲染过程类似，都是递归的过程。</p>
+<p>在组件销毁前，会检测组件实例上是有否有注册的 beforeUnmount 钩子函数 bum，如果有则通过 invokeArrayFns 执行。</p>
+<p>在组件销毁后，会检测组件实例上是否有注册的 unmounted 钩子函数 um，如果有则通过 queuePostRenderEffect 把 unmounted 钩子函数推入到 postFlushCbs 中，因为组件的销毁就是组件更新的一个分支逻辑，所以在 nextTick 后进行 flushJobs，因此此时再次执行 queuePostRenderEffect 推入队列的任务，会在同一个 Tick 内执行这些 postFlushCbs，也就是执行所有的 unmounted 钩子函数。</p>
+<p>对于嵌套组件，组件在执行销毁相关的生命周期钩子函数时，先执行父组件的 beforeUnmount，再执行子组件的 beforeUnmount，然后执行子组件的 unmounted ，最后执行父组件的 unmounted。</p>
+<p>虽然组件在销毁阶段会清理一些定义的 effects 函数，删除组件内部的 DOM 元素，但是有一些需要清理的对象，组件并不能自动完成它们的清理，比如你在组件内部创建一个定时器，就应该在 beforeUnmount 或者 unmounted 钩子函数中清除，举个例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">      <span class="tag">&lt;<span class="name">p</span>&gt;</span>&#123;&#123;count&#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"> </span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">import</span> &#123; ref, onBeforeUnmount &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">export</span> <span class="keyword">default</span> &#123; </span></span><br><span class="line"><span class="language-javascript">    setup () &#123; </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">const</span> count = <span class="title function_">ref</span>(<span class="number">0</span>) </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">const</span> timer = <span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">console</span>.<span class="title function_">log</span>(count.<span class="property">value</span>++) </span></span><br><span class="line"><span class="language-javascript">      &#125;, <span class="number">1000</span>) </span></span><br><span class="line"><span class="language-javascript">      <span class="title function_">onBeforeUnmount</span>(<span class="function">() =&gt;</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        <span class="built_in">clearInterval</span>(timer) </span></span><br><span class="line"><span class="language-javascript">      &#125;) </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">return</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        count </span></span><br><span class="line"><span class="language-javascript">      &#125; </span></span><br><span class="line"><span class="language-javascript">    &#125; </span></span><br><span class="line"><span class="language-javascript">  &#125; </span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这里我们在 setup 函数内部定义了一个 timer 计时器， count 每秒会加 1 并在控制台中输出。如果这个组件被销毁，就会触发 onBeforeUnmount 注册的 beforeUnmount 钩子函数，然后清除定时器。如果你不清除，就会发现组件销毁后，虽然 DOM 被移除了，计时器仍然存在，并且会一直计时并在控制台输出，这就造成了不必要的内存泄漏。</p>
+<p>接下来，我们来看通过 onErrorCaptured 注册的钩子函数</p>
+<h3 id="onErrorCaptured"><a href="#onErrorCaptured" class="headerlink" title="onErrorCaptured"></a>onErrorCaptured</h3><p>在前面的课时中，我们多次接触过一个方法 callWithErrorHandling，它就是执行一段函数并通过 handleError 处理错误。那么，handleError 具体做了哪些事情呢？</p>
+<p>我们先来看一下它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">handleError</span>(<span class="params">err, instance, type</span>) &#123; </span><br><span class="line">  <span class="keyword">const</span> contextVNode = instance ? instance.<span class="property">vnode</span> : <span class="literal">null</span> </span><br><span class="line">  <span class="keyword">if</span> (instance) &#123; </span><br><span class="line">    <span class="keyword">let</span> cur = instance.<span class="property">parent</span> </span><br><span class="line">    <span class="comment">// 为了兼容 2.x 版本，暴露组件实例给钩子函数 </span></span><br><span class="line">    <span class="keyword">const</span> exposedInstance = instance.<span class="property">proxy</span> </span><br><span class="line">    <span class="comment">// 获取错误信息 </span></span><br><span class="line">    <span class="keyword">const</span> errorInfo = (process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>) ? <span class="title class_">ErrorTypeStrings</span>[type] : type </span><br><span class="line">    <span class="comment">// 尝试向上查找所有父组件，执行 errorCaptured 钩子函数 </span></span><br><span class="line">    <span class="keyword">while</span> (cur) &#123; </span><br><span class="line">      <span class="keyword">const</span> errorCapturedHooks = cur.<span class="property">ec</span> </span><br><span class="line">      <span class="keyword">if</span> (errorCapturedHooks) &#123; </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; errorCapturedHooks.<span class="property">length</span>; i++) &#123; </span><br><span class="line">          <span class="comment">// 如果执行的 errorCaptured 钩子函数并返回 true，则停止向上查找。、 </span></span><br><span class="line">          <span class="keyword">if</span> (errorCapturedHooks[i](err, exposedInstance, errorInfo)) &#123; </span><br><span class="line">            <span class="keyword">return</span> </span><br><span class="line">          &#125; </span><br><span class="line">        &#125; </span><br><span class="line">      &#125; </span><br><span class="line">      cur = cur.<span class="property">parent</span> </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 往控制台输出未处理的错误 </span></span><br><span class="line">  <span class="title function_">logError</span>(err, type, contextVNode) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>handleError 的实现其实很简单，它会从当前报错的组件的父组件实例开始，尝试去查找注册的 errorCaptured 钩子函数，如果有则遍历执行并且判断 errorCaptured 钩子函数的返回值是否为 true，如果是则说明这个错误已经得到了正确的处理，就会直接结束。</p>
+<p>否则会继续遍历，遍历完当前组件实例的 errorCaptured 钩子函数后，如果这个错误还没得到正确处理，则向上查找它的父组件实例，以同样的逻辑去查找是否有正确处理该错误的 errorCaptured 钩子函数，直到查找完毕。</p>
+<p>如果整个链路上都没有正确处理错误的 errorCaptured 钩子函数，则通过 logError 往控制台输出未处理的错误。所以 <strong>errorCaptured 本质上是捕获一个来自子孙组件的错误</strong>，<strong>它返回 true 就可以阻止错误继续向上传播</strong>。</p>
+<p>errorCaptured 在平时工作中可能用的不多，但它的确是一个很实用的功能，比如你可以在根组件注册一个 errorCaptured 钩子函数，去捕获所有子孙组件的错误，并且可以根据错误的类型和信息统计和上报错误。</p>
+<p>接下来，我们来看通过 onRenderTracked 和 onRenderTriggered 注册的钩子函数。</p>
+<h3 id="onRenderTracked-和-onRenderTriggered"><a href="#onRenderTracked-和-onRenderTriggered" class="headerlink" title="onRenderTracked 和 onRenderTriggered"></a>onRenderTracked 和 onRenderTriggered</h3><p>onRenderTracked 和 onRenderTriggered 是 Vue.js 3.0 新增的生命周期 API，它们是在开发阶段渲染调试用的。这里再次回顾一下我们创建的副作用渲染函数的第二个参数（这里你可以去 响应式内部的实现原理是怎样的？ ”中复习一下），在开发环境下它的代码是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">instance.<span class="property">update</span> = <span class="title function_">effect</span>(<span class="keyword">function</span> <span class="title function_">componentEffect</span>(<span class="params"></span>) &#123; </span><br><span class="line"><span class="comment">// 创建或者更组件 </span></span><br><span class="line">&#125;, <span class="title function_">createDevEffectOptions</span>(instance)) </span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createDevEffectOptions</span>(<span class="params">instance</span>) &#123; </span><br><span class="line">  <span class="keyword">return</span> &#123; </span><br><span class="line">    <span class="attr">scheduler</span>: queueJob, </span><br><span class="line">    <span class="attr">onTrack</span>: instance.<span class="property">rtc</span> ? <span class="function"><span class="params">e</span> =&gt;</span> <span class="title function_">invokeArrayFns</span>(instance.<span class="property">rtc</span>, e) : <span class="keyword">void</span> <span class="number">0</span>, </span><br><span class="line">    <span class="attr">onTrigger</span>: instance.<span class="property">rtg</span> ? <span class="function"><span class="params">e</span> =&gt;</span> <span class="title function_">invokeArrayFns</span>(instance.<span class="property">rtg</span>, e) : <span class="keyword">void</span> <span class="number">0</span> </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上述代码我们发现，onRenderTracked 和 onRenderTriggered 注册的钩子函数，原来是在副作用渲染函数的 onTrack 和 onTrigger 对应的函数中执行的。</p>
+<p>我们当时介绍 effect 副作用函数的配置时并没有介绍这两个属性，那么它们是做什么用的呢？</p>
+<p>这就要先来看 onTrack 函数的执行时机。我们知道当访问一个响应式对象时，会执行 track 函数做依赖收集，我们来回顾一下它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">track</span>(<span class="params">target, type, key</span>) &#123; </span><br><span class="line">  <span class="comment">// 执行一些依赖收集的操作 </span></span><br><span class="line">  <span class="keyword">if</span> (!dep.<span class="title function_">has</span>(activeEffect)) &#123;</span><br><span class="line">     dep.<span class="title function_">add</span>(activeEffect)</span><br><span class="line">     activeEffect.<span class="property">deps</span>.<span class="title function_">push</span>(dep)</span><br><span class="line">     <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>) &amp;&amp; activeEffect.<span class="property">options</span>.<span class="property">onTrack</span>) &#123;</span><br><span class="line">       <span class="comment">// 执行 onTrack 函数 </span></span><br><span class="line">       activeEffect.<span class="property">options</span>.<span class="title function_">onTrack</span>(&#123;</span><br><span class="line">          <span class="attr">effect</span>: activeEffect,</span><br><span class="line">          target,</span><br><span class="line">          type,</span><br><span class="line">          key</span><br><span class="line">       &#125;)</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，track 函数先执行依赖收集，然后在非生产环境下检测当前的 activeEffect 的配置有没有定义 onTrack 函数，如果有的则执行该方法。</p>
+<p>因此对应到副作用渲染函数，当它执行的时候，activeEffect 就是这个副作用渲染函数，这时访问响应式数据就会触发 track 函数，<strong>在执行完依赖收集后</strong>，<strong>会执行 onTrack 函数</strong>，<strong>也就是遍历执行我们注册的 renderTracked 钩子函数</strong>。</p>
+<p>接下来，我们再来回顾一下 trigger 函数的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">trigger</span> (target, type, key, newValue) &#123; </span><br><span class="line">  <span class="comment">// 添加要运行的 effects 集合 </span></span><br><span class="line">  <span class="keyword">const</span> <span class="title function_">run</span> = (<span class="params">effect</span>) =&gt; &#123; </span><br><span class="line">    <span class="keyword">if</span> ((process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span>) &amp;&amp; effect.<span class="property">options</span>.<span class="property">onTrigger</span>) &#123; </span><br><span class="line">        <span class="comment">// 执行 onTrigger </span></span><br><span class="line">      effect.<span class="property">options</span>.<span class="title function_">onTrigger</span>(&#123; </span><br><span class="line">        effect, </span><br><span class="line">        target, </span><br><span class="line">        key, </span><br><span class="line">        type, </span><br><span class="line">        newValue, </span><br><span class="line">        oldValue, </span><br><span class="line">        oldTarget </span><br><span class="line">      &#125;) </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> (effect.<span class="property">options</span>.<span class="property">scheduler</span>) &#123; </span><br><span class="line">      effect.<span class="property">options</span>.<span class="title function_">scheduler</span>(effect) </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123; </span><br><span class="line">      <span class="title function_">effect</span>() </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">  <span class="comment">// 遍历执行 effects </span></span><br><span class="line">  effects.<span class="title function_">forEach</span>(run) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们知道，trigger 函数首先要创建运行的 effects 集合，然后遍历执行，在执行的过程中，会在非生产环境下检测待执行的 effect 配置中有没有定义 onTrigger 函数，如果有则执行该方法。</p>
+<p>因此对应到我们的副作用渲染函数，当它内部依赖的响应式对象值被修改后，就会触发 trigger 函数 ，这个时候副作用渲染函数就会被添加到要运行的 effects 集合中，<strong>在遍历执行 effects 的时候会执行 onTrigger 函数</strong>，<strong>也就是遍历执行我们注册的 renderTriggered 钩子函数</strong>。</p>
+<p>了解完 renderTracked 和 renderTriggered 钩子函数的执行时机后，我们来看一下实际场景的应用：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">      <span class="tag">&lt;<span class="name">p</span>&gt;</span>&#123;&#123;count&#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span> </span><br><span class="line">      <span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">&quot;increase&quot;</span>&gt;</span>Increase<span class="tag">&lt;/<span class="name">button</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"> </span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">import</span> &#123; ref, onRenderTracked, onRenderTriggered &#125; <span class="keyword">from</span> <span class="string">&#x27;vue&#x27;</span> </span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">export</span> <span class="keyword">default</span> &#123; </span></span><br><span class="line"><span class="language-javascript">    setup () &#123; </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">const</span> count = <span class="title function_">ref</span>(<span class="number">0</span>) </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">function</span> <span class="title function_">increase</span> () &#123; </span></span><br><span class="line"><span class="language-javascript">        count.<span class="property">value</span>++ </span></span><br><span class="line"><span class="language-javascript">      &#125; </span></span><br><span class="line"><span class="language-javascript">      <span class="title function_">onRenderTracked</span>(<span class="function">(<span class="params">e</span>) =&gt;</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">console</span>.<span class="title function_">log</span>(e) </span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">debugger</span> </span></span><br><span class="line"><span class="language-javascript">      &#125;) </span></span><br><span class="line"><span class="language-javascript">      <span class="title function_">onRenderTriggered</span>(<span class="function">(<span class="params">e</span>) =&gt;</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">console</span>.<span class="title function_">log</span>(e) </span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">debugger</span> </span></span><br><span class="line"><span class="language-javascript">      &#125;) </span></span><br><span class="line"><span class="language-javascript">      <span class="keyword">return</span> &#123; </span></span><br><span class="line"><span class="language-javascript">        count, </span></span><br><span class="line"><span class="language-javascript">        increase </span></span><br><span class="line"><span class="language-javascript">      &#125; </span></span><br><span class="line"><span class="language-javascript">    &#125; </span></span><br><span class="line"><span class="language-javascript">  &#125; </span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>像这样</strong>在开发阶段，我们可以通过注册这两个钩子函数，来追踪组件渲染的依赖来源以及触发组件重新渲染的数据更新来源。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>好的，到这里我们这一节的学习就结束啦，通过学习，你应该掌握 Vue.js 中生命周期注册的 API，了解各个生命周期的执行时机和应用场景。</p>
+<p>最后，我们通过一张图再来直观地感受一下组件的各个生命周期：</p>
+<p><img src="/blog/life-cycle/Ciqc1F8zkvmAR_QpAAJxUtKU_4s942.png"></p>
+<p>Vue.js 3.0 还有 2 个生命周期 API，分别是 onActivated 和 onDeactivated，我们将会在介绍 KeepAlive 组件时详细分析。</p>
+<blockquote>
+<p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;apiLifecycle.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts<br>packages&#x2F;reactivity&#x2F;src&#x2F;effect.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E9%92%A9%E5%AD%90%E5%87%BD%E6%95%B0"><span class="toc-text">注册钩子函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#onBeforeMount-%E5%92%8C-onMounted"><span class="toc-text">onBeforeMount 和 onMounted</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#onBeforeUpdate-%E5%92%8C-onUpdated"><span class="toc-text">onBeforeUpdate 和 onUpdated</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#onBeforeUnmount-%E5%92%8C-onUnmounted"><span class="toc-text">onBeforeUnmount 和 onUnmounted</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#onErrorCaptured"><span class="toc-text">onErrorCaptured</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#onRenderTracked-%E5%92%8C-onRenderTriggered"><span class="toc-text">onRenderTracked 和 onRenderTriggered</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/07/07/vue3/life-cycle/">https://xiaozhouguo.github.io/blog/2022/07/07/vue3/life-cycle/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/blog/2022/07/05/vue3/watcher-one/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          侦听器的实现原理和使用场景 - 上篇
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2022/07/26/vue3/provide-inject/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          依赖注入：子孙组件如何共享数据？
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/blog/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
+        <span> | </span><a href="/blog/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/blog/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/blog/js/search.json.js"></script>
+
+
+  
+<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/blog/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/blog/localshare/js/social-share.js"></script>
+
+    
+<script src="/blog/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '52ec56b78cde1f38514e',
+        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>
