@@ -11,10 +11,10 @@
   
   
   
-    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
   
   
-    <link rel="shortcut icon" href="/blog/favicon.png">
+    <link rel="shortcut icon" href="/favicon.png">
   
   
     
@@ -22,16 +22,16 @@
 
   
   
-<link rel="stylesheet" href="/blog/css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 
   
     
-<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
   
     
-<link rel="stylesheet" href="/blog/localshare/css/share.css">
+<link rel="stylesheet" href="/localshare/css/share.css">
 
   
   
@@ -49,24 +49,24 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+        <a href="/" id="logo">We Are ALL Made Of Star Stuff</a>
       </h1>
       
         <h2 id="subtitle-wrap">
-          <a href="/blog/" id="subtitle">steps-by-steps</a>
+          <a href="/" id="subtitle">steps-by-steps</a>
         </h2>
       
     </div>
     <div id="header-inner" class="inner">
       <nav id="main-nav">
         
-          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+          <a class="main-nav-link" href="/."><i class="fa fa-home"></i> 首页</a>
         
-          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+          <a class="main-nav-link" href="/archives/"><i class="fa fa-archive"></i> 归档</a>
         
-          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+          <a class="main-nav-link" href="/about/"><i class="fa fa-user"></i> 关于</a>
         
-          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+          <a class="main-nav-link" href="/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
         
       </nav>
     </div>
@@ -116,7 +116,7 @@
       
   <div class="article-category">
     <i class="fa fa-classify"></i>
-    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+    <a class="article-category-link" href="/categories/Vue3/">Vue3</a>
   </div>
 
       
@@ -129,7 +129,7 @@
 
       
       
-<a href="/blog/2022/06/23/vue3/vue3-optimization-summary/#comments" class="article-comment-link">
+<a href="/2022/06/23/vue3/vue3-optimization-summary/#comments" class="article-comment-link">
   
     
     
@@ -152,9 +152,9 @@
 <p>那么接下来，我们就一起来看一下 Vue.js 3.0 具体做了哪些优化。相信你学习完这篇文章，不仅能知道 Vue.js 3.0 的升级给我们开发带来的收益，还能学习到一些设计思想和理念，并在自己的开发工作中应用，获得提升。</p>
 <h2 id="源码优化"><a href="#源码优化" class="headerlink" title="源码优化"></a>源码优化</h2><p>首先是源码优化，也就是尤大对于 Vue.js 框架本身开发的优化，它的目的是让代码更易于开发和维护。源码的优化主要体现在使用 <code>monorepo</code> 和 <code>TypeScript</code> 管理和开发源码，这样做的目标是提升自身代码可维护性。接下来我们就来看一下这两个方面的具体变化。</p>
 <h3 id="更好的代码管理方式：monorepo"><a href="#更好的代码管理方式：monorepo" class="headerlink" title="更好的代码管理方式：monorepo"></a>更好的代码管理方式：<code>monorepo</code></h3><p>首先，源码的优化体现在代码管理方式上。Vue.js 2.x 的源码托管在 src 目录，然后依据功能拆分出了 compiler（模板编译的相关代码）、core（与平台无关的通用运行时代码）、platforms（平台专有代码）、server（服务端渲染的相关代码）、sfc（.vue 单文件解析相关代码）、shared（共享工具代码） 等目录：</p>
-<p><img src="/blog/vue3-optimization-summary/Ciqc1F8Cn6mAHaUrAACzRBFsL1g844.png"></p>
+<p><img src="/vue3-optimization-summary/Ciqc1F8Cn6mAHaUrAACzRBFsL1g844.png"></p>
 <p>而到了 Vue.js 3.0 ，整个源码是通过 monorepo 的方式维护的，根据功能将不同的模块拆分到 packages 目录下面不同的子目录中：</p>
-<p><img src="/blog/vue3-optimization-summary/Ciqc1F8Cn7KAELkqAAJkxFes1zw593.png"></p>
+<p><img src="/vue3-optimization-summary/Ciqc1F8Cn7KAELkqAAJkxFes1zw593.png"></p>
 <p>可以看出相对于 Vue.js 2.x 的源码组织方式，monorepo 把这些模块拆分到不同的 package 中，每个 package 有各自的 API、类型定义和测试。这样使得模块拆分更细化，职责划分更明确，模块之间的依赖关系也更加明确，开发人员也更容易阅读、理解和更改所有模块源码，提高代码的可维护性。<br>另外一些 package（比如 reactivity 响应式库）是可以独立于 Vue.js 使用的，这样用户如果只想使用 Vue.js 3.0 的响应式能力，可以单独依赖这个响应式库而不用去依赖整个 Vue.js，减小了引用包的体积大小，而 Vue.js 2 .x 是做不到这一点的。</p>
 <h3 id="有类型的-JavaScript：TypeScript"><a href="#有类型的-JavaScript：TypeScript" class="headerlink" title="有类型的 JavaScript：TypeScript"></a>有类型的 JavaScript：TypeScript</h3><p>其次，源码的优化还体现在 Vue.js 3.0 自身采用了 TypeScript 开发。Vue.js 1.x 版本的源码是没有用类型语言的，尤大用 JavaScript 开发了整个框架，但对于复杂的框架项目开发，使用类型语言非常有利于代码的维护，因为它可以在编码期间帮你做类型检查，避免一些因类型问题导致的错误；也可以利于它去定义接口的类型，利于 IDE 对变量类型的推导。<br>因此在重构 2.0 的时候，尤大选型了 Flow，但是在 Vue.js 3.0 的时候抛弃 Flow 转而采用 TypeScript 重构了整个项目，这里有两方面原因，接下来我们具体说一下。<br>首先，Flow 是 Facebook 出品的 JavaScript 静态类型检查工具，它可以以非常小的成本对已有的 JavaScript 代码迁入，非常灵活，这也是 Vue.js 2.0 当初选型它时一方面的考量。但是 Flow 对于一些复杂场景类型的检查，支持得并不好。记得在看 Vue.js 2.x 源码的时候，在某行代码的注释中看到了对 Flow 的吐槽，比如在组件更新 props 的地方出现了：</p>
 <figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">propOptions</span>: <span class="built_in">any</span> = vm.<span class="property">$options</span>.<span class="property">props</span> <span class="comment">// wtf flow?</span></span><br></pre></td></tr></table></figure>
@@ -175,7 +175,7 @@
 
 <p>可以看到，未被引入的 square 模块被标记了， 然后压缩阶段会利用例如 uglify-js、terser 等压缩工具真正地删除这些没有用到的代码。<br>也就是说，利用 tree-shaking 技术，如果你在项目中没有引入 Transition、KeepAlive 等组件，那么它们对应的代码就不会打包，这样也就间接达到了减少项目引入的 Vue.js 包体积的目的。</p>
 <h3 id="数据劫持优化"><a href="#数据劫持优化" class="headerlink" title="数据劫持优化"></a>数据劫持优化</h3><p>其次是数据劫持优化。Vue.js 区别于 React 的一大特色是它的数据是响应式的，这个特性从 Vue.js 1.x 版本就一直伴随着，这也是 Vue.js 粉喜欢 Vue.js 的原因之一，DOM 是数据的一种映射，数据发生变化后可以自动更新 DOM，用户只需要专注于数据的修改，没有其余的心智负担。<br>在 Vue.js 内部，想实现这个功能是要付出一定代价的，那就是必须劫持数据的访问和更新。其实这点很好理解，当数据改变后，为了自动更新 DOM，那么就必须劫持数据的更新，也就是说当数据发生改变后能自动执行一些代码去更新 DOM，那么问题来了，Vue.js 怎么知道更新哪一片 DOM 呢？因为在渲染 DOM 的时候访问了数据，我们可以对它进行访问劫持，这样就在内部建立了依赖关系，也就知道数据对应的 DOM 是什么了。以上只是大体的思路，具体实现要比这更复杂，内部还依赖了一个 watcher 的数据结构做依赖管理，参考下图：</p>
-<p><img src="/blog/vue3-optimization-summary/CgqCHl8CudyAJc3tAAGkPxYyp9k501.png"></p>
+<p><img src="/vue3-optimization-summary/CgqCHl8CudyAJc3tAAGkPxYyp9k501.png"></p>
 <p>Vue.js 1.x 和 Vue.js 2.x 内部都是通过 Object.defineProperty 这个 API 去劫持数据的 getter 和 setter，具体是这样的：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(data, <span class="string">&#x27;a&#x27;</span>,&#123;</span><br><span class="line">  <span class="title function_">get</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="comment">// track</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="title function_">set</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="comment">// trigger</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
 
@@ -190,16 +190,16 @@
 <p>由于它劫持的是整个对象，那么自然对于对象的属性的增加和删除都能检测到。</p>
 <p>但要注意的是，Proxy API 并不能监听到内部深层次的对象变化，因此 Vue.js 3.0 的处理方式是在 getter 中去递归响应式，这样的好处是真正访问到的内部对象才会变成响应式，而不是无脑递归，这样无疑也在很大程度上提升了性能，我会在后面分析响应式章节详细介绍它的具体实现原理。</p>
 <h3 id="编译优化"><a href="#编译优化" class="headerlink" title="编译优化"></a>编译优化</h3><p>最后是编译优化，为了便于理解，我们先来看一张图：</p>
-<p><img src="/blog/vue3-optimization-summary/CgqCHl8Cuf2AZw70AAEFU2EMA50521.png"></p>
+<p><img src="/vue3-optimization-summary/CgqCHl8Cuf2AZw70AAEFU2EMA50521.png"></p>
 <p>这是 Vue.js 2.x 从 new Vue 开始渲染成 DOM 的流程，上面说过的响应式过程就发生在图中的 init 阶段，另外 template compile to render function 的流程是可以借助 vue-loader 在 webpack 编译阶段离线完成，并非一定要在运行时完成。</p>
 <p>所以想优化整个 Vue.js 的运行时，除了数据劫持部分的优化，我们可以在耗时相对较多的 patch 阶段想办法，Vue.js 3.0 也是这么做的，并且它通过在编译阶段优化编译的结果，来实现运行时 patch 过程的优化。</p>
 <p>我们知道，通过数据劫持和依赖收集，Vue.js 2.x 的数据更新并触发重新渲染的粒度是组件级的：</p>
-<p><img src="/blog/vue3-optimization-summary/Ciqc1F8CuhCADiJ1AAGMYHdzHa0498.png"></p>
+<p><img src="/vue3-optimization-summary/Ciqc1F8CuhCADiJ1AAGMYHdzHa0498.png"></p>
 <p>虽然 Vue 能保证触发更新的组件最小化，但在单个组件内部依然需要遍历该组件的整个 vnode 树，举个例子，比如我们要更新这个组件：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;text&quot;</span>&gt;</span>static text<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;text&quot;</span>&gt;</span>static text<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;text&quot;</span>&gt;</span>&#123;&#123;message&#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;text&quot;</span>&gt;</span>static text<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;text&quot;</span>&gt;</span>static text<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>整个 diff 过程如图所示：</p>
-<p><img src="/blog/vue3-optimization-summary/Ciqc1F-zmN-AbAP_AAEJ0vicgdA415.png"></p>
+<p><img src="/vue3-optimization-summary/Ciqc1F-zmN-AbAP_AAEJ0vicgdA415.png"></p>
 <p>可以看到，因为这段代码中只有一个动态节点，所以这里有很多 diff 和遍历其实都是不需要的，这就会导致 vnode 的性能跟模版大小正相关，跟动态节点的数量无关，当一些组件的整个模版内只有少量动态节点时，这些遍历都是性能的浪费。</p>
 <p>而对于上述例子，理想状态只需要 diff 这个绑定 message 动态节点的 p 标签即可。</p>
 <p>Vue.js 3.0 做到了，它通过编译阶段对静态模板的分析，编译生成了 Block tree。Block tree 是一个将模版基于动态节点指令切割的嵌套区块，每个区块内部的节点结构是固定的，而且每个区块只需要以一个 Array 来追踪自身包含的动态节点。借助 Block tree，Vue.js 将 vnode <strong>更新性能</strong>由与模版整体大小相关提升为<strong>与动态内容的数量相关</strong>，这是一个非常大的性能突破，我会在后续的章节详细分析它是如何实现的。</p>
@@ -216,10 +216,10 @@
 <li>处理当前工作目录的更改</li>
 </ul>
 <p>如果我们按照逻辑关注点做颜色编码，就可以看到当使用 Options API 去编写组件时，这些逻辑关注点是非常分散的：</p>
-<p><img src="/blog/vue3-optimization-summary/Ciqc1F8CoIeAToThAAG5J8trLZc593.png"></p>
+<p><img src="/vue3-optimization-summary/Ciqc1F8CoIeAToThAAG5J8trLZc593.png"></p>
 <p>Vue.js 3.0 提供了一种新的 API：Composition API，它有一个很好的机制去解决这样的问题，就是将某个逻辑关注点相关的代码全都放在一个函数里，这样当需要修改一个功能时，就不再需要在文件中跳来跳去。</p>
 <p>通过下图，我们可以很直观地感受到 Composition API 在逻辑组织方面的优势：</p>
-<p><img src="/blog/vue3-optimization-summary/CgqCHl8CoI-ACOXEAAM5NZiddQs980.png"></p>
+<p><img src="/vue3-optimization-summary/CgqCHl8CoI-ACOXEAAM5NZiddQs980.png"></p>
 <h4 id="优化逻辑复用"><a href="#优化逻辑复用" class="headerlink" title="优化逻辑复用"></a>优化逻辑复用</h4><p>当我们开发项目变得复杂的时候，免不了需要抽象出一些复用的逻辑。在 Vue.js 2.x 中，我们通常会用 <code>mixins</code> 去复用逻辑，举一个鼠标位置侦听的例子，我们会编写如下函数 mousePositionMixin：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mousePositionMixin = &#123;</span><br><span class="line">  <span class="title function_">data</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="attr">x</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">y</span>: <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="title function_">mounted</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">addEventListener</span>(<span class="string">&#x27;mousemove&#x27;</span>, <span class="variable language_">this</span>.<span class="property">update</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="title function_">destroyed</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">removeEventListener</span>(<span class="string">&#x27;mousemove&#x27;</span>, <span class="variable language_">this</span>.<span class="property">update</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">methods</span>: &#123;</span><br><span class="line">    <span class="title function_">update</span>(<span class="params">e</span>) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">x</span> = e.<span class="property">pageX</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">y</span> = e.<span class="property">pageY</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> mousePositionMixin</span><br></pre></td></tr></table></figure>
 
@@ -265,7 +265,7 @@
         
         
           <blockquote id="copyright">
-              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/06/23/vue3/vue3-optimization-summary/">https://xiaozhouguo.github.io/blog/2022/06/23/vue3/vue3-optimization-summary/</a></p>
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/2022/06/23/vue3/vue3-optimization-summary/">https://xiaozhouguo.github.io/2022/06/23/vue3/vue3-optimization-summary/</a></p>
               <p>版权声明: 转载请注明出处.</p>
           </blockquote>
         
@@ -290,7 +290,7 @@
         
 <nav id="article-nav">
   
-    <a href="/blog/2022/05/30/typescript/type-challanges/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2022/05/30/typescript/type-challanges/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">older</strong>
       <div class="article-nav-title">
         
@@ -300,7 +300,7 @@
     </a>
   
   
-    <a href="/blog/2022/06/24/vue3/component-render/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2022/06/24/vue3/component-render/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">newer</strong>
       <div class="article-nav-title">
         
@@ -339,23 +339,23 @@
       <ul>
         
           <li>
-            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+            <a href="/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+            <a href="/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+            <a href="/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+            <a href="/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+            <a href="/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
           </li>
         
       </ul>
@@ -368,7 +368,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
     <div class="widget tagcloud">
-      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+      <a href="/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/tags/Array/" style="font-size: 10px;">Array</a> <a href="/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/tags/computed/" style="font-size: 10px;">computed</a> <a href="/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/tags/provide/" style="font-size: 10px;">provide</a> <a href="/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/tags/setup/" style="font-size: 10px;">setup</a> <a href="/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/tags/watch/" style="font-size: 13.33px;">watch</a>
     </div>
   </div>
 
@@ -377,7 +377,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -387,7 +387,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
     </div>
   </div>
 
@@ -397,7 +397,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -428,9 +428,9 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       <p>
-        <a href="/blog/sitemap.xml">网站地图</a>
-        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
-        <span> | </span><a href="/blog/about/">联系博主</a>
+        <a href="/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/atom.xml">订阅本站</a>
+        <span> | </span><a href="/about/">联系博主</a>
       </p>
       
         <p>
@@ -453,19 +453,19 @@
     </div>
   </div>
   
-<script src="/blog/js/jquery-3.4.1.min.js"></script>
+<script src="/js/jquery-3.4.1.min.js"></script>
 
 
-<script src="/blog/js/search.json.js"></script>
+<script src="/js/search.json.js"></script>
 
 
   
-<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+<script src="/fancybox/jquery.fancybox.min.js"></script>
 
 
 
 
-<script src="/blog/js/script.js"></script>
+<script src="/js/script.js"></script>
 
 
 
@@ -480,10 +480,10 @@
 
   
     
-<script src="/blog/localshare/js/social-share.js"></script>
+<script src="/localshare/js/social-share.js"></script>
 
     
-<script src="/blog/localshare/js/qrcode.js"></script>
+<script src="/localshare/js/qrcode.js"></script>
 
   
   
@@ -499,8 +499,8 @@
 
     <script>
       var gitalk = new Gitalk({
-        clientID: '52ec56b78cde1f38514e',
-        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        clientID: '73caaf19e0a3f8e71ddd',
+        clientSecret: 'd4447cc0909c43121bd44ccae5073305021cd6be',
         repo: 'blog',
         owner: 'XIAOZHOUGUO',
         admin: ['XIAOZHOUGUO'],

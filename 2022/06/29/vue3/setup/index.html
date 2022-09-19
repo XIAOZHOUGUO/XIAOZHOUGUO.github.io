@@ -11,10 +11,10 @@
   
   
   
-    <link rel="alternate" href="/blog/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
   
   
-    <link rel="shortcut icon" href="/blog/favicon.png">
+    <link rel="shortcut icon" href="/favicon.png">
   
   
     
@@ -22,16 +22,16 @@
 
   
   
-<link rel="stylesheet" href="/blog/css/style.css">
+<link rel="stylesheet" href="/css/style.css">
 
   
     
-<link rel="stylesheet" href="/blog/fancybox/jquery.fancybox.min.css">
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
   
     
-<link rel="stylesheet" href="/blog/localshare/css/share.css">
+<link rel="stylesheet" href="/localshare/css/share.css">
 
   
   
@@ -49,24 +49,24 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/blog/" id="logo">We Are ALL Made Of Star Stuff</a>
+        <a href="/" id="logo">We Are ALL Made Of Star Stuff</a>
       </h1>
       
         <h2 id="subtitle-wrap">
-          <a href="/blog/" id="subtitle">steps-by-steps</a>
+          <a href="/" id="subtitle">steps-by-steps</a>
         </h2>
       
     </div>
     <div id="header-inner" class="inner">
       <nav id="main-nav">
         
-          <a class="main-nav-link" href="/blog/."><i class="fa fa-home"></i> 首页</a>
+          <a class="main-nav-link" href="/."><i class="fa fa-home"></i> 首页</a>
         
-          <a class="main-nav-link" href="/blog/archives/"><i class="fa fa-archive"></i> 归档</a>
+          <a class="main-nav-link" href="/archives/"><i class="fa fa-archive"></i> 归档</a>
         
-          <a class="main-nav-link" href="/blog/about/"><i class="fa fa-user"></i> 关于</a>
+          <a class="main-nav-link" href="/about/"><i class="fa fa-user"></i> 关于</a>
         
-          <a class="main-nav-link" href="/blog/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+          <a class="main-nav-link" href="/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
         
       </nav>
     </div>
@@ -116,7 +116,7 @@
       
   <div class="article-category">
     <i class="fa fa-classify"></i>
-    <a class="article-category-link" href="/blog/categories/Vue3/">Vue3</a>
+    <a class="article-category-link" href="/categories/Vue3/">Vue3</a>
   </div>
 
       
@@ -129,7 +129,7 @@
 
       
       
-<a href="/blog/2022/06/29/vue3/setup/#comments" class="article-comment-link">
+<a href="/2022/06/29/vue3/setup/#comments" class="article-comment-link">
   
     
     
@@ -157,7 +157,7 @@
 <p>我们先来回想一下 Vue.js 2.x 编写组件的时候，会在 props、data、methods、computed 等 options 中定义一些变量。在组件初始化阶段，Vue.js 内部会处理这些 options，即把定义的变量添加到了组件实例上。等模板编译成 render 函数的时候，内部通过 with(this){} 的语法去访问在组件实例中的变量。</p>
 <p>那么到了 Vue.js 3.0，既支持组件定义 setup 函数，而且在模板 render 的时候，又可以访问到 setup 函数返回的值，这是如何实现的？我们来一探究竟。</p>
 <h3 id="创建和设置组件实例"><a href="#创建和设置组件实例" class="headerlink" title="创建和设置组件实例"></a>创建和设置组件实例</h3><p>首先，我们来回顾一下组件的渲染流程：创建 vnode 、渲染 vnode 和生成 DOM。</p>
-<p><img src="/blog/setup/Ciqc1F8VZpKAVYWOAABLt08AfuQ883.png"></p>
+<p><img src="/setup/Ciqc1F8VZpKAVYWOAABLt08AfuQ883.png"></p>
 <p>其中渲染 vnode 的过程主要就是在挂载组件：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">mountComponent</span> = (<span class="params">initialVNode, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 创建组件实例</span></span><br><span class="line">  <span class="keyword">const</span> instance = (initialVNode.<span class="property">component</span> = <span class="title function_">createComponentInstance</span>(initialVNode, parentComponent, parentSuspense))</span><br><span class="line">  <span class="comment">// 设置组件实例</span></span><br><span class="line">  <span class="title function_">setupComponent</span>(instance)</span><br><span class="line">  <span class="comment">// 设置并运行带副作用的渲染函数</span></span><br><span class="line">  <span class="title function_">setupRenderEffect</span>(instance, initialVNode, container, anchor, </span><br><span class="line">  parentSuspense, isSVG, optimized)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -282,7 +282,7 @@
 <p>由于 applyOptions 的代码特别长，所以这里我用注释列出了它主要做的事情，感兴趣的同学可以去翻阅它的源码。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这节课我们主要分析了组件的初始化流程，主要包括创建组件实例和设置组件实例。通过进一步细节的深入，我们也了解了渲染上下文的代理过程；了解了 Composition API 中的 setup 启动函数执行的时机，以及如何建立 setup 返回结果和模板渲染之间的联系；了解了组件定义的模板或者渲染函数的标准化过程；了解了如何兼容 Vue.js 2.x 的 Options API。</p>
 <p>我们通过一张图再直观感受一下 Vue.js 3.0 组件的初始化流程：</p>
-<p><img src="/blog/setup/Ciqc1F8VZvaAYCgKAAHVSzimXjw614.png"></p>
+<p><img src="/setup/Ciqc1F8VZvaAYCgKAAHVSzimXjw614.png"></p>
 <blockquote>
 <p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;component.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;componentProxy.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;errorHandling.ts</p>
 </blockquote>
@@ -302,7 +302,7 @@
         
         
           <blockquote id="copyright">
-              <p>原文链接: <a href="https://xiaozhouguo.github.io/blog/2022/06/29/vue3/setup/">https://xiaozhouguo.github.io/blog/2022/06/29/vue3/setup/</a></p>
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/2022/06/29/vue3/setup/">https://xiaozhouguo.github.io/2022/06/29/vue3/setup/</a></p>
               <p>版权声明: 转载请注明出处.</p>
           </blockquote>
         
@@ -314,7 +314,7 @@
           
 
           
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/setup/" rel="tag">setup</a></li></ul>
 
           
     <div class="social-share">
@@ -329,7 +329,7 @@
         
 <nav id="article-nav">
   
-    <a href="/blog/2022/06/28/vue3/dom-diff-process2/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2022/06/28/vue3/dom-diff-process2/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">older</strong>
       <div class="article-nav-title">
         
@@ -339,7 +339,7 @@
     </a>
   
   
-    <a href="/blog/2022/07/01/vue3/reactive-inner/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2022/07/01/vue3/reactive-inner/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">newer</strong>
       <div class="article-nav-title">
         
@@ -378,23 +378,23 @@
       <ul>
         
           <li>
-            <a href="/blog/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
+            <a href="/2022/08/31/vue3/ast-two/">构造AST的完整流程是怎样的？ -下篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
+            <a href="/2022/08/03/vue3/ast-transform-one/">AST 节点内部做了哪些转换？- 上篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
+            <a href="/2022/08/02/vue3/ast-one/">构造AST的完整流程是怎么样的？ - 上篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
+            <a href="/2022/08/01/vue3/watcher-two/">侦听器的实现原理和使用场景 - 下篇</a>
           </li>
         
           <li>
-            <a href="/blog/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
+            <a href="/2022/08/01/vue3/reactive-inner-two/">响应式内部的实现原理是怎么样的？- 下篇</a>
           </li>
         
       </ul>
@@ -407,7 +407,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
     <div class="widget tagcloud">
-      <a href="/blog/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/blog/tags/Array/" style="font-size: 10px;">Array</a> <a href="/blog/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/blog/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/blog/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/blog/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/blog/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/blog/tags/computed/" style="font-size: 10px;">computed</a> <a href="/blog/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/blog/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/blog/tags/provide/" style="font-size: 10px;">provide</a> <a href="/blog/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/blog/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/blog/tags/setup/" style="font-size: 10px;">setup</a> <a href="/blog/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/blog/tags/watch/" style="font-size: 13.33px;">watch</a>
+      <a href="/tags/AST/" style="font-size: 16.67px;">AST</a> <a href="/tags/Array/" style="font-size: 10px;">Array</a> <a href="/tags/DOM-diff/" style="font-size: 13.33px;">DOM-diff</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/tags/computed/" style="font-size: 10px;">computed</a> <a href="/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/tags/provide/" style="font-size: 10px;">provide</a> <a href="/tags/reactive/" style="font-size: 16.67px;">reactive</a> <a href="/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/tags/setup/" style="font-size: 10px;">setup</a> <a href="/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/tags/watch/" style="font-size: 13.33px;">watch</a>
     </div>
   </div>
 
@@ -416,7 +416,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue3/">Vue3</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -426,7 +426,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/blog/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/">2022年</a><span class="archive-list-count">19</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
     </div>
   </div>
 
@@ -436,7 +436,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/blog/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AST/" rel="tag">AST</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -467,9 +467,9 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       <p>
-        <a href="/blog/sitemap.xml">网站地图</a>
-        <span> | </span><a href="/blog/atom.xml">订阅本站</a>
-        <span> | </span><a href="/blog/about/">联系博主</a>
+        <a href="/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/atom.xml">订阅本站</a>
+        <span> | </span><a href="/about/">联系博主</a>
       </p>
       
         <p>
@@ -492,19 +492,19 @@
     </div>
   </div>
   
-<script src="/blog/js/jquery-3.4.1.min.js"></script>
+<script src="/js/jquery-3.4.1.min.js"></script>
 
 
-<script src="/blog/js/search.json.js"></script>
+<script src="/js/search.json.js"></script>
 
 
   
-<script src="/blog/fancybox/jquery.fancybox.min.js"></script>
+<script src="/fancybox/jquery.fancybox.min.js"></script>
 
 
 
 
-<script src="/blog/js/script.js"></script>
+<script src="/js/script.js"></script>
 
 
 
@@ -519,10 +519,10 @@
 
   
     
-<script src="/blog/localshare/js/social-share.js"></script>
+<script src="/localshare/js/social-share.js"></script>
 
     
-<script src="/blog/localshare/js/qrcode.js"></script>
+<script src="/localshare/js/qrcode.js"></script>
 
   
   
@@ -538,8 +538,8 @@
 
     <script>
       var gitalk = new Gitalk({
-        clientID: '52ec56b78cde1f38514e',
-        clientSecret: '2717c35984cdd38208d922b574fcfcf70f782ed8',
+        clientID: '73caaf19e0a3f8e71ddd',
+        clientSecret: 'd4447cc0909c43121bd44ccae5073305021cd6be',
         repo: 'blog',
         owner: 'XIAOZHOUGUO',
         admin: ['XIAOZHOUGUO'],

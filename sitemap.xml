@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/08/31/vue3/ast-two/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/08/31/vue3/ast-two/</loc>
     
     <lastmod>2022-08-31</lastmod>
     
@@ -11,7 +11,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/08/03/vue3/ast-transform-one/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/08/03/vue3/ast-transform-one/</loc>
     
     <lastmod>2022-08-03</lastmod>
     
@@ -20,7 +20,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/08/02/vue3/ast-one/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/08/02/vue3/ast-one/</loc>
     
     <lastmod>2022-08-02</lastmod>
     
@@ -29,7 +29,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/08/01/vue3/watcher-two/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/08/01/vue3/watcher-two/</loc>
     
     <lastmod>2022-08-01</lastmod>
     
@@ -38,7 +38,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/08/01/vue3/reactive-inner-two/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/08/01/vue3/reactive-inner-two/</loc>
     
     <lastmod>2022-08-01</lastmod>
     
@@ -47,7 +47,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/07/26/vue3/provide-inject/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/07/26/vue3/provide-inject/</loc>
     
     <lastmod>2022-08-01</lastmod>
     
@@ -56,7 +56,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/06/28/vue3/dom-diff-process2/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/06/28/vue3/dom-diff-process2/</loc>
     
     <lastmod>2022-07-26</lastmod>
     
@@ -65,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/06/27/vue3/dom-diff-process1/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/06/27/vue3/dom-diff-process1/</loc>
     
     <lastmod>2022-07-26</lastmod>
     
@@ -74,7 +74,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/06/24/vue3/component-render/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/06/24/vue3/component-render/</loc>
     
     <lastmod>2022-07-26</lastmod>
     
@@ -83,7 +83,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/06/23/vue3/vue3-optimization-summary/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/06/23/vue3/vue3-optimization-summary/</loc>
     
     <lastmod>2022-07-26</lastmod>
     
@@ -92,7 +92,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/06/29/vue3/setup/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/06/29/vue3/setup/</loc>
     
     <lastmod>2022-07-26</lastmod>
     
@@ -101,7 +101,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/07/07/vue3/life-cycle/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/07/07/vue3/life-cycle/</loc>
     
     <lastmod>2022-07-14</lastmod>
     
@@ -110,7 +110,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/07/05/vue3/watcher-one/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/07/05/vue3/watcher-one/</loc>
     
     <lastmod>2022-07-05</lastmod>
     
@@ -119,7 +119,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/07/01/vue3/reactive-inner/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/07/01/vue3/reactive-inner/</loc>
     
     <lastmod>2022-07-04</lastmod>
     
@@ -128,7 +128,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/07/04/vue3/computed/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/07/04/vue3/computed/</loc>
     
     <lastmod>2022-07-04</lastmod>
     
@@ -137,7 +137,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/14/DataBase01/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/14/DataBase01/</loc>
     
     <lastmod>2022-07-01</lastmod>
     
@@ -146,7 +146,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/05/30/typescript/type-challanges/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/05/30/typescript/type-challanges/</loc>
     
     <lastmod>2022-06-08</lastmod>
     
@@ -155,7 +155,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/05/21/vue/nextTick/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/05/21/vue/nextTick/</loc>
     
     <lastmod>2022-06-02</lastmod>
     
@@ -164,7 +164,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/about/index.html</loc>
+    <loc>https://xiaozhouguo.github.io/about/index.html</loc>
     
     <lastmod>2022-06-02</lastmod>
     
@@ -173,7 +173,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/05/23/javascript-array/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/05/23/javascript-array/</loc>
     
     <lastmod>2022-06-02</lastmod>
     
@@ -182,7 +182,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2022/05/25/vue3/simple-reactive/</loc>
+    <loc>https://xiaozhouguo.github.io/2022/05/25/vue3/simple-reactive/</loc>
     
     <lastmod>2022-05-26</lastmod>
     
@@ -191,7 +191,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/04/WebJs01/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/04/WebJs01/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -200,7 +200,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2018/05/31/regular-expression/</loc>
+    <loc>https://xiaozhouguo.github.io/2018/05/31/regular-expression/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -209,7 +209,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/13/WebJs10/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/13/WebJs10/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -218,7 +218,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/12/WebJs09/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/12/WebJs09/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -227,7 +227,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/12/WebJs08/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/12/WebJs08/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -236,7 +236,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/10/WebJs07/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/10/WebJs07/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -245,7 +245,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/09/WebJs06/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/09/WebJs06/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -254,7 +254,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/09/WebJs05/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/09/WebJs05/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -263,7 +263,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/08/WebJs04/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/08/WebJs04/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -272,7 +272,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/08/WebJs03/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/08/WebJs03/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -281,7 +281,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/05/WebJs02/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/05/WebJs02/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -290,7 +290,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/03/markdown/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/03/markdown/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -299,7 +299,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/2017/08/18/javascript01/</loc>
+    <loc>https://xiaozhouguo.github.io/2017/08/18/javascript01/</loc>
     
     <lastmod>2022-05-25</lastmod>
     
@@ -308,7 +308,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/category/index.html</loc>
+    <loc>https://xiaozhouguo.github.io/category/index.html</loc>
     
     <lastmod>2017-08-14</lastmod>
     
@@ -317,7 +317,7 @@
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/index.html</loc>
+    <loc>https://xiaozhouguo.github.io/tags/index.html</loc>
     
     <lastmod>2017-08-14</lastmod>
     
@@ -327,7 +327,7 @@
   
 
   <url>
-    <loc>https://xiaozhouguo.github.io/blog</loc>
+    <loc>https://xiaozhouguo.github.io/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -335,112 +335,112 @@
 
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/MongoDB/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/JavaScript/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/MySQL/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/MongoDB/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/JavaScript/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/MySQL/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/regular-expression/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/Array/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/Array/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/regular-expression/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/nextTick/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/type-challanges/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/Promise/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/nextTick/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/AST/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/Promise/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/type-challanges/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/AST/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/computed/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/DOM-diff/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/DOM-diff/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/computed/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/reactive/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/provide/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/provide/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/life-cycle/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/life-cycle/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/reactive/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/setup/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/setup/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/tags/watch/</loc>
+    <loc>https://xiaozhouguo.github.io/tags/watch/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -449,63 +449,63 @@
 
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/MongoDB/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/MongoDB/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/%E5%B0%8F%E7%AA%A5-javascript/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/JavaScript/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/MarkDown/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/MarkDown/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/%E5%B0%8F%E7%AA%A5-javascript/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/JavaScript/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/Vue2/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/TypeScript/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/Vue3/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/Vue2/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/blog/categories/TypeScript/</loc>
+    <loc>https://xiaozhouguo.github.io/categories/Vue3/</loc>
     <lastmod>2022-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
