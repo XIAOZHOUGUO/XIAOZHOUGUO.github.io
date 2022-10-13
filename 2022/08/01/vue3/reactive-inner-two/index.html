@@ -237,7 +237,8 @@
 <p>接着对 rawValue 做了一层转换，如果 rawValue 是对象或者数组类型，那么把它转换成一个 reactive 对象。</p>
 <p>最后定义一个对 value 属性做 getter 和 setter 劫持的对象并返回，get 部分就是执行 track 函数做依赖收集然后返回它的值；set 部分就是设置新值并且执行 trigger 函数派发通知。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>最后我们通过一张图来看一下整个响应式 API 实现和组件更新的关系：</p>
-<p><img src="/reactive-inner-two/CgqCHl8iOeqAJJlaAAHAhGDRoDQ714.png"></p>
+<img src="/2022/08/01/vue3/reactive-inner-two/CgqCHl8iOeqAJJlaAAHAhGDRoDQ714.png" class="">
+
 <p>这幅图是不是很眼熟？没错，它和前面 Vue.js 2.x 的响应式原理图很接近，其实 Vue.js 3.0 在响应式的实现思路和 Vue.js 2.x 差别并不大，主要就是 <strong>劫持数据的方式改成用 Proxy 实现</strong> ， <strong>以及收集的依赖由 watcher 实例变成了组件副作用渲染函数</strong> 。</p>
 <blockquote>
 <p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;reactivity&#x2F;src&#x2F;baseHandlers.ts<br>packages&#x2F;reactivity&#x2F;src&#x2F;effect.ts<br>packages&#x2F;reactivity&#x2F;src&#x2F;reactive.ts<br>packages&#x2F;reactivity&#x2F;src&#x2F;ref.ts</p>

@@ -202,21 +202,24 @@
 <li>如果新子节点是空，那么删除旧子节点即可；</li>
 <li>如果新子节点是 vnode 数组，那么先把旧子节点的文本清空，再去旧子节点的父容器下添加多个新子节点。</li>
 </ul>
-<p><img src="/dom-diff-process1/Ciqc1F8MBDWAfUAXAADe59XvjHY701.png"></p>
+<img src="/2022/06/27/vue3/dom-diff-process1/Ciqc1F8MBDWAfUAXAADe59XvjHY701.png" class="">
+
 <p>接下来看一下<strong>旧子节点是空</strong>的情况：</p>
 <ul>
 <li>如果新子节点是纯文本，那么在旧子节点的父容器下添加新文本节点即可；</li>
 <li>如果新子节点也是空，那么什么都不需要做；</li>
 <li>如果新子节点是 vnode 数组，那么直接去旧子节点的父容器下添加多个新子节点即可。</li>
 </ul>
-<p><img src="/dom-diff-process1/CgqCHl8MBEOANnFmAADYr-_R5mM894.png"></p>
+<img src="/2022/06/27/vue3/dom-diff-process1/CgqCHl8MBEOANnFmAADYr-_R5mM894.png" class="">
+
 <p>最后来看一下<strong>旧子节点是 vnode 数组</strong>的情况：</p>
 <ul>
 <li>如果新子节点是纯文本，那么先删除旧子节点，再去旧子节点的父容器下添加新文本节点；</li>
 <li>如果新子节点是空，那么删除旧子节点即可；</li>
 <li>如果新子节点也是 vnode 数组，那么就需要做完整的 diff 新旧子节点了，这是最复杂的情况，内部运用了核心 diff 算法。</li>
 </ul>
-<p><img src="/dom-diff-process1/CgqCHl8MBCuAUZksAADplAU2718113.png"></p>
+<img src="/2022/06/27/vue3/dom-diff-process1/CgqCHl8MBCuAUZksAADplAU2718113.png" class="">
+
 <p>下节课我们就来深入探究一下这个复杂的 diff 算法。</p>
 <blockquote>
 <p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;componentRenderUtils.ts</p>

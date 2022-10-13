@@ -188,7 +188,8 @@
 <p>它并没有对计算属性求新值，而仅仅是把 dirty 设置为 true，再执行 trigger(computed, “set” , ‘value’)，去通知执行 plusOne 依赖的组件渲染副作用函数，即触发组件的重新渲染。</p>
 <p>在组件重新渲染的时候，会再次访问 plusOne，我们发现这个时候 dirty 为 true，然后会再次执行 computed getter，此时才会执行 count.value + 1 求得新值。这就是虽然组件没有直接访问 count，但是当我们修改 count 的值的时候，组件仍然会重新渲染的原因。</p>
 <p>为了更加直观展示上述过程，我画了一张图：</p>
-<p><img src="/computed/Ciqc1F8nv6SAMiYhAAJ4vcrA7pg591.png"></p>
+<img src="/2022/07/04/vue3/computed/Ciqc1F8nv6SAMiYhAAJ4vcrA7pg591.png" class="">
+
 <p>通过以上分析，我们可以看出 computed 计算属性有两个特点：</p>
 <ol>
 <li><strong>延时计算</strong>，只有当我们访问计算属性的时候，它才会真正运行 computed getter 函数计算；</li>

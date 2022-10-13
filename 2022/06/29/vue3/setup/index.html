@@ -157,7 +157,8 @@
 <p>我们先来回想一下 Vue.js 2.x 编写组件的时候，会在 props、data、methods、computed 等 options 中定义一些变量。在组件初始化阶段，Vue.js 内部会处理这些 options，即把定义的变量添加到了组件实例上。等模板编译成 render 函数的时候，内部通过 with(this){} 的语法去访问在组件实例中的变量。</p>
 <p>那么到了 Vue.js 3.0，既支持组件定义 setup 函数，而且在模板 render 的时候，又可以访问到 setup 函数返回的值，这是如何实现的？我们来一探究竟。</p>
 <h3 id="创建和设置组件实例"><a href="#创建和设置组件实例" class="headerlink" title="创建和设置组件实例"></a>创建和设置组件实例</h3><p>首先，我们来回顾一下组件的渲染流程：创建 vnode 、渲染 vnode 和生成 DOM。</p>
-<p><img src="/setup/Ciqc1F8VZpKAVYWOAABLt08AfuQ883.png"></p>
+<img src="/2022/06/29/vue3/setup/Ciqc1F8VZpKAVYWOAABLt08AfuQ883.png" class="">
+
 <p>其中渲染 vnode 的过程主要就是在挂载组件：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">mountComponent</span> = (<span class="params">initialVNode, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 创建组件实例</span></span><br><span class="line">  <span class="keyword">const</span> instance = (initialVNode.<span class="property">component</span> = <span class="title function_">createComponentInstance</span>(initialVNode, parentComponent, parentSuspense))</span><br><span class="line">  <span class="comment">// 设置组件实例</span></span><br><span class="line">  <span class="title function_">setupComponent</span>(instance)</span><br><span class="line">  <span class="comment">// 设置并运行带副作用的渲染函数</span></span><br><span class="line">  <span class="title function_">setupRenderEffect</span>(instance, initialVNode, container, anchor, </span><br><span class="line">  parentSuspense, isSVG, optimized)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -282,7 +283,8 @@
 <p>由于 applyOptions 的代码特别长，所以这里我用注释列出了它主要做的事情，感兴趣的同学可以去翻阅它的源码。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这节课我们主要分析了组件的初始化流程，主要包括创建组件实例和设置组件实例。通过进一步细节的深入，我们也了解了渲染上下文的代理过程；了解了 Composition API 中的 setup 启动函数执行的时机，以及如何建立 setup 返回结果和模板渲染之间的联系；了解了组件定义的模板或者渲染函数的标准化过程；了解了如何兼容 Vue.js 2.x 的 Options API。</p>
 <p>我们通过一张图再直观感受一下 Vue.js 3.0 组件的初始化流程：</p>
-<p><img src="/setup/Ciqc1F8VZvaAYCgKAAHVSzimXjw614.png"></p>
+<img src="/2022/06/29/vue3/setup/Ciqc1F8VZvaAYCgKAAHVSzimXjw614.png" class="">
+
 <blockquote>
 <p><strong>本节课的相关代码在源代码中的位置如下：</strong><br>packages&#x2F;runtime-core&#x2F;src&#x2F;renderer.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;component.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;componentProxy.ts<br>packages&#x2F;runtime-core&#x2F;src&#x2F;errorHandling.ts</p>
 </blockquote>
