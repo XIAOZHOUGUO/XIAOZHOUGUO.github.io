@@ -328,120 +328,120 @@
 
   <url>
     <loc>https://xiaozhouguo.github.io/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
-    <loc>https://xiaozhouguo.github.io/tags/JavaScript/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://xiaozhouguo.github.io/tags/MongoDB/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/MySQL/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/tags/JavaScript/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/Array/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/tags/regular-expression/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/tags/type-challanges/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/nextTick/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/Promise/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/tags/regular-expression/</loc>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/tags/type-challanges/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/AST/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/tags/DOM-diff/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/computed/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/tags/provide/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/tags/life-cycle/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <loc>https://xiaozhouguo.github.io/tags/DOM-diff/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/reactive/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/tags/life-cycle/</loc>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/tags/provide/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/setup/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/tags/watch/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -449,64 +449,64 @@
 
   
   <url>
-    <loc>https://xiaozhouguo.github.io/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <loc>https://xiaozhouguo.github.io/categories/MongoDB/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://xiaozhouguo.github.io/categories/MongoDB/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <loc>https://xiaozhouguo.github.io/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/categories/JavaScript/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/categories/MarkDown/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/categories/%E5%B0%8F%E7%AA%A5-javascript/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</loc>
-    <lastmod>2022-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://xiaozhouguo.github.io/categories/TypeScript/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/categories/Vue2/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</loc>
+    <lastmod>2022-10-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://xiaozhouguo.github.io/categories/TypeScript/</loc>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://xiaozhouguo.github.io/categories/Vue3/</loc>
-    <lastmod>2022-09-19</lastmod>
+    <lastmod>2022-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
