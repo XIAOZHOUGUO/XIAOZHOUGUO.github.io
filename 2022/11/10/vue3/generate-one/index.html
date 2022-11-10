@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>生成代码-AST如何生成可运行的代码？-上篇 | We Are ALL Made Of Star Stuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <meta name="description" content="start from zero">
+  
+  
+  
+    <link rel="alternate" href="/atom.xml" title="We Are ALL Made Of Star Stuff" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/localshare/css/share.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">We Are ALL Made Of Star Stuff</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">steps-by-steps</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        
+          <a class="main-nav-link" href="/."><i class="fa fa-home"></i> 首页</a>
+        
+          <a class="main-nav-link" href="/archives/"><i class="fa fa-archive"></i> 归档</a>
+        
+          <a class="main-nav-link" href="/about/"><i class="fa fa-user"></i> 关于</a>
+        
+          <a class="main-nav-link" href="/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
+        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
+      </div>
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vue3/generate-one" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      生成代码-AST如何生成可运行的代码？-上篇
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="article-meta">
+      
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2022-11-10T07:08:20.000Z" itemprop="datePublished">2022年11月10日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/categories/Vue3/">Vue3</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/2022/11/10/vue3/generate-one/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  留言
+</a>
+
+
+    </div>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本篇开始，我们就来分析整个编译的过程的最后一步——代码生成的实现原理。</p>
+<span id="more"></span>
+
+<p>同样的，代码生成阶段由于要处理的场景很多，所以代码也非常多而复杂。为了方便你理解它的核心流程，我们还是通过这个示例来演示整个代码生成的过程：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">hello</span> <span class="attr">v-if</span>=<span class="string">&quot;flag&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">hello</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">v-else</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>hello &#123;&#123; msg + test &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>static<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>static<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码生成的结果是和编译配置相关的，你可以打开官方提供的<a target="_blank" rel="noopener" href="https://vue-next-template-explorer.netlify.app/">模板导出工具平台</a>，点击右上角的 Options 修改编译配置。为了让你理解核心的流程，这里我只分析一种配置方案，当然当你理解整个编译核心流程后，也可以修改这些配置分析其他的分支逻辑。</p>
+<p>我们分析的编译配置是：mode 为 module，prefixIdentifiers 开启，hoistStatic 开启，其他配置均不开启。</p>
+<p>为了让你有个大致印象，我们先来看一下上述例子生成代码的结果：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">render</span>(<span class="params">_ctx, _cache</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> _component_hello = <span class="title function_">_resolveComponent</span>(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">  <span class="keyword">return</span> (<span class="title function_">_openBlock</span>(), <span class="title function_">_createBlock</span>(<span class="string">&quot;div&quot;</span>, _hoisted_1, [</span><br><span class="line">    (_ctx.<span class="property">flag</span>)</span><br><span class="line">      ? <span class="title function_">_createVNode</span>(_component_hello, &#123; <span class="attr">key</span>: <span class="number">0</span> &#125;)</span><br><span class="line">      : (<span class="title function_">_openBlock</span>(), <span class="title function_">_createBlock</span>(<span class="string">&quot;div&quot;</span>, _hoisted_2, [</span><br><span class="line">          <span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;hello &quot;</span> + <span class="title function_">_toDisplayString</span>(_ctx.<span class="property">msg</span> + _ctx.<span class="property">test</span>), <span class="number">1</span> <span class="comment">/* TEXT */</span>),</span><br><span class="line">          _hoisted_3,</span><br><span class="line">          _hoisted_4</span><br><span class="line">        ]))</span><br><span class="line">  ]))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>示例的模板是如何转换生成这样的代码的？在 AST 转换后，会执行 generate 函数生成代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="title function_">generate</span>(ast, <span class="title function_">extend</span>(&#123;&#125;, options, &#123;</span><br><span class="line">  prefixIdentifiers</span><br><span class="line">&#125;))</span><br></pre></td></tr></table></figure>
+
+<p>generate 函数的输入就是转换后的 AST 根节点，我们看一下它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">generate</span>(<span class="params">ast, options = &#123;&#125;</span>) &#123;</span><br><span class="line">  <span class="comment">// 创建代码生成上下文</span></span><br><span class="line">  <span class="keyword">const</span> context = <span class="title function_">createCodegenContext</span>(ast, options);</span><br><span class="line">  <span class="keyword">const</span> &#123; mode, push, prefixIdentifiers, indent, deindent, newline, scopeId, ssr &#125; = context;</span><br><span class="line">  <span class="keyword">const</span> hasHelpers = ast.<span class="property">helpers</span>.<span class="property">length</span> &gt; <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">const</span> useWithBlock = !prefixIdentifiers &amp;&amp; mode !== <span class="string">&#x27;module&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> genScopeId = scopeId != <span class="literal">null</span> &amp;&amp; mode === <span class="string">&#x27;module&#x27;</span>;</span><br><span class="line">  <span class="comment">// 生成预设代码</span></span><br><span class="line">  <span class="keyword">if</span> ( mode === <span class="string">&#x27;module&#x27;</span>) &#123;</span><br><span class="line">    <span class="title function_">genModulePreamble</span>(ast, context, genScopeId);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">genFunctionPreamble</span>(ast, context);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!ssr) &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`function render(_ctx, _cache) &#123;`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`function ssrRender(_ctx, _push, _parent, _attrs) &#123;`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">indent</span>();</span><br><span class="line">  <span class="keyword">if</span> (useWithBlock) &#123;</span><br><span class="line">    <span class="comment">// 处理带 with 的情况，Web 端运行时编译</span></span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`with (_ctx) &#123;`</span>);</span><br><span class="line">    <span class="title function_">indent</span>();</span><br><span class="line">    <span class="keyword">if</span> (hasHelpers) &#123;</span><br><span class="line">      <span class="title function_">push</span>(<span class="string">`const &#123; <span class="subst">$&#123;ast.helpers</span></span></span><br><span class="line"><span class="subst"><span class="string">        .map(s =&gt; <span class="string">`<span class="subst">$&#123;helperNameMap[s]&#125;</span>: _<span class="subst">$&#123;helperNameMap[s]&#125;</span>`</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">        .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span> &#125; = _Vue`</span>);</span><br><span class="line">      <span class="title function_">push</span>(<span class="string">`\n`</span>);</span><br><span class="line">      <span class="title function_">newline</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 生成自定义组件声明代码</span></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">components</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="title function_">genAssets</span>(ast.<span class="property">components</span>, <span class="string">&#x27;component&#x27;</span>, context);</span><br><span class="line">    <span class="keyword">if</span> (ast.<span class="property">directives</span>.<span class="property">length</span> || ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="title function_">newline</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 生成自定义指令声明代码</span></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">directives</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="title function_">genAssets</span>(ast.<span class="property">directives</span>, <span class="string">&#x27;directive&#x27;</span>, context);</span><br><span class="line">    <span class="keyword">if</span> (ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="title function_">newline</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 生成临时变量代码</span></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`let `</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; ast.<span class="property">temps</span>; i++) &#123;</span><br><span class="line">      <span class="title function_">push</span>(<span class="string">`<span class="subst">$&#123;i &gt; <span class="number">0</span> ? <span class="string">`, `</span> : <span class="string">``</span>&#125;</span>_temp<span class="subst">$&#123;i&#125;</span>`</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">components</span>.<span class="property">length</span> || ast.<span class="property">directives</span>.<span class="property">length</span> || ast.<span class="property">temps</span>) &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`\n`</span>);</span><br><span class="line">    <span class="title function_">newline</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!ssr) &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`return `</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 生成创建 VNode 树的表达式</span></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">codegenNode</span>) &#123;</span><br><span class="line">    <span class="title function_">genNode</span>(ast.<span class="property">codegenNode</span>, context);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`null`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (useWithBlock) &#123;</span><br><span class="line">    <span class="title function_">deindent</span>();</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`&#125;`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">deindent</span>();</span><br><span class="line">  <span class="title function_">push</span>(<span class="string">`&#125;`</span>);</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    ast,</span><br><span class="line">    <span class="attr">code</span>: context.<span class="property">code</span>,</span><br><span class="line">    <span class="attr">map</span>: context.<span class="property">map</span> ? context.<span class="property">map</span>.<span class="title function_">toJSON</span>() : <span class="literal">undefined</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>generate 主要做五件事情：创建代码生成上下文，生成预设代码，生成渲染函数，生成资源声明代码，以及生成创建 VNode 树的表达式。接下来，我们就依次详细分析这几个流程。</p>
+<h3 id="创建代码生成上下文"><a href="#创建代码生成上下文" class="headerlink" title="创建代码生成上下文"></a>创建代码生成上下文</h3><p>首先，是通过执行 createCodegenContext 创建代码生成上下文，我们来看它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">createCodegenContext</span>(<span class="params">ast, &#123; </span></span><br><span class="line"><span class="params">    mode = <span class="string">&#x27;function&#x27;</span>, prefixIdentifiers = mode === <span class="string">&#x27;module&#x27;</span>, </span></span><br><span class="line"><span class="params">    sourceMap = <span class="literal">false</span>, filename = <span class="string">`template.vue.html`</span>, </span></span><br><span class="line"><span class="params">    scopeId = <span class="literal">null</span>, optimizeBindings = <span class="literal">false</span>, </span></span><br><span class="line"><span class="params">    runtimeGlobalName = <span class="string">`Vue`</span>, runtimeModuleName = <span class="string">`vue`</span>, ssr = <span class="literal">false</span> &#125;</span></span><br><span class="line"><span class="params"> </span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> context = &#123;</span><br><span class="line">    mode,</span><br><span class="line">    prefixIdentifiers,</span><br><span class="line">    sourceMap,</span><br><span class="line">    filename,</span><br><span class="line">    scopeId,</span><br><span class="line">    optimizeBindings,</span><br><span class="line">    runtimeGlobalName,</span><br><span class="line">    runtimeModuleName,</span><br><span class="line">    ssr,</span><br><span class="line">    <span class="attr">source</span>: ast.<span class="property">loc</span>.<span class="property">source</span>,</span><br><span class="line">    <span class="attr">code</span>: <span class="string">``</span>,</span><br><span class="line">    <span class="attr">column</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">line</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">offset</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">indentLevel</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">pure</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">map</span>: <span class="literal">undefined</span>,</span><br><span class="line">    <span class="title function_">helper</span>(<span class="params">key</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`_<span class="subst">$&#123;helperNameMap[key]&#125;</span>`</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">push</span>(<span class="params">code</span>) &#123;</span><br><span class="line">      context.<span class="property">code</span> += code</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">indent</span>(<span class="params"></span>) &#123;</span><br><span class="line">      <span class="title function_">newline</span>(++context.<span class="property">indentLevel</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">deindent</span>(<span class="params">withoutNewLine = <span class="literal">false</span></span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (withoutNewLine) &#123;</span><br><span class="line">        --context.<span class="property">indentLevel</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title function_">newline</span>(--context.<span class="property">indentLevel</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">newline</span>(<span class="params"></span>) &#123;</span><br><span class="line">      <span class="title function_">newline</span>(context.<span class="property">indentLevel</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">newline</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    context.<span class="title function_">push</span>(<span class="string">&#x27;\n&#x27;</span> + <span class="string">`  `</span>.<span class="title function_">repeat</span>(n))</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> context</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个上下文对象 context 维护了 generate 过程的一些配置，比如 mode、prefixIdentifiers；也维护了 generate 过程的一些状态数据，比如当前生成的代码 code，当前生成代码的缩进 indentLevel 等。</p>
+<p>此外，context 还包含了在 generate 过程中可能会调用的一些辅助函数，接下来我会介绍几个常用的方法，它们会在整个代码生成节点过程中经常被用到。</p>
+<ul>
+<li><code>push(code)</code>，就是在当前的代码 context.code 后追加 code 来更新它的值。</li>
+<li><code>indent()</code>，它的作用就是增加代码的缩进，它会让上下文维护的代码缩进 context.indentLevel 加 1，内部会执行 newline 方法，添加一个换行符，以及两倍indentLevel 对应的空格来表示缩进的长度。</li>
+<li><code>deindent()</code>，和 indent 相反，它会减少代码的缩进，让上下文维护的代码缩进 context.indentLevel 减 1，在内部会执行 newline 方法去添加一个换行符，并减少两倍indentLevel 对应的空格的缩进长度。</li>
+</ul>
+<p>上下文创建完毕后，接下来就到了真正的代码生成阶段，在分析的过程中我会结合示例讲解，让你更直观地理解整个代码的生成过程，我们先来看生成预设代码。</p>
+<h3 id="生成预设代码"><a href="#生成预设代码" class="headerlink" title="生成预设代码"></a>生成预设代码</h3><p>因为 mode 是 module，所以会执行 genModulePreamble 生成预设代码，我们来看它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">genModulePreamble</span>(<span class="params">ast, context, genScopeId</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;</span><br><span class="line">    push,</span><br><span class="line">    newline,</span><br><span class="line">    optimizeImports,</span><br><span class="line">    runtimeModuleName,</span><br><span class="line">    ssrRuntimeModuleName</span><br><span class="line">  &#125; = context</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (genScopeId &amp;&amp; ast.<span class="property">hoists</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    ast.<span class="property">helpers</span>.<span class="title function_">push</span>(<span class="variable constant_">PUSH_SCOPE_ID</span>, <span class="variable constant_">POP_SCOPE_ID</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// generate import statements for helpers</span></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">helpers</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (optimizeImports) &#123;</span><br><span class="line">      <span class="comment">// when bundled with webpack with code-split, calling an import binding</span></span><br><span class="line">      <span class="comment">// as a function leads to it being wrapped with `Object(a.b)` or `(0,a.b)`,</span></span><br><span class="line">      <span class="comment">// incurring both payload size increase and potential perf overhead.</span></span><br><span class="line">      <span class="comment">// therefore we assign the imports to variables (which is a constant ~50b</span></span><br><span class="line">      <span class="comment">// cost per-component instead of scaling with template size)</span></span><br><span class="line">      <span class="title function_">push</span>(</span><br><span class="line">        <span class="string">`import &#123; <span class="subst">$&#123;ast.helpers</span></span></span><br><span class="line"><span class="subst"><span class="string">          .map(s =&gt; helperNameMap[s])</span></span></span><br><span class="line"><span class="subst"><span class="string">          .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span> &#125; from <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(runtimeModuleName)&#125;</span>\n`</span></span><br><span class="line">      )</span><br><span class="line">      <span class="title function_">push</span>(</span><br><span class="line">        <span class="string">`\n// Binding optimization for webpack code-split\nconst <span class="subst">$&#123;ast.helpers</span></span></span><br><span class="line"><span class="subst"><span class="string">          .map(s =&gt; <span class="string">`_<span class="subst">$&#123;helperNameMap[s]&#125;</span> = <span class="subst">$&#123;helperNameMap[s]&#125;</span>`</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">          .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span>\n`</span></span><br><span class="line">      )</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="title function_">push</span>(</span><br><span class="line">        <span class="string">`import &#123; <span class="subst">$&#123;ast.helpers</span></span></span><br><span class="line"><span class="subst"><span class="string">          .map(s =&gt; <span class="string">`<span class="subst">$&#123;helperNameMap[s]&#125;</span> as _<span class="subst">$&#123;helperNameMap[s]&#125;</span>`</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">          .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span> &#125; from <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(runtimeModuleName)&#125;</span>\n`</span></span><br><span class="line">      )</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">ssrHelpers</span> &amp;&amp; ast.<span class="property">ssrHelpers</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="title function_">push</span>(</span><br><span class="line">      <span class="string">`import &#123; <span class="subst">$&#123;ast.ssrHelpers</span></span></span><br><span class="line"><span class="subst"><span class="string">        .map(s =&gt; <span class="string">`<span class="subst">$&#123;helperNameMap[s]&#125;</span> as _<span class="subst">$&#123;helperNameMap[s]&#125;</span>`</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">        .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span> &#125; from &quot;<span class="subst">$&#123;ssrRuntimeModuleName&#125;</span>&quot;\n`</span></span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">imports</span>.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="title function_">genImports</span>(ast.<span class="property">imports</span>, context)</span><br><span class="line">    <span class="title function_">newline</span>()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">genHoists</span>(ast.<span class="property">hoists</span>, context)</span><br><span class="line">  <span class="title function_">newline</span>()</span><br><span class="line">  <span class="title function_">push</span>(<span class="keyword">export</span> )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面我们结合前面的示例来分析这个过程，此时 genScopeId 为 false，所以相关逻辑我们可以不看。ast.helpers 是在 transform 阶段通过 context.helper 方法添加的，它的值如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  <span class="title class_">Symbol</span>(resolveComponent),</span><br><span class="line">  <span class="title class_">Symbol</span>(createVNode),</span><br><span class="line">  <span class="title class_">Symbol</span>(createCommentVNode),</span><br><span class="line">  <span class="title class_">Symbol</span>(toDisplayString),</span><br><span class="line">  <span class="title class_">Symbol</span>(openBlock),</span><br><span class="line">  <span class="title class_">Symbol</span>(createBlock)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>ast.helpers 存储了 Symbol 对象的数组，我们可以从 helperNameMap 中找到每个 Symbol 对象对应的字符串，helperNameMap 的定义如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> helperNameMap = &#123;</span><br><span class="line">  [<span class="variable constant_">FRAGMENT</span>]: <span class="string">`Fragment`</span>,</span><br><span class="line">  [<span class="variable constant_">TELEPORT</span>]: <span class="string">`Teleport`</span>,</span><br><span class="line">  [<span class="variable constant_">SUSPENSE</span>]: <span class="string">`Suspense`</span>,</span><br><span class="line">  [<span class="variable constant_">KEEP_ALIVE</span>]: <span class="string">`KeepAlive`</span>,</span><br><span class="line">  [<span class="variable constant_">BASE_TRANSITION</span>]: <span class="string">`BaseTransition`</span>,</span><br><span class="line">  [<span class="variable constant_">OPEN_BLOCK</span>]: <span class="string">`openBlock`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_BLOCK</span>]: <span class="string">`createBlock`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_VNODE</span>]: <span class="string">`createVNode`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_COMMENT</span>]: <span class="string">`createCommentVNode`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_TEXT</span>]: <span class="string">`createTextVNode`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_STATIC</span>]: <span class="string">`createStaticVNode`</span>,</span><br><span class="line">  [<span class="variable constant_">RESOLVE_COMPONENT</span>]: <span class="string">`resolveComponent`</span>,</span><br><span class="line">  [<span class="variable constant_">RESOLVE_DYNAMIC_COMPONENT</span>]: <span class="string">`resolveDynamicComponent`</span>,</span><br><span class="line">  [<span class="variable constant_">RESOLVE_DIRECTIVE</span>]: <span class="string">`resolveDirective`</span>,</span><br><span class="line">  [<span class="variable constant_">WITH_DIRECTIVES</span>]: <span class="string">`withDirectives`</span>,</span><br><span class="line">  [<span class="variable constant_">RENDER_LIST</span>]: <span class="string">`renderList`</span>,</span><br><span class="line">  [<span class="variable constant_">RENDER_SLOT</span>]: <span class="string">`renderSlot`</span>,</span><br><span class="line">  [<span class="variable constant_">CREATE_SLOTS</span>]: <span class="string">`createSlots`</span>,</span><br><span class="line">  [<span class="variable constant_">TO_DISPLAY_STRING</span>]: <span class="string">`toDisplayString`</span>,</span><br><span class="line">  [<span class="variable constant_">MERGE_PROPS</span>]: <span class="string">`mergeProps`</span>,</span><br><span class="line">  [<span class="variable constant_">TO_HANDLERS</span>]: <span class="string">`toHandlers`</span>,</span><br><span class="line">  [<span class="variable constant_">CAMELIZE</span>]: <span class="string">`camelize`</span>,</span><br><span class="line">  [<span class="variable constant_">SET_BLOCK_TRACKING</span>]: <span class="string">`setBlockTracking`</span>,</span><br><span class="line">  [<span class="variable constant_">PUSH_SCOPE_ID</span>]: <span class="string">`pushScopeId`</span>,</span><br><span class="line">  [<span class="variable constant_">POP_SCOPE_ID</span>]: <span class="string">`popScopeId`</span>,</span><br><span class="line">  [<span class="variable constant_">WITH_SCOPE_ID</span>]: <span class="string">`withScopeId`</span>,</span><br><span class="line">  [<span class="variable constant_">WITH_CTX</span>]: <span class="string">`withCtx`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于 optimizeBindings 是 false，所以会执行如下代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">push</span>(<span class="string">`import &#123; <span class="subst">$&#123;ast.helpers</span></span></span><br><span class="line"><span class="subst"><span class="string">  .map(s =&gt; <span class="string">`<span class="subst">$&#123;helperNameMap[s]&#125;</span> as _<span class="subst">$&#123;helperNameMap[s]&#125;</span>`</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">  .join(<span class="string">&#x27;, &#x27;</span>)&#125;</span> &#125; from <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(runtimeModuleName)&#125;</span>\n`</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终会生成这些代码，并更新到 context.code 中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>通过生成的代码，我们可以直观地感受到，这里就是从 Vue 中引入了一些辅助方法，那么为什么需要引入这些辅助方法呢，这就和 Vue.js 3.0 的设计有关了。</p>
+<p>在 Vue.js 2.x 中，创建 VNode 的方法比如 $createElement、_c 这些都是挂载在组件的实例上，在生成渲染函数的时候，直接从组件实例 vm 中访问这些方法即可。</p>
+<p>而到了 Vue.js 3.0，创建 VNode 的方法 createVNode 是直接通过模块的方式导出，其它方法比如 resolveComponent、openBlock ，都是类似的，所以我们首先需要生成这些 import 声明的预设代码。</p>
+<p>我们接着往下看，ssrHelpers 是 undefined，imports 的数组长度为空，genScopeId 为 false，所以这些内部逻辑都不会执行，接着执行 genHoists 生成静态提升的相关代码，我们来看它的实现：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">genHoists</span>(<span class="params">hoists, context</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!hoists.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  context.<span class="property">pure</span> = <span class="literal">true</span></span><br><span class="line">  <span class="keyword">const</span> &#123; push, newline, helper, scopeId, mode &#125; = context</span><br><span class="line">  <span class="keyword">const</span> genScopeId = !__BROWSER__ &amp;&amp; scopeId != <span class="literal">null</span> &amp;&amp; mode !== <span class="string">&#x27;function&#x27;</span></span><br><span class="line">  <span class="title function_">newline</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// generate inlined withScopeId helper</span></span><br><span class="line">  <span class="keyword">if</span> (genScopeId) &#123;</span><br><span class="line">    <span class="title function_">push</span>(</span><br><span class="line">      <span class="string">`const _withScopeId = n =&gt; (<span class="subst">$&#123;helper(</span></span></span><br><span class="line"><span class="subst"><span class="string">        PUSH_SCOPE_ID</span></span></span><br><span class="line"><span class="subst"><span class="string">      )&#125;</span>(&quot;<span class="subst">$&#123;scopeId&#125;</span>&quot;),n=n(),<span class="subst">$&#123;helper(POP_SCOPE_ID)&#125;</span>(),n)`</span></span><br><span class="line">    )</span><br><span class="line">    <span class="title function_">newline</span>()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; hoists.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> exp = hoists[i]</span><br><span class="line">    <span class="keyword">if</span> (exp) &#123;</span><br><span class="line">      <span class="keyword">const</span> needScopeIdWrapper = genScopeId &amp;&amp; exp.<span class="property">type</span> === <span class="title class_">NodeTypes</span>.<span class="property">VNODE_CALL</span></span><br><span class="line">      <span class="title function_">push</span>(</span><br><span class="line">        <span class="string">`const _hoisted_<span class="subst">$&#123;i + <span class="number">1</span>&#125;</span> = <span class="subst">$&#123;</span></span></span><br><span class="line"><span class="subst"><span class="string">          needScopeIdWrapper ? <span class="string">`<span class="subst">$&#123;PURE_ANNOTATION&#125;</span> _withScopeId(() =&gt; `</span> : <span class="string">``</span></span></span></span><br><span class="line"><span class="subst"><span class="string">        &#125;</span>`</span></span><br><span class="line">      )</span><br><span class="line">      <span class="title function_">genNode</span>(exp, context)</span><br><span class="line">      <span class="keyword">if</span> (needScopeIdWrapper) &#123;</span><br><span class="line">        <span class="title function_">push</span>(<span class="string">`)`</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="title function_">newline</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  context.<span class="property">pure</span> = <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先通过执行 newline 生成一个空行，然后遍历 hoists 数组，生成静态提升变量定义的方法。此时 hoists 的值是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span>: <span class="number">15</span>, <span class="comment">/* JS_OBJECT_EXPRESSION */</span></span><br><span class="line">    <span class="string">&quot;properties&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="number">16</span>, <span class="comment">/* JS_PROPERTY */</span></span><br><span class="line">        <span class="string">&quot;key&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;type&quot;</span>: <span class="number">4</span>, <span class="comment">/* SIMPLE_EXPRESSION */</span></span><br><span class="line">          <span class="string">&quot;isConstant&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;class&quot;</span>,</span><br><span class="line">          <span class="string">&quot;isStatic&quot;</span>: <span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;value&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;type&quot;</span>: <span class="number">4</span>, <span class="comment">/* SIMPLE_EXPRESSION */</span></span><br><span class="line">          <span class="string">&quot;isConstant&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;app&quot;</span>,</span><br><span class="line">          <span class="string">&quot;isStatic&quot;</span>: <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span>: <span class="number">15</span>, <span class="comment">/* JS_OBJECT_EXPRESSION */</span></span><br><span class="line">    <span class="string">&quot;properties&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="number">16</span>, <span class="comment">/* JS_PROPERTY */</span></span><br><span class="line">        <span class="string">&quot;key&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;type&quot;</span>: <span class="number">4</span>, <span class="comment">/* SIMPLE_EXPRESSION */</span></span><br><span class="line">          <span class="string">&quot;isConstant&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;key&quot;</span>,</span><br><span class="line">          <span class="string">&quot;isStatic&quot;</span>: <span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;value&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;type&quot;</span>: <span class="number">4</span>, <span class="comment">/* SIMPLE_EXPRESSION */</span></span><br><span class="line">          <span class="string">&quot;isConstant&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;1&quot;</span>,</span><br><span class="line">          <span class="string">&quot;isStatic&quot;</span>: <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span>: <span class="number">13</span>, <span class="comment">/* VNODE_CALL */</span></span><br><span class="line">    <span class="string">&quot;tag&quot;</span>: <span class="string">&quot;\&quot;p\&quot;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;children&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="number">2</span>, <span class="comment">/* ELEMENT */</span></span><br><span class="line">      <span class="string">&quot;content&quot;</span>: <span class="string">&quot;static&quot;</span></span><br><span class="line">    &#125;,                                                  </span><br><span class="line">    <span class="string">&quot;patchFlag&quot;</span>: <span class="string">&quot;-1 /* HOISTED */&quot;</span>,</span><br><span class="line">    <span class="string">&quot;isBlock&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="string">&quot;disableTracking&quot;</span>: <span class="literal">false</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span>: <span class="number">13</span>, <span class="comment">/* VNODE_CALL */</span></span><br><span class="line">    <span class="string">&quot;tag&quot;</span>: <span class="string">&quot;\&quot;p\&quot;&quot;</span>,</span><br><span class="line">    <span class="string">&quot;children&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="number">2</span>, <span class="comment">/* ELEMENT */</span></span><br><span class="line">      <span class="string">&quot;content&quot;</span>: <span class="string">&quot;static&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;patchFlag&quot;</span>: <span class="string">&quot;-1 /* HOISTED */&quot;</span>,</span><br><span class="line">    <span class="string">&quot;isBlock&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="string">&quot;disableTracking&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>这里，hoists 数组的长度为 4，前两个都是 JavaScript 对象表达式节点，后两个是 VNodeCall 节点，通过 genNode 我们可以把这些节点生成对应的代码，这个方法我们后续会详细说明，这里先略过。</p>
+<p>然后通过遍历 hoists 我们生成如下代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，除了从 Vue 中导入辅助方法，我们还创建了静态提升的变量。</p>
+<p>我们回到 genModulePreamble，接着会执行<code>newline()</code>和<code>push(export )</code>，非常好理解，也就是添加了一个空行和 export 字符串。</p>
+<p>至此，预设代码生成完毕，我们就得到了这些代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">export</span> </span><br></pre></td></tr></table></figure>
+
+<h3 id="生成渲染函数"><a href="#生成渲染函数" class="headerlink" title="生成渲染函数"></a>生成渲染函数</h3><p>接下来，就是生成渲染函数了，我们回到 generate 函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!ssr) &#123;</span><br><span class="line">  <span class="title function_">push</span>(<span class="string">`function render(_ctx, _cache) &#123;`</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="title function_">push</span>(<span class="string">`function ssrRender(_ctx, _push, _parent, _attrs) &#123;`</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">indent</span>();</span><br></pre></td></tr></table></figure>
+
+<p>由于 ssr 为 false, 所以生成如下代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">render</span>(<span class="params">_ctx, _cache</span>) &#123;</span><br></pre></td></tr></table></figure>
+
+<p>注意，<strong>这里代码的最后一行有 2 个空格的缩进</strong>。</p>
+<p>另外，由于 useWithBlock 为 false，所以我们也不需生成 with 相关的代码。而且，这里我们创建了 render 的函数声明，接下来的代码都是在生成 render 的函数体。</p>
+<h3 id="生成资源声明代码"><a href="#生成资源声明代码" class="headerlink" title="生成资源声明代码"></a>生成资源声明代码</h3><p>在 render 函数体的内部，我们首先要生成资源声明代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 生成自定义组件声明代码</span></span><br><span class="line"><span class="keyword">if</span> (ast.<span class="property">components</span>.<span class="property">length</span>) &#123;</span><br><span class="line">  <span class="title function_">genAssets</span>(ast.<span class="property">components</span>, <span class="string">&#x27;component&#x27;</span>, context);</span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">directives</span>.<span class="property">length</span> || ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="title function_">newline</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 生成自定义指令声明代码</span></span><br><span class="line"><span class="keyword">if</span> (ast.<span class="property">directives</span>.<span class="property">length</span>) &#123;</span><br><span class="line">  <span class="title function_">genAssets</span>(ast.<span class="property">directives</span>, <span class="string">&#x27;directive&#x27;</span>, context);</span><br><span class="line">  <span class="keyword">if</span> (ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="title function_">newline</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 生成临时变量代码</span></span><br><span class="line"><span class="keyword">if</span> (ast.<span class="property">temps</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="title function_">push</span>(<span class="string">`let `</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; ast.<span class="property">temps</span>; i++) &#123;</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`<span class="subst">$&#123;i &gt; <span class="number">0</span> ? <span class="string">`, `</span> : <span class="string">``</span>&#125;</span>_temp<span class="subst">$&#123;i&#125;</span>`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在我们的示例中，directives 数组长度为 0，temps 的值是 0，所以自定义指令和临时变量代码生成的相关逻辑跳过，而这里 components的值是<code>[&quot;hello&quot;]</code>。</p>
+<p>接着就通过 genAssets 去生成自定义组件声明代码，我们来看一下它的实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">genAssets</span>(<span class="params">assets, type, &#123; helper, push, newline &#125;</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> resolver = <span class="title function_">helper</span>(type === <span class="string">&#x27;component&#x27;</span> ? <span class="variable constant_">RESOLVE_COMPONENT</span> : <span class="variable constant_">RESOLVE_DIRECTIVE</span>)</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; assets.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> id = assets[i]</span><br><span class="line">    <span class="title function_">push</span>(<span class="string">`const <span class="subst">$&#123;toValidAssetId(id, type)&#125;</span> = <span class="subst">$&#123;resolver&#125;</span>(<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(id)&#125;</span>)`</span>)</span><br><span class="line">    <span class="keyword">if</span> (i &lt; assets.<span class="property">length</span> - <span class="number">1</span>) &#123;</span><br><span class="line">      <span class="title function_">newline</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的 helper 函数就是从前面提到的 helperNameMap 中查找对应的字符串，对于 component，返回的就是 resolveComponent。</p>
+<p>接着会遍历 assets 数组，生成自定义组件声明代码，在这个过程中，它们会把变量通过 toValidAssetId 进行一层包装：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">toValidAssetId</span>(<span class="params">name, type</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">`_<span class="subst">$&#123;type&#125;</span>_<span class="subst">$&#123;name.replace(/[^\w]/g, <span class="string">&#x27;_&#x27;</span>)&#125;</span>`</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如 hello 组件，执行 toValidAssetId 就变成了 _component_hello。</p>
+<p>因此对于我们的示例而言，genAssets 后生成的代码是这样的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">render</span>(<span class="params">_ctx, _cache</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> _component_hello = <span class="title function_">_resolveComponent</span>(<span class="string">&quot;hello&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这很好理解，通过 resolveComponent，我们就可以解析到注册的自定义组件对象，然后在后面创建组件 vnode 的时候当做参数传入。</p>
+<p>回到 generate 函数，接下来会执行如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (ast.components.length || ast.directives.length || ast.temps) &#123;</span><br><span class="line">  push(`\n`);</span><br><span class="line">  newline();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (!ssr) &#123;</span><br><span class="line">  push(`<span class="keyword">return</span> `);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里是指，如果生成了资源声明代码，则在尾部添加一个换行符，然后再生成一个空行，并且如果不是 ssr，则再添加一个 return 字符串，此时得到的代码结果如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveComponent <span class="keyword">as</span> _resolveComponent, createVNode <span class="keyword">as</span> _createVNode, createCommentVNode <span class="keyword">as</span> _createCommentVNode, toDisplayString <span class="keyword">as</span> _toDisplayString, openBlock <span class="keyword">as</span> _openBlock, createBlock <span class="keyword">as</span> _createBlock &#125; <span class="keyword">from</span> <span class="string">&quot;vue&quot;</span></span><br><span class="line"><span class="keyword">const</span> _hoisted_1 = &#123; <span class="attr">class</span>: <span class="string">&quot;app&quot;</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_2 = &#123; <span class="attr">key</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="keyword">const</span> _hoisted_3 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">const</span> _hoisted_4 = <span class="comment">/*#__PURE__*/</span><span class="title function_">_createVNode</span>(<span class="string">&quot;p&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;static&quot;</span>, -<span class="number">1</span> <span class="comment">/* HOISTED */</span>)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">render</span>(<span class="params">_ctx, _cache</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> _component_hello = <span class="title function_">_resolveComponent</span>(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">  <span class="keyword">return</span> </span><br></pre></td></tr></table></figure>
+
+<p>好的，我们就先分析到这里，下篇继续来看生成创建 VNode 树的表达式的过程。</p>
+<blockquote>
+<p>本节课的相关代码在源代码中的位置如下：<br>packages&#x2F;compiler-core&#x2F;src&#x2F;codegen.ts</p>
+</blockquote>
+
+        
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> 文章目录</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-text">创建代码生成上下文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E9%A2%84%E8%AE%BE%E4%BB%A3%E7%A0%81"><span class="toc-text">生成预设代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E6%B8%B2%E6%9F%93%E5%87%BD%E6%95%B0"><span class="toc-text">生成渲染函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E8%B5%84%E6%BA%90%E5%A3%B0%E6%98%8E%E4%BB%A3%E7%A0%81"><span class="toc-text">生成资源声明代码</span></a></li></ol>
+    </div>
+  </div>
+
+
+            </div>
+        
+        
+          <blockquote id="copyright">
+              <p>原文链接: <a href="https://xiaozhouguo.github.io/2022/11/10/vue3/generate-one/">https://xiaozhouguo.github.io/2022/11/10/vue3/generate-one/</a></p>
+              <p>版权声明: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
+
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AST/" rel="tag">AST</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>分享到:</span>
+    </div>
+
+
+
+        </div>
+      
+      
+        
+<nav id="article-nav">
+  
+    <a href="/2022/10/24/vue3/ast-transform-two/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">older</strong>
+      <div class="article-nav-title">
+        
+          AST转换-AST节点内部做了哪些转换？ -下篇
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+      
+      
+        
+  <div id="comments"></div>
+
+
+
+
+
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> 最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/11/10/vue3/generate-one/">生成代码-AST如何生成可运行的代码？-上篇</a>
+          </li>
+        
+          <li>
+            <a href="/2022/10/24/vue3/ast-transform-two/">AST转换-AST节点内部做了哪些转换？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/31/vue3/ast-two/">模板解析-构造AST的完整流程是怎样的？ -下篇</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/03/vue3/ast-transform-one/">AST转换-AST节点内部做了哪些转换？- 上篇</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/02/vue3/ast-one/">模板解析-构造AST的完整流程是怎么样的？ - 上篇</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AST/" style="font-size: 17.5px;">AST</a> <a href="/tags/Array/" style="font-size: 10px;">Array</a> <a href="/tags/DOM-diff/" style="font-size: 12.5px;">DOM-diff</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/Promise/" style="font-size: 10px;">Promise</a> <a href="/tags/computed/" style="font-size: 10px;">computed</a> <a href="/tags/life-cycle/" style="font-size: 10px;">life-cycle</a> <a href="/tags/nextTick/" style="font-size: 10px;">nextTick</a> <a href="/tags/provide/" style="font-size: 10px;">provide</a> <a href="/tags/reactive/" style="font-size: 15px;">reactive</a> <a href="/tags/regular-expression/" style="font-size: 10px;">regular expression</a> <a href="/tags/setup/" style="font-size: 10px;">setup</a> <a href="/tags/type-challanges/" style="font-size: 10px;">type-challanges</a> <a href="/tags/watch/" style="font-size: 12.5px;">watch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> 分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MarkDown/">MarkDown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/TypeScript/">TypeScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue2/">Vue2</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vue3/">Vue3</a><span class="category-list-count">18</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E8%BF%9B%E9%98%B6/">前端基础进阶</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B0%8F%E7%AA%A5-javascript/">小窥 javascript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">正则表达式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> 归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/">2022年</a><span class="archive-list-count">21</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018年</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017年</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> 标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AST/" rel="tag">AST</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Array/" rel="tag">Array</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DOM-diff/" rel="tag">DOM-diff</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MongoDB/" rel="tag">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Promise/" rel="tag">Promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/computed/" rel="tag">computed</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/life-cycle/" rel="tag">life-cycle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nextTick/" rel="tag">nextTick</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/provide/" rel="tag">provide</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reactive/" rel="tag">reactive</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/regular-expression/" rel="tag">regular expression</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/setup/" rel="tag">setup</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/type-challanges/" rel="tag">type-challanges</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/watch/" rel="tag">watch</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> 友情链接</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://weibo.com/u/5531933570">weibo</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/sitemap.xml">网站地图</a>
+        <span> | </span><a href="/atom.xml">订阅本站</a>
+        <span> | </span><a href="/about/">联系博主</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2022 guoxiaozhou.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </div>
+  
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/js/search.json.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+
+  
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+    
+<script src="/localshare/js/social-share.js"></script>
+
+    
+<script src="/localshare/js/qrcode.js"></script>
+
+  
+  
+
+
+
+  
+    
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+    
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+    <script>
+      var gitalk = new Gitalk({
+        clientID: '73caaf19e0a3f8e71ddd',
+        clientSecret: 'd4447cc0909c43121bd44ccae5073305021cd6be',
+        repo: 'blog',
+        owner: 'XIAOZHOUGUO',
+        admin: ['XIAOZHOUGUO'],
+        id: md5(window.location.pathname),
+        distractionFreeMode: false,
+        language: 'zh-CN',
+        pagerDirection: 'last'
+      });
+      gitalk.render('comments');
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
+</body>
+</html>
